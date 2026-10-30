@@ -75,7 +75,7 @@ export const SectionReorder: React.FC = () => {
 
   if (!mounted) {
     return (
-      <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 animate-pulse h-28" />
+      <div className="p-4 rounded-xl bg-stone-200 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 animate-pulse h-28" />
     );
   }
 
@@ -100,27 +100,27 @@ export const SectionReorder: React.FC = () => {
   ).length;
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden transition-all shadow-sm">
+    <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/70 overflow-hidden transition-all shadow-sm">
       {/* Header bar */}
-      <div className="px-4 py-3 bg-slate-850/80 flex items-center justify-between border-b border-slate-800">
+      <div className="px-4 py-3 bg-stone-50/80 dark:bg-stone-850/80 flex items-center justify-between border-b border-stone-200 dark:border-stone-800">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center space-x-2 text-left group focus:outline-none"
         >
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 transition">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500/20 transition">
             <Layers className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold text-white tracking-wide uppercase">
+              <span className="text-xs font-bold text-stone-900 dark:text-white tracking-wide uppercase">
                 Section Flow & Ordering
               </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-slate-800 text-slate-300 border border-slate-700">
+              <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700">
                 {visibleCount}/{sectionOrder.length} Visible
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-stone-500 dark:text-stone-400">
               Shift section priorities up or down and toggle preview visibility
             </p>
           </div>
@@ -131,7 +131,7 @@ export const SectionReorder: React.FC = () => {
             type="button"
             onClick={handleReset}
             title="Reset standard order"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-transparent hover:border-slate-700 text-xs flex items-center space-x-1 transition"
+            className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 border border-transparent hover:border-stone-300 dark:hover:border-stone-700 text-xs flex items-center space-x-1 transition"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span className="hidden sm:inline text-[11px]">Reset</span>
@@ -139,7 +139,7 @@ export const SectionReorder: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+            className="p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition"
           >
             {isOpen ? (
               <ChevronUp className="w-4 h-4" />
@@ -169,29 +169,29 @@ export const SectionReorder: React.FC = () => {
                 key={sectionId}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg border transition ${
                   isVisible
-                    ? "bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700"
-                    : "bg-slate-950/60 border-slate-850 text-slate-500 opacity-60"
+                    ? "bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200 hover:border-amber-300 dark:hover:border-stone-700 shadow-sm"
+                    : "bg-stone-100/50 dark:bg-stone-950/60 border-stone-200/60 dark:border-stone-850 text-stone-400 dark:text-stone-500 opacity-60"
                 }`}
               >
                 {/* Left: Position index, Icon, and Label */}
                 <div className="flex items-center space-x-3 min-w-0">
-                  <span className="w-5 h-5 rounded flex items-center justify-center bg-slate-800 text-emerald-400 font-mono text-[11px] font-bold shrink-0">
+                  <span className="w-5 h-5 rounded flex items-center justify-center bg-stone-200 dark:bg-stone-800 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold shrink-0">
                     {index + 1}
                   </span>
                   <div
                     className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${
                       isVisible
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "bg-slate-800 text-slate-600"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-600"
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
                   </div>
                   <div className="truncate">
-                    <p className="text-xs font-semibold truncate leading-tight">
+                    <p className="text-xs font-semibold truncate leading-tight text-stone-900 dark:text-stone-100">
                       {config.label}
                     </p>
-                    <p className="text-[10px] text-slate-400 truncate hidden sm:block">
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 truncate hidden sm:block">
                       {config.description}
                     </p>
                   </div>
@@ -204,7 +204,7 @@ export const SectionReorder: React.FC = () => {
                     disabled={isFirst}
                     onClick={() => handleMove(index, "up")}
                     aria-label={`Move ${config.label} Up`}
-                    className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition"
+                    className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-stone-400 transition"
                   >
                     <ChevronUp className="w-3.5 h-3.5" />
                   </button>
@@ -214,12 +214,12 @@ export const SectionReorder: React.FC = () => {
                     disabled={isLast}
                     onClick={() => handleMove(index, "down")}
                     aria-label={`Move ${config.label} Down`}
-                    className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition"
+                    className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-stone-400 transition"
                   >
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
 
-                  <div className="w-[1px] h-3.5 bg-slate-800 mx-0.5" />
+                  <div className="w-[1px] h-3.5 bg-stone-200 dark:bg-slate-800 mx-0.5" />
 
                   <button
                     type="button"
@@ -231,8 +231,8 @@ export const SectionReorder: React.FC = () => {
                     }
                     className={`p-1.5 rounded transition ${
                       isVisible
-                        ? "text-emerald-400 hover:bg-emerald-500/10"
-                        : "text-slate-600 hover:text-slate-400 hover:bg-slate-800"
+                        ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                        : "text-stone-400 dark:text-stone-600 hover:text-stone-600 dark:hover:text-stone-400 hover:bg-stone-200 dark:hover:bg-slate-800"
                     }`}
                   >
                     {isVisible ? (

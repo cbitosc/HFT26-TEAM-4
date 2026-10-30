@@ -239,6 +239,7 @@ export interface ResumeState {
   resume: ResumeDocument;
   jd: JdRequirements;
   isTailored: boolean;
+  uiTheme: "dark" | "light";
 
   // Actions on active/tailored resume (never mutates masterResume)
   updateBasics: (basics: Partial<ResumeBasics>) => void;
@@ -281,6 +282,10 @@ export interface ResumeState {
   resetToDefault: () => void;
   resetToMaster: () => void;
   saveAsMaster: () => void;
+
+  // UI Theme (Light / Dark)
+  toggleUiTheme: () => void;
+  setUiTheme: (theme: "dark" | "light") => void;
 }
 
 export const useResumeStore = create<ResumeState>()(
@@ -290,6 +295,7 @@ export const useResumeStore = create<ResumeState>()(
       resume: clone(defaultResumeDocument),
       jd: createEmptyJd(),
       isTailored: false,
+      uiTheme: "dark",
 
       updateBasics: (basics) =>
         set((state) => ({
@@ -632,6 +638,31 @@ export const useResumeStore = create<ResumeState>()(
         set((state) => ({
           masterResume: clone(state.resume),
         })),
+
+      toggleUiTheme: () =>
+        set((state) => {
+          const next = state.uiTheme === "dark" ? "light" : "dark";
+          if (typeof document !== "undefined") {
+            if (next === "dark") {
+              document.documentElement.classList.add("dark");
+            } else {
+              document.documentElement.classList.remove("dark");
+            }
+          }
+          return { uiTheme: next };
+        }),
+
+      setUiTheme: (theme) =>
+        set(() => {
+          if (typeof document !== "undefined") {
+            if (theme === "dark") {
+              document.documentElement.classList.add("dark");
+            } else {
+              document.documentElement.classList.remove("dark");
+            }
+          }
+          return { uiTheme: theme };
+        }),
     }),
     {
       name: "resuarchitect_resume_v1",
@@ -641,7 +672,17 @@ export const useResumeStore = create<ResumeState>()(
         resume: state.resume,
         jd: state.jd,
         isTailored: state.isTailored,
+        uiTheme: state.uiTheme,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state && typeof document !== "undefined") {
+          if (state.uiTheme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        }
+      },
     }
   )
 );

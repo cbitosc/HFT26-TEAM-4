@@ -353,14 +353,14 @@ export const DiffReviewer: React.FC = () => {
 
       {/* Empty JD Alert if no JD is loaded */}
       {!hasJd && (
-        <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-start space-x-2.5 text-amber-200">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-xl bg-peach-50 dark:bg-amber-950/30 border border-peach-200 dark:border-amber-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm">
+          <div className="flex items-start space-x-2.5 text-peach-900 dark:text-amber-200">
+            <AlertTriangle className="w-4 h-4 text-peach-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-amber-300">
+              <p className="font-semibold text-peach-900 dark:text-amber-300">
                 No Job Description loaded
               </p>
-              <p className="text-amber-200/80 text-[11px]">
+              <p className="text-peach-700 dark:text-amber-200/80 text-[11px]">
                 The AI Tailor needs target JD keywords to align your experience bullets.
               </p>
             </div>
@@ -368,7 +368,7 @@ export const DiffReviewer: React.FC = () => {
           <button
             type="button"
             onClick={() => setJd(stripeFullStackJd)}
-            className="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs transition shrink-0 flex items-center space-x-1"
+            className="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs transition shrink-0 flex items-center space-x-1 shadow-sm"
           >
             <Zap className="w-3.5 h-3.5" />
             <span>Load Sample Stripe JD</span>
@@ -377,21 +377,21 @@ export const DiffReviewer: React.FC = () => {
       )}
 
       {/* Generator Trigger Card */}
-      <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+      <div className="p-4 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-4 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-semibold text-white">
+              <span className="text-xs font-semibold text-stone-800 dark:text-white">
                 Current JD Coverage:
               </span>
-              <span className="text-xs font-mono font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+              <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
                 {currentCoverage.overallScore}%
               </span>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-stone-500 dark:text-slate-400">
                 ({currentCoverage.matchedCount} / {currentCoverage.totalRequiredKeywords} skills matched)
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-500 dark:text-slate-400">
               Run the 4-stage bounded pipeline to tailor bullets with missing keywords.
             </p>
           </div>
@@ -402,7 +402,7 @@ export const DiffReviewer: React.FC = () => {
             disabled={isLoading || !hasJd}
             className={`px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center space-x-2 shadow-md transition ${
               isLoading || !hasJd
-                ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/60"
+                ? "bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-slate-500 cursor-not-allowed border border-stone-300 dark:border-slate-700/60"
                 : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border border-emerald-400/30 hover:shadow-emerald-500/20"
             }`}
           >
@@ -422,13 +422,13 @@ export const DiffReviewer: React.FC = () => {
 
         {/* Multi-Stage Progress Stepper */}
         {(isLoading || activeStage > 0) && (
-          <div className="p-3.5 rounded-lg bg-slate-950/80 border border-slate-800 space-y-2.5">
+          <div className="p-3.5 rounded-lg bg-stone-50 dark:bg-stone-950/80 border border-stone-200 dark:border-slate-800 space-y-2.5">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-300 font-semibold flex items-center space-x-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-stone-800 dark:text-slate-300 font-semibold flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-emerald-400" />
                 <span>AI Pipeline Execution Workflow</span>
               </span>
-              <span className="text-slate-400 text-[11px]">
+              <span className="text-stone-500 dark:text-slate-400 text-[11px]">
                 {activeStage >= 5
                   ? "✓ Pipeline Finished"
                   : `Stage ${Math.min(activeStage, 4)} of 4`}
@@ -446,38 +446,38 @@ export const DiffReviewer: React.FC = () => {
                     key={stg.number}
                     className={`flex items-start space-x-2.5 p-2 rounded text-xs transition duration-200 ${
                       isCurrent
-                        ? "bg-emerald-950/30 border border-emerald-500/40 text-emerald-200"
+                        ? "bg-amber-50 dark:bg-emerald-950/30 border border-amber-300 dark:border-emerald-500/40 text-amber-900 dark:text-emerald-200"
                         : isPassed
-                        ? "text-slate-300 bg-slate-900/60"
-                        : "text-slate-500 opacity-60"
+                        ? "text-stone-700 dark:text-slate-300 bg-white dark:bg-slate-900/60 border border-stone-200/60 dark:border-transparent"
+                        : "text-stone-400 dark:text-slate-500 opacity-60"
                     }`}
                   >
                     <div className="mt-0.5 shrink-0">
                       {isPassed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       ) : isCurrent ? (
-                        <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" />
+                        <RefreshCw className="w-4 h-4 text-amber-600 dark:text-emerald-400 animate-spin" />
                       ) : (
-                        <div className="w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center text-[10px] text-slate-500">
+                        <div className="w-4 h-4 rounded-full border border-stone-300 dark:border-slate-700 flex items-center justify-center text-[10px] text-stone-400 dark:text-slate-500">
                           {stg.number}
                         </div>
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="font-medium text-xs flex items-center space-x-1.5">
-                        <span>{stg.title}</span>
+                        <span className="text-stone-900 dark:text-white">{stg.title}</span>
                         {isPassed && (
-                          <span className="text-[10px] font-mono text-emerald-400">
+                          <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">
                             [Done]
                           </span>
                         )}
                         {isCurrent && (
-                          <span className="text-[10px] font-mono text-amber-300 animate-pulse">
+                          <span className="text-[10px] font-mono text-amber-600 dark:text-amber-300 animate-pulse">
                             [Processing...]
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                      <p className="text-[11px] text-stone-500 dark:text-slate-400 leading-tight mt-0.5">
                         {stg.description}
                       </p>
                     </div>
@@ -489,8 +489,8 @@ export const DiffReviewer: React.FC = () => {
         )}
 
         {errorMessage && (
-          <div className="p-3 rounded-lg bg-red-950/40 border border-red-800/60 text-red-200 text-xs flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+          <div className="p-3 rounded-lg bg-rose-50 dark:bg-red-950/40 border border-rose-200 dark:border-red-800/60 text-rose-800 dark:text-red-200 text-xs flex items-center space-x-2">
+            <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-red-400 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -500,16 +500,16 @@ export const DiffReviewer: React.FC = () => {
       {tailorResponse && (
         <div className="space-y-5">
           {/* Action & Filter Header Toolbar */}
-          <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
             {/* Filter Tabs */}
-            <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+            <div className="flex items-center space-x-1 bg-stone-100 dark:bg-slate-950 p-1 rounded-lg border border-stone-200 dark:border-slate-800 text-xs">
               <button
                 type="button"
                 onClick={() => setFilter("all")}
                 className={`px-2.5 py-1 rounded font-medium transition ${
                   filter === "all"
-                    ? "bg-slate-800 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-white dark:bg-slate-800 text-stone-900 dark:text-white shadow-sm border border-stone-200 dark:border-stone-700"
+                    : "text-stone-600 dark:text-slate-400 hover:text-stone-900 dark:hover:text-slate-200"
                 }`}
               >
                 All Diffs ({allBulletSuggestions.length})
@@ -519,11 +519,11 @@ export const DiffReviewer: React.FC = () => {
                 onClick={() => setFilter("verified")}
                 className={`px-2.5 py-1 rounded font-medium transition flex items-center space-x-1 ${
                   filter === "verified"
-                    ? "bg-slate-800 text-emerald-300 shadow-sm"
-                    : "text-slate-400 hover:text-emerald-300"
+                    ? "bg-emerald-50 dark:bg-slate-800 text-emerald-800 dark:text-emerald-300 shadow-sm border border-emerald-200 dark:border-emerald-800/40"
+                    : "text-stone-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Verified ({verifiedCount})</span>
               </button>
               <button
@@ -531,11 +531,11 @@ export const DiffReviewer: React.FC = () => {
                 onClick={() => setFilter("needs_confirmation")}
                 className={`px-2.5 py-1 rounded font-medium transition flex items-center space-x-1 ${
                   filter === "needs_confirmation"
-                    ? "bg-slate-800 text-amber-300 shadow-sm"
-                    : "text-slate-400 hover:text-amber-300"
+                    ? "bg-amber-50 dark:bg-slate-800 text-amber-800 dark:text-amber-300 shadow-sm border border-amber-200 dark:border-amber-800/40"
+                    : "text-stone-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300"
                 }`}
               >
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>Requires Review ({unverifiedCount})</span>
               </button>
             </div>
@@ -547,7 +547,7 @@ export const DiffReviewer: React.FC = () => {
               disabled={verifiedUnacceptedCount === 0}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition ${
                 verifiedUnacceptedCount === 0
-                  ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
+                  ? "bg-stone-200 dark:bg-slate-800 text-stone-400 dark:text-slate-500 cursor-not-allowed border border-stone-300 dark:border-slate-700/50"
                   : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm border border-emerald-500"
               }`}
               title="Apply all verified suggestions with a single click"
@@ -564,9 +564,9 @@ export const DiffReviewer: React.FC = () => {
           {/* 1. Summary Diff Card (if present) */}
           {summarySuggestion && (
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
+              <div className="flex items-center justify-between text-xs font-semibold text-stone-700 dark:text-slate-300 uppercase tracking-wider font-mono">
                 <span>1. Professional Summary Tailoring</span>
-                <span className="text-[10px] text-slate-500 lowercase font-normal">
+                <span className="text-[10px] text-stone-400 dark:text-slate-500 lowercase font-normal">
                   (aligns target role & core highlights)
                 </span>
               </div>
@@ -583,17 +583,17 @@ export const DiffReviewer: React.FC = () => {
 
           {/* 2. Experience & Project Bullet Diffs */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
+            <div className="flex items-center justify-between text-xs font-semibold text-stone-700 dark:text-slate-300 uppercase tracking-wider font-mono">
               <span>
                 2. Experience & Project Bullet Diffs ({filteredBulletSuggestions.length})
               </span>
-              <span className="text-[10px] text-slate-500 lowercase font-normal">
+              <span className="text-[10px] text-stone-400 dark:text-slate-500 lowercase font-normal">
                 {filter === "all" ? "Showing all" : `Filtered: ${filter}`}
               </span>
             </div>
 
             {filteredBulletSuggestions.length === 0 ? (
-              <div className="p-6 text-center text-xs text-slate-500 bg-slate-900/40 rounded-xl border border-slate-800">
+              <div className="p-6 text-center text-xs text-stone-400 dark:text-slate-500 bg-stone-50 dark:bg-slate-900/40 rounded-xl border border-stone-200 dark:border-slate-800">
                 No bullet diffs match the current filter ({filter}).
               </div>
             ) : (
@@ -615,50 +615,50 @@ export const DiffReviewer: React.FC = () => {
 
           {/* 3. Critic & ATS Scannability Findings Panel */}
           {tailorResponse.criticFindings && tailorResponse.criticFindings.length > 0 && (
-            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+            <div className="p-4 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-3 shadow-sm">
               <button
                 type="button"
                 onClick={() => setShowCritic(!showCritic)}
                 className="w-full flex items-center justify-between text-left"
               >
                 <div className="flex items-center space-x-2">
-                  <Info className="w-4 h-4 text-blue-400" />
-                  <span className="text-xs font-semibold text-slate-200">
+                  <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-xs font-semibold text-stone-900 dark:text-slate-200">
                     Critic Linting & Action Verb Analysis ({tailorResponse.criticFindings.length})
                   </span>
                 </div>
                 {showCritic ? (
-                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                  <ChevronUp className="w-4 h-4 text-stone-400 dark:text-slate-400" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className="w-4 h-4 text-stone-400 dark:text-slate-400" />
                 )}
               </button>
 
               {showCritic && (
-                <div className="space-y-2 pt-1 border-t border-slate-800/80">
+                <div className="space-y-2 pt-1 border-t border-stone-200 dark:border-slate-800/80">
                   {tailorResponse.criticFindings.map((finding) => (
                     <div
                       key={finding.id}
-                      className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 text-xs space-y-1"
+                      className="p-2.5 rounded-lg bg-stone-50 dark:bg-slate-950/60 border border-stone-200 dark:border-slate-800/80 text-xs space-y-1"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                        <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-stone-200 dark:bg-slate-800 text-stone-700 dark:text-slate-300">
                           {finding.category}
                         </span>
                         <span
                           className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
                             finding.type === "warning"
-                              ? "bg-amber-500/10 text-amber-300"
-                              : "bg-blue-500/10 text-blue-300"
+                              ? "bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300"
+                              : "bg-blue-100 dark:bg-blue-500/10 text-blue-800 dark:text-blue-300"
                           }`}
                         >
                           {finding.type}
                         </span>
                       </div>
-                      <p className="text-slate-300 text-xs">{finding.message}</p>
+                      <p className="text-stone-700 dark:text-slate-300 text-xs">{finding.message}</p>
                       {finding.suggestion && (
-                        <div className="text-[11px] text-emerald-400/90 font-mono flex items-center space-x-1">
-                          <ArrowRight className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <div className="text-[11px] text-emerald-600 dark:text-emerald-400/90 font-mono flex items-center space-x-1">
+                          <ArrowRight className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           <span>{finding.suggestion}</span>
                         </div>
                       )}

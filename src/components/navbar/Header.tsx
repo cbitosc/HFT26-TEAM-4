@@ -2,25 +2,19 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
-  FileText,
-  RotateCcw,
   Printer,
   Download,
   ShieldCheck,
   ChevronDown,
   Sparkles,
   Check,
+  RotateCcw,
+  Sun,
+  Moon,
   Cpu,
-  User,
-  Briefcase,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
-import {
-  sampleProfilesMap,
-  seniorFullStackProfile,
-  dataScientistMlProfile,
-  technicalProductManagerProfile,
-} from "@/lib/presets/sampleProfiles";
+import { sampleProfilesMap } from "@/lib/presets/sampleProfiles";
 import {
   stripeFullStackJd,
   googleMlJd,
@@ -45,12 +39,21 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
     loadProfile,
     resetToDefault,
     setJd,
-    isTailored,
+    uiTheme,
+    toggleUiTheme,
   } = useResumeStore();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Sync html class on mount
+    if (typeof document !== "undefined") {
+      if (uiTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  }, [uiTheme]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -122,63 +125,66 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
     {
       id: "profile-fullstack-01",
       key: "senior-fullstack" as const,
-      role: "Senior Full-Stack Engineer",
+      role: "Senior Full-Stack",
+      fullRole: "Senior Full-Stack Engineer",
       candidate: "Alex Morgan",
-      exp: "7+ Years • Next.js, Node, Postgres, AWS",
+      exp: "7+ Yrs • Next.js, Node, Postgres, AWS",
       targetJd: "Stripe Full-Stack Staff/Senior JD",
     },
     {
       id: "profile-ml-01",
       key: "data-scientist-ml" as const,
-      role: "Senior ML & Data Scientist",
+      role: "ML & Data Science",
+      fullRole: "Senior ML & Data Scientist",
       candidate: "Dr. Elena Rostova",
-      exp: "6+ Years • PyTorch, LLMs, MLOps, GCP",
+      exp: "6+ Yrs • PyTorch, LLMs, MLOps, GCP",
       targetJd: "Google ML Infrastructure JD",
     },
     {
       id: "profile-pm-01",
       key: "technical-product-manager" as const,
-      role: "Principal Tech Product Manager",
+      role: "Tech Product Manager",
+      fullRole: "Principal Tech Product Manager",
       candidate: "Marcus Vance",
-      exp: "8+ Years • AI Platforms, Systems, Strategy",
+      exp: "8+ Yrs • AI Platforms, Systems, Strategy",
       targetJd: "Airbnb Core Systems PM JD",
     },
   ];
 
   return (
-    <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-50 px-4 py-2.5 sm:px-6 print:hidden">
-      <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-4">
-        {/* Brand & Badges */}
-        <div className="flex items-center space-x-3 shrink-0">
-          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm shadow-emerald-500/5">
-            <Cpu className="w-5 h-5" />
+    <header className="sticky top-0 z-50 w-full border-b border-stone-200 dark:border-stone-800/80 bg-white/95 dark:bg-stone-950/95 backdrop-blur-md px-2.5 sm:px-4 lg:px-6 py-2 transition-colors duration-200 print:hidden shadow-sm">
+      <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-1.5 sm:gap-3">
+        {/* Brand Logo & Name */}
+        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+          <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-amber-500/20 via-orange-500/15 to-emerald-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 dark:border-amber-500/30 shadow-sm">
+            <Cpu className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-bold text-base sm:text-lg tracking-tight text-white">
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-1.5">
+              <span className="font-extrabold text-sm sm:text-base tracking-tight text-stone-900 dark:text-stone-100">
                 ResuArchitect
               </span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+              <span className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30">
                 AI
               </span>
-              <span className="hidden md:inline-flex items-center text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60 font-medium">
+              <span className="hidden xl:inline-flex items-center text-[10px] px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-900 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800 font-medium">
                 Local-First & ATS-Optimized
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">
-              Tailored Resume Studio & Deterministic JD Engine
+            <p className="text-[10px] text-stone-500 dark:text-stone-400 hidden md:block">
+              Tailored Resume Studio & Deterministic Scoring
             </p>
           </div>
         </div>
 
-        {/* Center / Right Control Panel */}
-        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-          {/* Privacy Badge */}
+        {/* Right Action Cluster - Highly Compact and Always Visible on Mobile */}
+        <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+          {/* Privacy Badge (Visible on larger screens) */}
           <div
-            className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 border border-emerald-800/50 text-[11px] text-emerald-300 font-medium"
+            className="hidden 2xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-[11px] text-emerald-800 dark:text-emerald-300 font-medium"
             title="All resume data, scoring, and text generation stay 100% on your device."
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>100% On-Device Data</span>
           </div>
 
@@ -187,33 +193,32 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
             <button
               type="button"
               onClick={() => setDropdownOpen((prev) => !prev)}
-              className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-xs font-medium text-slate-200 transition focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-900 hover:bg-stone-200 dark:hover:bg-stone-850 border border-stone-300 dark:border-stone-700/80 text-xs font-medium text-stone-800 dark:text-stone-200 transition focus:outline-none focus:ring-1 focus:ring-amber-500"
               aria-label="Load Sample Profile"
               aria-expanded={dropdownOpen}
             >
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="hidden sm:inline">Load Preset:</span>
-              <span className="font-semibold text-emerald-300 max-w-[120px] truncate sm:max-w-none">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span className="hidden md:inline text-stone-500 dark:text-stone-400">Preset:</span>
+              <span className="font-semibold text-amber-700 dark:text-amber-400 max-w-[80px] sm:max-w-[130px] md:max-w-none truncate text-[11px] sm:text-xs">
                 {mounted
-                  ? presets.find((p) => p.id === currentProfileId)?.role ??
-                    "Senior Full-Stack"
-                  : "Senior Full-Stack"}
+                  ? presets.find((p) => p.id === currentProfileId)?.role ?? "Full-Stack"
+                  : "Full-Stack"}
               </span>
               <ChevronDown
-                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                className={`w-3 h-3 text-stone-400 transition-transform duration-200 shrink-0 ${
                   dropdownOpen ? "rotate-180" : ""
                 }`}
               />
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl bg-slate-900 border border-slate-700/80 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-2 border-b border-slate-800">
-                  <p className="text-xs font-semibold text-white">
-                    Load Production Sample Profile & JD
+              <div className="absolute right-0 mt-2 w-72 sm:w-96 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-2 border-b border-stone-100 dark:border-stone-800">
+                  <p className="text-xs font-semibold text-stone-900 dark:text-white">
+                    Load Sample Profile & Matching JD
                   </p>
-                  <p className="text-[11px] text-slate-400">
-                    Instantly populates realistic careers & paired job descriptions.
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                    Instantly populates career history & paired job postings.
                   </p>
                 </div>
                 <div className="mt-1 space-y-1">
@@ -226,28 +231,28 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
                         onClick={() => handleSelectPreset(preset.key)}
                         className={`w-full text-left p-2.5 rounded-lg transition flex items-start justify-between group ${
                           isSelected
-                            ? "bg-emerald-950/40 border border-emerald-500/30 text-white"
-                            : "hover:bg-slate-800 text-slate-200 border border-transparent"
+                            ? "bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/60 text-stone-900 dark:text-white"
+                            : "hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 border border-transparent"
                         }`}
                       >
                         <div className="space-y-0.5">
                           <div className="flex items-center space-x-1.5">
-                            <span className="text-xs font-semibold text-white group-hover:text-emerald-300 transition-colors">
-                              {preset.role}
+                            <span className="text-xs font-semibold text-stone-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                              {preset.fullRole}
                             </span>
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-[10px] text-stone-500 dark:text-stone-400">
                               ({preset.candidate})
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 leading-snug">
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-snug">
                             {preset.exp}
                           </p>
-                          <p className="text-[10px] text-emerald-400/80 font-mono">
-                            Paired: {preset.targetJd}
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                            Target: {preset.targetJd}
                           </p>
                         </div>
                         {isSelected && (
-                          <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
+                          <Check className="w-4 h-4 text-amber-500 shrink-0 mt-1" />
                         )}
                       </button>
                     );
@@ -261,35 +266,55 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
           <button
             type="button"
             onClick={handleReset}
-            title="Reset active resume and JD to default template"
-            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-slate-700/80 hover:border-slate-600 bg-slate-800/60 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-white transition"
+            title="Reset to default profile"
+            className="p-1.5 sm:px-2 sm:py-1.5 rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition text-xs font-medium"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-            <span className="hidden sm:inline">Reset</span>
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="sr-only sm:not-sr-only sm:inline-block sm:ml-1">Reset</span>
           </button>
 
-          {/* Export Actions */}
-          <div className="flex items-center space-x-1.5 border-l border-slate-800 pl-2 sm:pl-3">
+          {/* Light / Dark Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleUiTheme}
+            title={`Switch to ${uiTheme === "dark" ? "Light" : "Dark"} Mode`}
+            className="p-1.5 sm:px-2 sm:py-1.5 rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 transition text-xs font-medium focus:outline-none focus:ring-1 focus:ring-amber-500"
+            aria-label="Toggle Theme"
+          >
+            {mounted && uiTheme === "light" ? (
+              <Moon className="w-3.5 h-3.5 text-stone-700" />
+            ) : (
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
+            )}
+            <span className="sr-only">Toggle Theme</span>
+          </button>
+
+          {/* ALWAYS VISIBLE EXPORT BUTTONS (Even on Smallest Screen) */}
+          <div className="flex items-center space-x-1 sm:space-x-1.5 border-l border-stone-200 dark:border-stone-800 pl-1.5 sm:pl-2 shrink-0">
+            {/* PDF Export Button */}
             <button
               type="button"
               onClick={handlePdfClick}
-              title="Print or Save to PDF (Clean vector page with @media print)"
-              className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition shadow-sm"
+              title="Export as Vector PDF (Clean @media print)"
+              className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 text-xs font-bold transition shadow-sm"
             >
-              <Printer className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <Printer className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
               <span>PDF</span>
             </button>
 
+            {/* DOCX Export Button */}
             <button
               type="button"
               onClick={handleDocxClick}
               disabled={exportingDocx}
-              title="Export ATS-Friendly Word Document (.docx)"
-              className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium transition shadow-sm shadow-emerald-950/40"
+              title="Export as Native Word Document (.docx)"
+              className="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition shadow-sm shadow-emerald-900/20"
             >
-              <Download className={`w-3.5 h-3.5 shrink-0 ${exportingDocx ? "animate-bounce" : ""}`} />
-              <span className="hidden sm:inline">{exportingDocx ? "Generating..." : "Export"}</span>
-              <span>{exportingDocx ? "DOCX..." : "DOCX"}</span>
+              <Download
+                className={`w-3.5 h-3.5 shrink-0 ${exportingDocx ? "animate-bounce" : ""}`}
+              />
+              <span className="hidden sm:inline">{exportingDocx ? "Wait..." : "Word"}</span>
+              <span>{exportingDocx ? "..." : "DOCX"}</span>
             </button>
           </div>
         </div>

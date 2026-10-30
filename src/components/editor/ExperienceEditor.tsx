@@ -121,23 +121,23 @@ export const ExperienceEditor: React.FC = () => {
   };
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
+    <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/70 overflow-hidden shadow-sm">
       {/* Section Header */}
-      <div className="px-4 py-3 bg-slate-850/80 border-b border-slate-800 flex items-center justify-between">
+      <div className="px-4 py-3 bg-stone-50/80 dark:bg-stone-850/80 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
             <Briefcase className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wide">
+              <h3 className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wide">
                 Work Experience
               </h3>
-              <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-slate-800 text-slate-300 border border-slate-700">
+              <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700">
                 {resume.experience.length} Roles
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-stone-500 dark:text-stone-400">
               Add companies, roles, quantifiable bullet points, and tech stacks
             </p>
           </div>
@@ -146,7 +146,7 @@ export const ExperienceEditor: React.FC = () => {
         <button
           type="button"
           onClick={handleAddNewExperience}
-          className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 transition"
+          className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 transition"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Position</span>
@@ -156,7 +156,7 @@ export const ExperienceEditor: React.FC = () => {
       {/* Experience List */}
       <div className="p-4 space-y-3.5">
         {resume.experience.length === 0 ? (
-          <div className="text-center py-8 border border-dashed border-slate-800 rounded-lg text-slate-400 text-xs">
+          <div className="text-center py-8 border border-dashed border-stone-300 dark:border-stone-800 rounded-lg text-stone-400 text-xs">
             No work experience positions listed yet. Click &quot;Add Position&quot; to add your first job.
           </div>
         ) : (
@@ -168,26 +168,26 @@ export const ExperienceEditor: React.FC = () => {
             return (
               <div
                 key={exp.id}
-                className="rounded-lg border border-slate-800 bg-slate-950/90 overflow-hidden transition shadow-sm"
+                className="rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-950/90 overflow-hidden transition shadow-sm"
               >
                 {/* Job Card Header */}
-                <div className="px-3.5 py-2.5 bg-slate-900 flex items-center justify-between border-b border-slate-800/80">
+                <div className="px-3.5 py-2.5 bg-stone-100/90 dark:bg-stone-900 flex items-center justify-between border-b border-stone-200 dark:border-stone-800/80">
                   <button
                     type="button"
                     onClick={() => toggleExpand(exp.id)}
                     className="flex items-center space-x-2 text-left min-w-0"
                   >
-                    <span className="w-5 h-5 rounded flex items-center justify-center bg-slate-800 text-emerald-400 font-mono text-[10px] font-bold shrink-0">
+                    <span className="w-5 h-5 rounded flex items-center justify-center bg-stone-200 dark:bg-stone-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold shrink-0">
                       {expIdx + 1}
                     </span>
                     <div className="truncate">
-                      <span className="text-xs font-bold text-slate-200">
+                      <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
                         {exp.position || "Position Title"}
                       </span>
-                      <span className="text-[11px] text-slate-400 ml-1.5 hidden sm:inline">
+                      <span className="text-[11px] text-stone-500 dark:text-stone-400 ml-1.5 hidden sm:inline">
                         • {exp.company || "Company"}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-mono ml-2 hidden md:inline">
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500 font-mono ml-2 hidden md:inline">
                         ({exp.startDate || "Date"} – {exp.current ? "Present" : exp.endDate || "Date"})
                       </span>
                     </div>
@@ -199,7 +199,7 @@ export const ExperienceEditor: React.FC = () => {
                       disabled={isFirst}
                       onClick={() => handleMoveJob(expIdx, "up")}
                       title="Move role up"
-                      className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="p-1 rounded text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:hover:bg-transparent"
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
                     </button>
@@ -208,23 +208,23 @@ export const ExperienceEditor: React.FC = () => {
                       disabled={isLast}
                       onClick={() => handleMoveJob(expIdx, "down")}
                       title="Move role down"
-                      className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="p-1 rounded text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:hover:bg-transparent"
                     >
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
-                    <div className="w-[1px] h-3 bg-slate-800 mx-0.5" />
+                    <div className="w-[1px] h-3 bg-stone-200 dark:bg-stone-800 mx-0.5" />
                     <button
                       type="button"
                       onClick={() => deleteExperience(exp.id)}
                       title="Delete experience"
-                      className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition"
+                      className="p-1 rounded text-stone-400 hover:text-red-500 hover:bg-red-500/10 transition"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleExpand(exp.id)}
-                      className="p-1 rounded text-slate-400 hover:text-slate-200 transition"
+                      className="p-1 rounded text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition"
                     >
                       {isExpanded ? (
                         <ChevronUp className="w-3.5 h-3.5" />
@@ -241,8 +241,8 @@ export const ExperienceEditor: React.FC = () => {
                     {/* Position & Company */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                          Job Title / Position <span className="text-emerald-400">*</span>
+                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                          Job Title / Position <span className="text-amber-500 dark:text-emerald-400">*</span>
                         </label>
                         <input
                           type="text"
@@ -251,13 +251,13 @@ export const ExperienceEditor: React.FC = () => {
                             updateExperience(exp.id, { position: e.target.value })
                           }
                           placeholder="e.g. Senior Full-Stack Engineer"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                          Company / Organization <span className="text-emerald-400">*</span>
+                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                          Company / Organization <span className="text-amber-500 dark:text-emerald-400">*</span>
                         </label>
                         <input
                           type="text"
@@ -266,7 +266,7 @@ export const ExperienceEditor: React.FC = () => {
                             updateExperience(exp.id, { company: e.target.value })
                           }
                           placeholder="e.g. Apex Cloud Technologies"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
                         />
                       </div>
                     </div>
@@ -274,9 +274,9 @@ export const ExperienceEditor: React.FC = () => {
                     {/* Location, Dates, Current Job */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
                           <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-slate-500" />
+                            <MapPin className="w-3 h-3 text-stone-400" />
                             Location
                           </span>
                         </label>
@@ -287,14 +287,14 @@ export const ExperienceEditor: React.FC = () => {
                             updateExperience(exp.id, { location: e.target.value })
                           }
                           placeholder="e.g. San Francisco, CA (or Remote)"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
                           <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-slate-500" />
+                            <Calendar className="w-3 h-3 text-stone-400" />
                             Start Date (YYYY-MM)
                           </span>
                         </label>
@@ -305,16 +305,16 @@ export const ExperienceEditor: React.FC = () => {
                             updateExperience(exp.id, { startDate: e.target.value })
                           }
                           placeholder="2022-03"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-xs text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
                         />
                       </div>
 
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                          <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                             End Date
                           </label>
-                          <label className="flex items-center space-x-1.5 text-[10px] text-emerald-400 cursor-pointer">
+                          <label className="flex items-center space-x-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 cursor-pointer">
                             <input
                               type="checkbox"
                               checked={exp.current}
@@ -324,7 +324,7 @@ export const ExperienceEditor: React.FC = () => {
                                   endDate: e.target.checked ? "Present" : exp.endDate || "2024-01",
                                 })
                               }
-                              className="rounded border-slate-700 text-emerald-500 focus:ring-0 w-3 h-3 bg-slate-900"
+                              className="rounded border-stone-300 dark:border-stone-700 text-emerald-600 focus:ring-0 w-3 h-3 bg-white dark:bg-stone-900"
                             />
                             <span>Present</span>
                           </label>
@@ -337,27 +337,27 @@ export const ExperienceEditor: React.FC = () => {
                             updateExperience(exp.id, { endDate: e.target.value })
                           }
                           placeholder="2024-01"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-slate-900 border border-slate-800 text-xs text-slate-200 font-mono disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 font-mono disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
                         />
                       </div>
                     </div>
 
                     {/* Technologies Tag Manager */}
                     <div className="space-y-1.5 pt-1">
-                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                      <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                         Technologies & Tools Used
                       </label>
                       <div className="flex flex-wrap gap-1.5 items-center">
                         {exp.technologies.map((tech) => (
                           <span
                             key={tech}
-                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-slate-850 text-slate-200 border border-slate-750 text-xs"
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-850 text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-750 text-xs"
                           >
                             <span>{tech}</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveTech(exp.id, tech)}
-                              className="text-slate-400 hover:text-red-400 transition"
+                              className="text-stone-400 hover:text-red-500 transition"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -381,12 +381,12 @@ export const ExperienceEditor: React.FC = () => {
                               }
                             }}
                             placeholder="+ Add tech tag..."
-                            className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-32"
+                            className="px-2 py-0.5 rounded bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-amber-500 dark:focus:border-emerald-500 w-32"
                           />
                           <button
                             type="button"
                             onClick={() => handleAddTech(exp.id)}
-                            className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
+                            className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs"
                           >
                             Add
                           </button>
@@ -395,13 +395,13 @@ export const ExperienceEditor: React.FC = () => {
                     </div>
 
                     {/* Bullet Points Section */}
-                    <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                    <div className="pt-2 border-t border-stone-200 dark:border-stone-800/80 space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1.5">
-                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                          <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                             Achievement Bullets ({exp.bullets.length})
                           </span>
-                          <span className="text-[10px] text-slate-500">
+                          <span className="text-[10px] text-stone-400 dark:text-stone-500">
                             (Google XYZ formula recommended)
                           </span>
                         </div>
@@ -413,7 +413,7 @@ export const ExperienceEditor: React.FC = () => {
                               "Spearheaded key improvement resulting in quantifiable metric gain."
                             )
                           }
-                          className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium flex items-center space-x-1"
+                          className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 font-medium flex items-center space-x-1"
                         >
                           <Plus className="w-3 h-3" />
                           <span>Add Bullet</span>
@@ -428,7 +428,7 @@ export const ExperienceEditor: React.FC = () => {
                           return (
                             <div
                               key={bullet.id}
-                              className="flex items-start space-x-2 bg-slate-900/60 p-2 rounded-lg border border-slate-850"
+                              className="flex items-start space-x-2 bg-white dark:bg-stone-900/60 p-2 rounded-lg border border-stone-200 dark:border-stone-850 shadow-sm"
                             >
                               <div className="flex flex-col items-center space-y-0.5 pt-1 shrink-0">
                                 <button
@@ -437,11 +437,11 @@ export const ExperienceEditor: React.FC = () => {
                                   onClick={() =>
                                     handleMoveBullet(exp.id, bIdx, "up")
                                   }
-                                  className="text-slate-500 hover:text-slate-300 disabled:opacity-20"
+                                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 disabled:opacity-20"
                                 >
                                   <ChevronUp className="w-3 h-3" />
                                 </button>
-                                <span className="text-[10px] font-mono text-emerald-400">
+                                <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                                   {bIdx + 1}
                                 </span>
                                 <button
@@ -450,7 +450,7 @@ export const ExperienceEditor: React.FC = () => {
                                   onClick={() =>
                                     handleMoveBullet(exp.id, bIdx, "down")
                                   }
-                                  className="text-slate-500 hover:text-slate-300 disabled:opacity-20"
+                                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 disabled:opacity-20"
                                 >
                                   <ChevronDown className="w-3 h-3" />
                                 </button>
@@ -463,7 +463,7 @@ export const ExperienceEditor: React.FC = () => {
                                   updateBullet(exp.id, bullet.id, e.target.value)
                                 }
                                 placeholder="Describe quantifiable accomplishment..."
-                                className="flex-1 px-2.5 py-1.5 rounded bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 leading-relaxed resize-y"
+                                className="flex-1 px-2.5 py-1.5 rounded bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 leading-relaxed resize-y"
                               />
 
                               <button
@@ -478,9 +478,9 @@ export const ExperienceEditor: React.FC = () => {
                                   })
                                 }
                                 title="Optimize bullet with AI Co-Pilot (Google XYZ formula)"
-                                className="px-2 py-1 rounded text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/15 border border-emerald-500/30 transition shrink-0 flex items-center space-x-1 group mt-0.5"
+                                className="px-2 py-1 rounded text-amber-700 dark:text-emerald-400 hover:text-amber-800 dark:hover:text-emerald-300 hover:bg-amber-100 dark:hover:bg-emerald-500/15 border border-amber-300 dark:border-emerald-500/30 transition shrink-0 flex items-center space-x-1 group mt-0.5 shadow-sm"
                               >
-                                <Sparkles className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-emerald-400" />
+                                <Sparkles className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-amber-600 dark:text-emerald-400" />
                                 <span className="text-[10px] font-semibold hidden sm:inline">✨ Optimize</span>
                               </button>
 
@@ -488,7 +488,7 @@ export const ExperienceEditor: React.FC = () => {
                                 type="button"
                                 onClick={() => deleteBullet(exp.id, bullet.id)}
                                 title="Delete bullet point"
-                                className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition pt-1.5 shrink-0"
+                                className="p-1 rounded text-stone-400 hover:text-red-500 hover:bg-red-500/10 transition pt-1.5 shrink-0"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>

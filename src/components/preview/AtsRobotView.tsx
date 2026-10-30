@@ -248,9 +248,9 @@ export const AtsRobotView: React.FC<AtsRobotViewProps> = ({
 
   if (!mounted) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-slate-950 text-slate-400">
+      <div className="flex-1 flex items-center justify-center bg-stone-50 dark:bg-stone-950 text-stone-500 dark:text-stone-400">
         <div className="flex items-center space-x-2 text-xs">
-          <Bot className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <Bot className="w-4 h-4 text-emerald-500 animate-pulse" />
           <span>Extracting linearized ATS text stream...</span>
         </div>
       </div>
@@ -281,48 +281,48 @@ export const AtsRobotView: React.FC<AtsRobotViewProps> = ({
   };
 
   return (
-    <div className={`flex flex-col h-full bg-slate-950 text-slate-100 overflow-hidden ${className}`}>
+    <div className={`flex flex-col h-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 overflow-hidden transition-colors duration-200 ${className}`}>
       {/* Top ATS Verification Header */}
-      <div className="border-b border-slate-800 bg-slate-900/90 px-4 py-3 shrink-0 space-y-3">
+      <div className="border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur px-3 sm:px-4 py-2.5 sm:py-3 shrink-0 space-y-2.5 shadow-xs">
         {/* Verification Status Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Bot className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-sm font-bold text-white tracking-tight">
+                <h2 className="text-sm font-bold text-stone-900 dark:text-white tracking-tight">
                   ATS Robot Linear Stream
                 </h2>
-                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-semibold">
-                  <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 font-mono font-semibold">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                   100% Parser Compliant
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-stone-500 dark:text-stone-400">
                 Exact linearized text stream ingested by Workday, Taleo, Greenhouse, and Lever parsers.
               </p>
             </div>
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
             <button
               type="button"
               onClick={handleCopy}
-              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-200 hover:text-white border border-slate-700 transition text-xs"
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-stone-700 transition text-xs font-medium"
               title="Copy plain text to clipboard"
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-400 font-mono">Copied</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-emerald-600 dark:text-emerald-400 font-mono">Copied</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-3.5 h-3.5" />
-                  <span>Copy Stream</span>
+                  <span className="hidden xs:inline">Copy Stream</span>
                 </>
               )}
             </button>
@@ -330,7 +330,7 @@ export const AtsRobotView: React.FC<AtsRobotViewProps> = ({
             <button
               type="button"
               onClick={handleDownloadTxt}
-              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-sm transition text-xs"
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-xs transition text-xs"
               title="Download raw .txt file"
             >
               <Download className="w-3.5 h-3.5" />
@@ -341,84 +341,84 @@ export const AtsRobotView: React.FC<AtsRobotViewProps> = ({
 
         {/* Verification Checklist Metrics Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-start space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="p-2 sm:p-2.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-start space-x-2 shadow-xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-white text-[11px]">Zero Unparseable Tables</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">100% Single-column flow</p>
+              <p className="font-semibold text-stone-900 dark:text-white text-[11px]">Zero Unparseable Tables</p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">100% Single-column flow</p>
             </div>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-start space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="p-2 sm:p-2.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-start space-x-2 shadow-xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-white text-[11px]">Single-Column Flow</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Zero column collision risk</p>
+              <p className="font-semibold text-stone-900 dark:text-white text-[11px]">Single-Column Flow</p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Zero column collision risk</p>
             </div>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-start space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="p-2 sm:p-2.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-start space-x-2 shadow-xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-white text-[11px]">Standard Headers</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">{metrics.sectionsCount} Sections recognized</p>
+              <p className="font-semibold text-stone-900 dark:text-white text-[11px]">Standard Headers</p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Clean section extraction</p>
             </div>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-start space-x-2">
-            <Cpu className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="p-2 sm:p-2.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-start space-x-2 shadow-xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-white text-[11px]">Parse Latency</p>
-              <p className="text-[10px] text-emerald-400 font-mono mt-0.5">&lt; 2ms (Clean ASCII)</p>
+              <p className="font-semibold text-stone-900 dark:text-white text-[11px]">Vector Selectable Text</p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Zero rasterization error</p>
             </div>
           </div>
         </div>
 
         {/* Search & Stream Metadata Strip */}
-        <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-1 gap-2 text-[11px] text-stone-500 dark:text-stone-400">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <span className="font-mono">
-              Words: <strong className="text-slate-200">{metrics.wordCount}</strong>
+              Words: <strong className="text-stone-800 dark:text-stone-200">{metrics.wordCount}</strong>
             </span>
             <span className="font-mono">
-              Characters: <strong className="text-slate-200">{metrics.charCount}</strong>
+              Characters: <strong className="text-stone-800 dark:text-stone-200">{metrics.charCount}</strong>
             </span>
             <span className="font-mono">
-              Bullets: <strong className="text-slate-200">{metrics.bulletCount}</strong>
+              Bullets: <strong className="text-stone-800 dark:text-stone-200">{metrics.bulletCount}</strong>
             </span>
             <span className="font-mono hidden sm:inline">
-              Lines: <strong className="text-slate-200">{metrics.lineCount}</strong>
+              Lines: <strong className="text-stone-800 dark:text-stone-200">{metrics.lineCount}</strong>
             </span>
           </div>
 
           {/* Quick Search */}
-          <div className="relative w-44 sm:w-56">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+          <div className="relative w-full sm:w-56">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400" />
             <input
               type="text"
               placeholder="Find keyword in stream..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-2 py-1 rounded-md bg-slate-950 border border-slate-800 text-[11px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full pl-8 pr-2 py-1 rounded-md bg-stone-100 dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-[11px] text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:border-amber-500 font-mono"
             />
           </div>
         </div>
       </div>
 
       {/* Raw Stream Terminal Output */}
-      <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-950 font-mono text-xs leading-relaxed custom-scrollbar">
-        <div className="max-w-4xl mx-auto rounded-xl bg-slate-900/90 border border-slate-800 p-4 sm:p-6 shadow-2xl">
+      <div className="flex-1 overflow-auto p-3 sm:p-6 bg-stone-100 dark:bg-stone-950 font-mono text-xs leading-relaxed custom-scrollbar transition-colors duration-200">
+        <div className="max-w-4xl mx-auto rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-4 sm:p-6 shadow-md transition-colors duration-200">
           {/* Terminal Banner */}
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800 text-[11px] text-slate-400">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-200 dark:border-stone-800 text-[11px] text-stone-500 dark:text-stone-400">
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-              <span className="font-mono ml-2 text-slate-300">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+              <span className="font-mono ml-2 text-stone-700 dark:text-stone-300 font-bold">
                 stdin:ats_text_parser_v4.2.1
               </span>
             </div>
-            <span className="text-emerald-400 font-mono">
+            <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">
               STATUS: OK (No glyph collisions)
             </span>
           </div>
@@ -436,24 +436,24 @@ export const AtsRobotView: React.FC<AtsRobotViewProps> = ({
               return (
                 <div
                   key={idx}
-                  className={`flex items-start group hover:bg-slate-800/40 px-1 rounded transition-colors ${
-                    matchesSearch ? "bg-emerald-950/60 ring-1 ring-emerald-500/50" : ""
+                  className={`flex items-start group hover:bg-stone-100 dark:hover:bg-stone-800/40 px-1 rounded transition-colors ${
+                    matchesSearch ? "bg-amber-100 dark:bg-amber-950/60 ring-1 ring-amber-500/50" : ""
                   }`}
                 >
-                  <span className="w-10 shrink-0 text-slate-600 text-right pr-4 select-none text-[10px] pt-0.5 font-mono">
+                  <span className="w-10 shrink-0 text-stone-400 dark:text-stone-600 text-right pr-4 select-none text-[10px] pt-0.5 font-mono">
                     {idx + 1}
                   </span>
                   <span
                     className={`flex-1 break-words ${
                       isCandidateName
-                        ? "text-emerald-400 font-bold text-sm"
+                        ? "text-amber-700 dark:text-amber-400 font-bold text-sm"
                         : isSectionTitle
-                        ? "text-amber-300 font-bold tracking-wider"
+                        ? "text-emerald-700 dark:text-emerald-400 font-bold tracking-wider"
                         : isHeaderLine
-                        ? "text-slate-600"
+                        ? "text-stone-400 dark:text-stone-600"
                         : line.startsWith("* ")
-                        ? "text-slate-200"
-                        : "text-slate-300"
+                        ? "text-stone-800 dark:text-stone-200"
+                        : "text-stone-700 dark:text-stone-300"
                     }`}
                   >
                     {line || "\u00A0"}

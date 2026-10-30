@@ -52,7 +52,20 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
   useEffect(() => {
     setMounted(true);
+    // On small screens/phones, auto-scale zoom to fit screen width cleanly
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      const autoScale = Math.max(0.42, Math.min(0.85, (window.innerWidth - 32) / 800));
+      setZoom(Number(autoScale.toFixed(2)));
+    }
   }, []);
+
+  const handleFitWidth = () => {
+    if (typeof window !== "undefined") {
+      const available = window.innerWidth < 1024 ? window.innerWidth - 32 : (window.innerWidth / 2) - 48;
+      const fit = Math.max(0.40, Math.min(1.2, available / 800));
+      setZoom(Number(fit.toFixed(2)));
+    }
+  };
 
   if (!mounted) {
     return (
@@ -198,44 +211,54 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
       };
 
   return (
-    <div className={`flex flex-col h-full bg-slate-950 overflow-hidden ${className}`}>
+    <div className={`flex flex-col h-full bg-stone-100 dark:bg-stone-950 overflow-hidden transition-colors duration-200 ${className}`}>
       {/* Canvas Interactive Top Toolbar */}
-      <div className="border-b border-slate-800/90 bg-slate-900/90 px-4 py-2 flex items-center justify-between shrink-0 text-xs print:hidden">
+      <div className="border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur px-2.5 sm:px-4 py-2 flex items-center justify-between shrink-0 text-xs print:hidden shadow-xs">
         {/* Left: View & Theme Info */}
-        <div className="flex items-center space-x-2.5">
-          <div className="flex items-center space-x-1.5 text-slate-200 font-semibold">
-            <FileText className="w-3.5 h-3.5 text-emerald-400" />
-            <span>A4 Canvas</span>
+        <div className="flex items-center space-x-1.5 sm:space-x-2.5">
+          <div className="flex items-center space-x-1.5 text-stone-800 dark:text-stone-200 font-bold">
+            <FileText className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span className="hidden xs:inline">A4 Canvas</span>
           </div>
-          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+          <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 font-mono capitalize">
             {themeConfig.name}
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20 font-mono hidden sm:inline">
             {basePt} pt
           </span>
           {autoFitOnePage && (
-            <span className="hidden md:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              1-Page Auto-Fit (0.5rem / 0.2rem Clamped)
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 font-mono">
+              <ShieldCheck className="w-3 h-3 text-emerald-500" />
+              1-Page Fit
             </span>
           )}
         </div>
 
         {/* Right: Zoom & Export Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2">
           {/* Zoom controls */}
-          <div className="flex items-center bg-slate-850 rounded-lg border border-slate-800 p-0.5">
+          <div className="flex items-center bg-stone-100 dark:bg-stone-850 rounded-lg border border-stone-200 dark:border-stone-800 p-0.5">
             <button
               type="button"
               onClick={handleZoomOut}
-              disabled={zoom <= 0.75}
-              className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition"
+              disabled={zoom <= 0.42}
+              className="p-1 rounded text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-200 dark:hover:bg-stone-800 transition"
               title="Zoom out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
 
-            <div className="flex items-center px-1.5 space-x-1">
+            {/* Fit Width Button */}
+            <button
+              type="button"
+              onClick={handleFitWidth}
+              className="text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold transition text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-200 dark:hover:bg-stone-800"
+              title="Fit A4 sheet to screen width"
+            >
+              Fit
+            </button>
+
+            <div className="hidden sm:flex items-center px-1 space-x-0.5">
               {zoomLevels.map((z) => (
                 <button
                   key={z}
@@ -243,8 +266,8 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
                   onClick={() => handleSetZoom(z)}
                   className={`text-[10px] px-1.5 py-0.5 rounded font-mono transition ${
                     Math.abs(zoom - z) < 0.02
-                      ? "bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/30"
+                      : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   {Math.round(z * 100)}%
@@ -256,7 +279,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
               type="button"
               onClick={handleZoomIn}
               disabled={zoom >= 1.2}
-              className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 transition"
+              className="p-1 rounded text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-200 dark:hover:bg-stone-800 transition"
               title="Zoom in"
             >
               <ZoomIn className="w-3.5 h-3.5" />
@@ -267,18 +290,18 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
           <button
             type="button"
             onClick={handleCopyText}
-            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition text-[11px]"
+            className="hidden sm:flex items-center space-x-1 px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-stone-700 transition text-[11px]"
             title="Copy all resume text to clipboard"
           >
             {copied ? (
               <>
-                <Check className="w-3 h-3 text-emerald-400" />
-                <span className="text-emerald-400 font-mono">Copied</span>
+                <Check className="w-3 h-3 text-emerald-500" />
+                <span className="text-emerald-600 dark:text-emerald-400 font-mono">Copied</span>
               </>
             ) : (
               <>
                 <Copy className="w-3 h-3" />
-                <span className="hidden sm:inline">Copy Text</span>
+                <span className="hidden md:inline">Copy Text</span>
               </>
             )}
           </button>
@@ -288,11 +311,11 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             <button
               type="button"
               onClick={onToggleAtsView}
-              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 hover:border-slate-600 transition text-[11px]"
+              className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition text-[11px]"
               title="Inspect raw linearized plain text as parsed by ATS robots"
             >
-              <Bot className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">ATS Robot</span>
+              <Bot className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span className="hidden md:inline">ATS Robot</span>
             </button>
           )}
 
@@ -301,28 +324,28 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             type="button"
             onClick={handleExportDocx}
             disabled={exportingDocx}
-            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 border border-slate-700 font-medium shadow-sm transition text-[11px]"
+            className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-xs transition text-[11px] disabled:opacity-50"
             title="Export ATS-Friendly Word Document (.docx)"
           >
-            <Download className={`w-3 h-3 text-emerald-400 ${exportingDocx ? "animate-bounce" : ""}`} />
-            <span className="hidden sm:inline">{exportingDocx ? "DOCX..." : "DOCX"}</span>
+            <Download className={`w-3 h-3 ${exportingDocx ? "animate-bounce" : ""}`} />
+            <span>{exportingDocx ? "..." : "DOCX"}</span>
           </button>
 
           {/* Print button */}
           <button
             type="button"
             onClick={handlePrint}
-            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-sm transition text-[11px]"
+            className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-stone-950 font-bold shadow-xs transition text-[11px]"
             title="Print or Export Vector PDF"
           >
             <Printer className="w-3 h-3" />
-            <span className="hidden sm:inline">Print / PDF</span>
+            <span>PDF</span>
           </button>
         </div>
       </div>
 
       {/* Scrollable Viewport Wrapper */}
-      <div className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-slate-950/80 custom-scrollbar print:p-0 print:bg-white print:overflow-visible">
+      <div className="flex-1 overflow-auto p-2 sm:p-6 md:p-8 flex justify-center bg-stone-200/80 dark:bg-stone-950/80 custom-scrollbar print:p-0 print:bg-white print:overflow-visible transition-colors duration-200">
         {/* Scale transformation wrapper */}
         <div
           className="transition-transform duration-150 ease-out origin-top flex flex-col items-center print:transform-none print:m-0"

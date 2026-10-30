@@ -3,21 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #fafaf9;
+  --foreground: #1c1917;
+  --card-bg: #ffffff;
+  --card-border: #e7e5e4;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #090d16;
-    --foreground: #f8fafc;
-  }
+.dark {
+  --background: #0c0a09;
+  --foreground: #fafaf9;
+  --card-bg: #1c1917;
+  --card-border: #292524;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a8a29e;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #44403c;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #78716c;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #57534e;
 }
 
 /* Print Styles for ATS Vector PDF Export */
@@ -46,3 +77,4 @@ body {
     display: block !important;
   }
 }
+
