@@ -18,8 +18,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
-import { ResumeTheme, ResumeFontFamily, ResumeMargins } from "@/lib/schema/resume";
 import ProfileEditor from "./ProfileEditor";
+import ThemeCustomizer from "./ThemeCustomizer";
 
 export type EditorTabId = "profile" | "jd" | "ai" | "theme";
 
@@ -283,154 +283,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
         )}
 
         {/* Tab 4: Theme, Layout & Typography */}
-        {activeTab === "theme" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <h2 className="text-base font-semibold text-white">
-                  Theme, Layout & ATS Auto-Fit
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Customize visual aesthetic, typography scale, page margins, and 1-page constraints.
-                </p>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono capitalize">
-                {mounted ? resume.layout.theme : "modern"}
-              </span>
-            </div>
-
-            {/* Theme Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-300">
-                Visual ATS Theme
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                {[
-                  { id: "modern" as const, name: "Modern", desc: "Clean emerald accents & tech headers" },
-                  { id: "executive" as const, name: "Executive", desc: "Traditional styling for leadership, finance & law" },
-                  { id: "tech" as const, name: "Tech / ATS", desc: "Dense layout optimized for SWE/ML roles" },
-                ].map((th) => {
-                  const isSelected = mounted && resume.layout.theme === th.id;
-                  return (
-                    <button
-                      key={th.id}
-                      type="button"
-                      onClick={() =>
-                        updateTheme({ theme: th.id })
-                      }
-                      className={`p-3 rounded-xl text-left transition border ${
-                        isSelected
-                          ? "bg-emerald-950/40 border-emerald-500/50 text-white ring-1 ring-emerald-500/40"
-                          : "bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700"
-                      }`}
-                    >
-                      <p className="text-xs font-bold">{th.name}</p>
-                      <p className="text-[10px] text-slate-400 mt-1 leading-snug">
-                        {th.desc}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Font Family Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-300">
-                Typography Font Family
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                {[
-                  { id: "inter" as const, name: "Inter (Modern Sans)", font: "font-sans" },
-                  { id: "roboto" as const, name: "Roboto (Clean Sans)", font: "font-sans" },
-                  { id: "garamond" as const, name: "Garamond (Executive Serif)", font: "font-serif" },
-                ].map((f) => {
-                  const isSelected = mounted && resume.layout.fontFamily === f.id;
-                  return (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() =>
-                        updateTheme({ fontFamily: f.id })
-                      }
-                      className={`p-2.5 rounded-lg text-left transition border ${
-                        isSelected
-                          ? "bg-emerald-950/40 border-emerald-500/50 text-white"
-                          : "bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700"
-                      }`}
-                    >
-                      <p className={`text-xs font-semibold ${f.font}`}>{f.name}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Margins & Scale Controls */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Margins */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300">
-                  Page Margins
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: "compact", name: "Compact (0.5 in)" },
-                    { id: "normal", name: "Normal (0.75 in)" },
-                    { id: "spacious", name: "Spacious (1.0 in)" },
-                  ].map((m) => {
-                    const isSelected = mounted && resume.layout.margins === m.id;
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() =>
-                          updateTheme({ margins: m.id as ResumeMargins })
-                        }
-                        className={`py-2 px-1 text-center rounded-lg text-xs font-medium border transition ${
-                          isSelected
-                            ? "bg-emerald-950/40 border-emerald-500 text-white"
-                            : "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
-                        }`}
-                      >
-                        {m.name.split(" ")[0]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Auto-fit toggle */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300">
-                  1-Page Constraint
-                </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateTheme({
-                      autoFitOnePage: !(mounted && resume.layout.autoFitOnePage),
-                    })
-                  }
-                  className={`w-full py-2 px-3 rounded-lg border text-xs font-medium flex items-center justify-between transition ${
-                    mounted && resume.layout.autoFitOnePage
-                      ? "bg-emerald-950/40 border-emerald-500 text-emerald-300"
-                      : "bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700"
-                  }`}
-                >
-                  <span>Auto-Fit Exactly to 1 Page</span>
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      mounted && resume.layout.autoFitOnePage
-                        ? "bg-emerald-400"
-                        : "bg-slate-600"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === "theme" && <ThemeCustomizer />}
       </div>
     </div>
   );

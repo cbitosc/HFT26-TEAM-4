@@ -95,7 +95,14 @@ export const SectionIdSchema = z.enum([
 ]);
 export type SectionId = z.infer<typeof SectionIdSchema>;
 
-export const ResumeThemeSchema = z.enum(["modern", "executive", "tech"]);
+export const ResumeThemeSchema = z.enum([
+  "modern",
+  "executive",
+  "tech",
+  "modern-minimal",
+  "executive-ivy",
+  "tech-clean",
+]);
 export type ResumeTheme = z.infer<typeof ResumeThemeSchema>;
 
 export const ResumeFontFamilySchema = z.enum(["inter", "garamond", "roboto"]);

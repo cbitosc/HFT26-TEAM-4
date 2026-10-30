@@ -35,8 +35,11 @@ export default function Home() {
 
   const themeAccentMap: Record<ResumeTheme, string> = {
     modern: "text-emerald-700 border-emerald-600",
+    "modern-minimal": "text-emerald-700 border-emerald-600",
     executive: "text-slate-800 border-slate-700",
+    "executive-ivy": "text-slate-800 border-slate-700",
     tech: "text-blue-800 border-blue-700",
+    "tech-clean": "text-blue-800 border-blue-700",
   };
 
   const currentFontClass = mounted
