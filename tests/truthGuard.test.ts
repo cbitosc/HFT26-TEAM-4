@@ -190,11 +190,13 @@ describe("Deterministic Truth Guard Engine", () => {
   describe("validateSuggestion & validateSummary helper methods", () => {
     it("should validate and populate truth status on a TailoredSuggestion", () => {
       const suggestion: TailoredSuggestion = {
+        id: "sug-1",
+        section: "experience",
         bulletId: "b-1",
         originalText: "Spearheaded migration of legacy REST API to Next.js App Router.",
         suggestedText: "Managed Kubernetes clusters cutting latency to 95ms.",
-        keywordsAdded: ["Kubernetes"],
-        rationale: "Added Kubernetes for JD match",
+        targetKeywords: ["Kubernetes"],
+        explanation: "Added Kubernetes for JD match",
         truthStatus: "verified",
         unverifiedClaims: [],
       };
