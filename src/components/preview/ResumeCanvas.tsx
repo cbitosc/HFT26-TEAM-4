@@ -17,8 +17,9 @@ import {
   ShieldCheck,
   Sparkles,
   Layers,
-  ChevronDown,
+  RotateCcw,
   Bot,
+  Download,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import {
@@ -27,6 +28,8 @@ import {
   ResumeMargins,
   SectionId,
 } from "@/lib/schema/resume";
+import { exportToDocx } from "@/lib/export/docxExport";
+import { exportToPdf } from "@/lib/export/pdfExport";
 
 export interface ResumeCanvasProps {
   className?: string;
@@ -42,6 +45,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
   const [mounted, setMounted] = useState(false);
   const [zoom, setZoom] = useState<number>(1.0);
   const [copied, setCopied] = useState(false);
+  const [exportingDocx, setExportingDocx] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   const { resume } = useResumeStore();
@@ -95,7 +99,19 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
   // Browser Print trigger (standard A4 vector PDF output)
   const handlePrint = () => {
-    window.print();
+    exportToPdf(basics?.name);
+  };
+
+  // DOCX file download
+  const handleExportDocx = async () => {
+    try {
+      setExportingDocx(true);
+      await exportToDocx(resume);
+    } catch (err) {
+      console.error("Failed to export DOCX", err);
+    } finally {
+      setExportingDocx(false);
+    }
   };
 
   // Normalize theme: Modern Minimalist, Executive Ivy, Tech Clean
@@ -184,7 +200,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
   return (
     <div className={`flex flex-col h-full bg-slate-950 overflow-hidden ${className}`}>
       {/* Canvas Interactive Top Toolbar */}
-      <div className="border-b border-slate-800/90 bg-slate-900/90 px-4 py-2 flex items-center justify-between shrink-0 text-xs">
+      <div className="border-b border-slate-800/90 bg-slate-900/90 px-4 py-2 flex items-center justify-between shrink-0 text-xs print:hidden">
         {/* Left: View & Theme Info */}
         <div className="flex items-center space-x-2.5">
           <div className="flex items-center space-x-1.5 text-slate-200 font-semibold">
@@ -280,6 +296,18 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             </button>
           )}
 
+          {/* DOCX button */}
+          <button
+            type="button"
+            onClick={handleExportDocx}
+            disabled={exportingDocx}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 border border-slate-700 font-medium shadow-sm transition text-[11px]"
+            title="Export ATS-Friendly Word Document (.docx)"
+          >
+            <Download className={`w-3 h-3 text-emerald-400 ${exportingDocx ? "animate-bounce" : ""}`} />
+            <span className="hidden sm:inline">{exportingDocx ? "DOCX..." : "DOCX"}</span>
+          </button>
+
           {/* Print button */}
           <button
             type="button"
@@ -297,7 +325,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
       <div className="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-slate-950/80 custom-scrollbar print:p-0 print:bg-white print:overflow-visible">
         {/* Scale transformation wrapper */}
         <div
-          className="transition-transform duration-150 ease-out origin-top flex flex-col items-center"
+          className="transition-transform duration-150 ease-out origin-top flex flex-col items-center print:transform-none print:m-0"
           style={{
             transform: `scale(${zoom})`,
             marginBottom: zoom > 1.0 ? `${(zoom - 1.0) * 1123}px` : undefined,

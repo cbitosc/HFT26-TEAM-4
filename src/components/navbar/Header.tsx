@@ -26,6 +26,8 @@ import {
   googleMlJd,
   airbnbProductManagerJd,
 } from "@/lib/presets/sampleJds";
+import { exportToDocx } from "@/lib/export/docxExport";
+import { exportToPdf } from "@/lib/export/pdfExport";
 
 interface HeaderProps {
   onExportPdf?: () => void;
@@ -35,6 +37,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => {
   const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [exportingDocx, setExportingDocx] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -94,17 +97,22 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
     if (onExportPdf) {
       onExportPdf();
     } else {
-      window.print();
+      exportToPdf(resume?.basics?.name);
     }
   };
 
-  const handleDocxClick = () => {
+  const handleDocxClick = async () => {
     if (onExportDocx) {
       onExportDocx();
     } else {
-      alert(
-        "DOCX Export triggered. Native OpenXML (.docx) engine generates in Phase 6."
-      );
+      try {
+        setExportingDocx(true);
+        await exportToDocx(resume);
+      } catch (err) {
+        console.error("Failed to export DOCX", err);
+      } finally {
+        setExportingDocx(false);
+      }
     }
   };
 
@@ -138,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
   ];
 
   return (
-    <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-50 px-4 py-2.5 sm:px-6">
+    <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-50 px-4 py-2.5 sm:px-6 print:hidden">
       <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-4">
         {/* Brand & Badges */}
         <div className="flex items-center space-x-3 shrink-0">
@@ -275,12 +283,13 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
             <button
               type="button"
               onClick={handleDocxClick}
+              disabled={exportingDocx}
               title="Export ATS-Friendly Word Document (.docx)"
-              className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition shadow-sm shadow-emerald-950/40"
+              className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium transition shadow-sm shadow-emerald-950/40"
             >
-              <Download className="w-3.5 h-3.5 shrink-0" />
-              <span className="hidden sm:inline">Export</span>
-              <span>DOCX</span>
+              <Download className={`w-3.5 h-3.5 shrink-0 ${exportingDocx ? "animate-bounce" : ""}`} />
+              <span className="hidden sm:inline">{exportingDocx ? "Generating..." : "Export"}</span>
+              <span>{exportingDocx ? "DOCX..." : "DOCX"}</span>
             </button>
           </div>
         </div>

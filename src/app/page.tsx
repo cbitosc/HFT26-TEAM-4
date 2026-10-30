@@ -31,16 +31,16 @@ export default function Home() {
       <Header />
 
       {/* Main Studio Workspace: Responsive Split Screen */}
-      <main className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-61px)] overflow-hidden">
+      <main className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-61px)] overflow-hidden print:h-auto print:overflow-visible">
         {/* Left Pane: Tabbed Form Editor & Studio Controls */}
-        <div className="w-full lg:w-1/2 h-1/2 lg:h-full border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col bg-slate-950 overflow-hidden">
+        <div className="w-full lg:w-1/2 h-1/2 lg:h-full border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col bg-slate-950 overflow-hidden print:hidden">
           <EditorTabs />
         </div>
 
         {/* Right Pane: Live A4 Resume Canvas or ATS Robot Stream */}
-        <div className="w-full lg:w-1/2 h-1/2 lg:h-full flex flex-col bg-slate-900/60 overflow-hidden">
+        <div className="w-full lg:w-1/2 h-1/2 lg:h-full flex flex-col bg-slate-900/60 overflow-hidden print:w-full print:h-auto print:overflow-visible print:bg-white">
           {/* Preview Mode Switcher Toolbar */}
-          <div className="border-b border-slate-800 bg-slate-900/90 px-3 py-1.5 flex items-center justify-between shrink-0">
+          <div className="border-b border-slate-800 bg-slate-900/90 px-3 py-1.5 flex items-center justify-between shrink-0 print:hidden">
             {/* Mode Switcher Tabs */}
             <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
               <button
@@ -107,7 +107,9 @@ export default function Home() {
       </main>
 
       {/* Floating Coverage Score Increase Notification */}
-      <ScoreDeltaToast />
+      <div className="print:hidden">
+        <ScoreDeltaToast />
+      </div>
     </div>
   );
 }
