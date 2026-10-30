@@ -4,3 +4,4 @@ import "./truthGuard.test";
 import "./docxExport.test";
 import "./pdfExport.test";
 import "./urlScraper.test";
+import "./boundaryMatrix.test";
