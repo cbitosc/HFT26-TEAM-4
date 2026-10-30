@@ -1,14 +1,14 @@
 # STATE.md — Current Session State
 
 **Project:** ResuArchitect AI (HFT26-TEAM-4)  
-**Status:** Phase 3 Complete ➔ Ready for Phase 4  
-**Current Wave:** Wave 4 (Phase 3 Complete)  
+**Status:** Phase 4 Complete ➔ Ready for Phase 5  
+**Current Wave:** Wave 4 Complete  
 
 ## Phase Progress
 - [x] Phase 1: Foundation, Models & Shell
 - [x] Phase 2: Visual Studio & Live A4 Canvas
 - [x] Phase 3: JD Coverage & Keyword Gap Engine
-- [ ] Phase 4: Bounded AI Tailor & Diff Studio
+- [x] Phase 4: Bounded AI Tailor & Diff Studio
 - [ ] Phase 5: ATS Robot View & Bullet Optimizer
 - [ ] Phase 6: Dual ATS Export Engine
 - [ ] Phase 7: URL Reader, Docs & PR Submission
@@ -29,3 +29,8 @@
 - Built deterministic JD coverage scoring engine (`deterministicScorer.ts`, Plan 3.1) executing in <5ms with weighted evidence formula (1.0x bullet evidence, 0.6x skills list, 0.0x missing).
 - Built `JdScoringPanel.tsx` with 1-click sample JD loader, circular/bar coverage gauge, breakdown cards (Must-Haves %, Preferred %, Bullet Evidence %), matched keyword evidence inspector, and 1-click "+ Add to Skills" injection that updates the store in real time (Plan 3.1).
 - Wired `JdScoringPanel` into the Job & Match Score tab of `EditorTabs.tsx` (Plan 3.1).
+- Built AI types and deterministic anti-hallucination Truth Guard (`truthGuard.ts`, Plan 4.1).
+- Built offline heuristic tailor engine and Next.js App Router POST `/api/tailor` endpoint with PII anonymization and 8s timeout fallback (Plan 4.1).
+- Built `DiffCard.tsx` with side-by-side Before/After diffs, keyword badge highlights, Truth Guard badges (green shield vs amber confirmation alert), inline editing, and responsive action buttons (Plan 4.2).
+- Built `DiffReviewer.tsx` with AI generator trigger, 4-stage real-time progress stepper, summary diff, filtered bullet diffs list, bulk "Accept All Verified" action, and live delta score indicators (Plan 4.2).
+- Mounted `DiffReviewer` into the 'ai' tab of `EditorTabs.tsx` (Plan 4.2).
