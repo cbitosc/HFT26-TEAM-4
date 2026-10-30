@@ -81,6 +81,20 @@ describe("SSRF Protection & IP Validation", () => {
     const internalDomain = await validateJobUrl("http://app.internal/job");
     assert.strictEqual(internalDomain.valid, false);
   });
+
+  it("should permit legitimate public domains and block private IP literals in URLs", async () => {
+    const publicResult = await validateJobUrl("https://example.com");
+    assert.strictEqual(publicResult.valid, true);
+    assert.ok(publicResult.url);
+
+    const privateIpResult = await validateJobUrl("http://127.0.0.1:8080/job");
+    assert.strictEqual(privateIpResult.valid, false);
+    assert.ok(privateIpResult.error?.includes("SSRF") || privateIpResult.error?.includes("private"));
+
+    const privateNetworkResult = await validateJobUrl("http://192.168.1.50/job");
+    assert.strictEqual(privateNetworkResult.valid, false);
+    assert.ok(privateNetworkResult.error?.includes("SSRF") || privateNetworkResult.error?.includes("private"));
+  });
 });
 
 describe("HTML Parser & Job Text Extraction", () => {

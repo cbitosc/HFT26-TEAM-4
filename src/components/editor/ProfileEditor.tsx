@@ -31,6 +31,7 @@ import { EducationItem, BulletPoint, CertificationItem } from "@/lib/schema/resu
 export const ProfileEditor: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [expandedEdu, setExpandedEdu] = useState<Record<string, boolean>>({});
+  const [masterSavedToast, setMasterSavedToast] = useState(false);
 
   const {
     resume,
@@ -40,6 +41,8 @@ export const ProfileEditor: React.FC = () => {
     deleteEducation,
     addCertification,
     deleteCertification,
+    saveAsMaster,
+    resetToMaster,
   } = useResumeStore();
 
   useEffect(() => {
@@ -131,6 +134,39 @@ export const ProfileEditor: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Master Profile Sync & Snapshot Toolbar */}
+      <div className="flex items-center justify-between p-3 rounded-xl bg-stone-100/90 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs shadow-xs">
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+          <span className="font-semibold text-stone-800 dark:text-stone-200 truncate">Master Profile</span>
+          <span className="text-[10px] text-stone-500 dark:text-stone-400 hidden sm:inline">• Save baseline or restore untailored draft</span>
+        </div>
+        <div className="flex items-center space-x-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm("Revert your working resume to the saved Master Profile? Any uncommitted tailoring changes will be restored.")) {
+                resetToMaster();
+              }
+            }}
+            className="px-2.5 py-1 rounded-md text-xs font-medium text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-800 transition border border-stone-300 dark:border-stone-700/60"
+          >
+            Revert
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              saveAsMaster();
+              setMasterSavedToast(true);
+              setTimeout(() => setMasterSavedToast(false), 2500);
+            }}
+            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition"
+          >
+            {masterSavedToast ? "Saved!" : "Save Master"}
+          </button>
+        </div>
+      </div>
+
       {/* 1. Section Flow & Reordering Panel */}
       <section id="section-reorder">
         <SectionReorder />

@@ -1,4 +1,5 @@
 import dns from "node:dns/promises";
+import net from "node:net";
 
 export interface ScrapeResult {
   success: boolean;
@@ -93,6 +94,9 @@ export function isPrivateOrReservedIPv6(ip: string): boolean {
  * Checks if an IP string (v4 or v6) belongs to any private or reserved address block.
  */
 export function isPrivateOrReservedIp(ip: string): boolean {
+  if (net.isIP(ip) === 0) {
+    return false;
+  }
   if (ip.includes(":")) {
     return isPrivateOrReservedIPv6(ip);
   }
@@ -150,37 +154,39 @@ export async function validateJobUrl(urlStr: string): Promise<{
   }
 
   // Check if hostname is directly an IP literal
-  if (isPrivateOrReservedIp(hostname)) {
-    return {
-      valid: false,
-      error: "Access to private or reserved IP addresses is blocked (SSRF protection).",
-    };
-  }
-
-  // DNS pre-resolution check to prevent DNS rebinding or internal DNS aliases
-  try {
-    const lookupResults = await dns.lookup(hostname, { all: true });
-    if (!lookupResults || lookupResults.length === 0) {
+  if (net.isIP(hostname) !== 0) {
+    if (isPrivateOrReservedIp(hostname)) {
       return {
         valid: false,
-        error: `Could not resolve hostname "${hostname}". Please check the URL.`,
+        error: "Access to private or reserved IP addresses is blocked (SSRF protection).",
       };
     }
-
-    for (const record of lookupResults) {
-      if (isPrivateOrReservedIp(record.address)) {
+  } else {
+    // DNS pre-resolution check to prevent DNS rebinding or internal DNS aliases
+    try {
+      const lookupResults = await dns.lookup(hostname, { all: true });
+      if (!lookupResults || lookupResults.length === 0) {
         return {
           valid: false,
-          error: `Target hostname resolves to private/reserved IP (${record.address}). Request blocked for SSRF protection.`,
+          error: `Could not resolve hostname "${hostname}". Please check the URL.`,
         };
       }
+
+      for (const record of lookupResults) {
+        if (isPrivateOrReservedIp(record.address)) {
+          return {
+            valid: false,
+            error: `Target hostname resolves to private/reserved IP (${record.address}). Request blocked for SSRF protection.`,
+          };
+        }
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      return {
+        valid: false,
+        error: `DNS resolution failed for "${hostname}": ${errMsg}`,
+      };
     }
-  } catch (err: unknown) {
-    const errMsg = err instanceof Error ? err.message : String(err);
-    return {
-      valid: false,
-      error: `DNS resolution failed for "${hostname}": ${errMsg}`,
-    };
   }
 
   return { valid: true, url: parsed };
