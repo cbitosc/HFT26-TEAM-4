@@ -11,15 +11,22 @@ import {
   Github,
   FileText,
   GraduationCap,
+  Award,
   Plus,
   Trash2,
   ChevronDown,
   ChevronUp,
   Sparkles,
+  Briefcase,
+  Code,
+  Layers,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import SectionReorder from "./SectionReorder";
-import { EducationItem, BulletPoint } from "@/lib/schema/resume";
+import ExperienceEditor from "./ExperienceEditor";
+import ProjectsEditor from "./ProjectsEditor";
+import SkillsEditor from "./SkillsEditor";
+import { EducationItem, BulletPoint, CertificationItem } from "@/lib/schema/resume";
 
 export const ProfileEditor: React.FC = () => {
   const [mounted, setMounted] = useState(false);
@@ -31,6 +38,8 @@ export const ProfileEditor: React.FC = () => {
     addEducation,
     updateEducation,
     deleteEducation,
+    addCertification,
+    deleteCertification,
   } = useResumeStore();
 
   useEffect(() => {
@@ -46,7 +55,7 @@ export const ProfileEditor: React.FC = () => {
     );
   }
 
-  const { basics, education } = resume;
+  const { basics, education, certifications } = resume;
 
   // Toggle education item accordion
   const toggleEdu = (id: string) => {
@@ -107,16 +116,28 @@ export const ProfileEditor: React.FC = () => {
     });
   };
 
+  const handleAddCertification = () => {
+    const newCert: CertificationItem = {
+      id: `cert-${Date.now()}`,
+      name: "AWS Certified Solutions Architect",
+      issuer: "Amazon Web Services",
+      date: "2023-06",
+    };
+    addCertification(newCert);
+  };
+
   const summaryCharCount = basics.summary ? basics.summary.length : 0;
   const isSummaryLengthGood = summaryCharCount >= 150 && summaryCharCount <= 600;
 
   return (
     <div className="space-y-6">
-      {/* 1. Section Reordering Panel */}
-      <SectionReorder />
+      {/* 1. Section Flow & Reordering Panel */}
+      <section id="section-reorder">
+        <SectionReorder />
+      </section>
 
       {/* 2. Personal & Contact Basics Form */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
+      <section id="basics-form" className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-slate-850/80 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -297,10 +318,10 @@ export const ProfileEditor: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 3. Professional Summary Form with Character Counter */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
+      {/* 3. Professional Summary Form */}
+      <section id="summary-form" className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-slate-850/80 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -344,10 +365,25 @@ export const ProfileEditor: React.FC = () => {
             </span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 4. Education Form */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
+      {/* 4. Work Experience Form */}
+      <section id="experience-editor">
+        <ExperienceEditor />
+      </section>
+
+      {/* 5. Key Projects Form */}
+      <section id="projects-editor">
+        <ProjectsEditor />
+      </section>
+
+      {/* 6. Technical Skills Form */}
+      <section id="skills-editor">
+        <SkillsEditor />
+      </section>
+
+      {/* 7. Education Form */}
+      <section id="education-form" className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-slate-850/80 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -569,7 +605,64 @@ export const ProfileEditor: React.FC = () => {
             })
           )}
         </div>
-      </div>
+      </section>
+
+      {/* 8. Certifications Form */}
+      <section id="certifications-form" className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-sm">
+        <div className="px-4 py-3 bg-slate-850/80 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <Award className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-white uppercase tracking-wide">
+                Certifications & Credentials
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Industry credentials, cloud certifications, and licenses
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddCertification}
+            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 transition"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Certification</span>
+          </button>
+        </div>
+
+        <div className="p-4 space-y-2.5">
+          {certifications.length === 0 ? (
+            <div className="text-center py-6 border border-dashed border-slate-800 rounded-lg text-slate-400 text-xs">
+              No certifications added yet. Click &quot;Add Certification&quot; to add your credentials.
+            </div>
+          ) : (
+            certifications.map((cert) => (
+              <div
+                key={cert.id}
+                className="flex items-center justify-between p-3 rounded-lg bg-slate-950/80 border border-slate-800"
+              >
+                <div>
+                  <p className="text-xs font-bold text-white">{cert.name}</p>
+                  <p className="text-[11px] text-slate-400">
+                    {cert.issuer} • <span className="font-mono text-emerald-400">{cert.date}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => deleteCertification(cert.id)}
+                  className="p-1 rounded text-slate-500 hover:text-red-400 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
     </div>
   );
 };

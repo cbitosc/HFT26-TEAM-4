@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import { ResumeTheme, ResumeFontFamily, ResumeMargins } from "@/lib/schema/resume";
+import ProfileEditor from "./ProfileEditor";
 
 export type EditorTabId = "profile" | "jd" | "ai" | "theme";
 
@@ -149,116 +150,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
       {/* Tab Content Panes */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
         {/* Tab 1: Profile Details */}
-        {activeTab === "profile" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <h2 className="text-base font-semibold text-white">
-                  Career Details & Section Content
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Manage personal basics, work experience, projects, skills, and section ordering.
-                </p>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-                {mounted ? `${resume.experience.length} Positions` : "..."}
-              </span>
-            </div>
-
-            {/* Candidate Summary Card */}
-            <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-white">
-                    {mounted ? resume.basics.name : "Alex Morgan"}
-                  </h3>
-                  <p className="text-xs text-emerald-400 font-medium">
-                    {mounted ? resume.basics.headline : "Senior Full-Stack Engineer"}
-                  </p>
-                </div>
-                <div className="text-right text-[11px] text-slate-400 space-y-0.5">
-                  <p>{mounted ? resume.basics.email : "alex.morgan@example.com"}</p>
-                  <p>{mounted ? resume.basics.location : "San Francisco, CA"}</p>
-                </div>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed border-t border-slate-800/80 pt-2.5">
-                {mounted ? resume.basics.summary : "Full-Stack Engineer with 7+ years..."}
-              </p>
-            </div>
-
-            {/* Quick Section Breakdown */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 text-center">
-                <p className="text-slate-400 text-[11px]">Experience</p>
-                <p className="text-base font-bold text-white mt-0.5">
-                  {mounted ? resume.experience.length : 3}
-                </p>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 text-center">
-                <p className="text-slate-400 text-[11px]">Projects</p>
-                <p className="text-base font-bold text-white mt-0.5">
-                  {mounted ? resume.projects.length : 2}
-                </p>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 text-center">
-                <p className="text-slate-400 text-[11px]">Skill Groups</p>
-                <p className="text-base font-bold text-white mt-0.5">
-                  {mounted ? resume.skills.length : 4}
-                </p>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 text-center">
-                <p className="text-slate-400 text-[11px]">Education</p>
-                <p className="text-base font-bold text-white mt-0.5">
-                  {mounted ? resume.education.length : 1}
-                </p>
-              </div>
-            </div>
-
-            {/* Section Order Overview */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Layers className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                    Active Section Flow
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-400">
-                  Customizable via Up/Down buttons in Plan 2.2
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(mounted ? resume.layout.sectionOrder : [
-                  "summary",
-                  "experience",
-                  "projects",
-                  "skills",
-                  "education",
-                  "certifications",
-                ]).map((sec, idx) => (
-                  <span
-                    key={sec}
-                    className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700/80 text-xs font-medium text-slate-300"
-                  >
-                    <span className="text-[10px] text-emerald-400 font-mono">
-                      {idx + 1}.
-                    </span>
-                    <span className="capitalize">{sec}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-800/40 text-xs text-emerald-300 flex items-start space-x-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <p>
-                <strong>Plan 2.2 Handshake:</strong> Detailed form editors for personal basics,
-                rich bullet additions, drag-and-drop section ordering, and skill tag pills will mount
-                directly into this pane.
-              </p>
-            </div>
-          </div>
-        )}
+        {activeTab === "profile" && <ProfileEditor />}
 
         {/* Tab 2: Job Description & Match Score */}
         {activeTab === "jd" && (
