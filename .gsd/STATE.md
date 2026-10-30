@@ -1,15 +1,15 @@
 # STATE.md — Current Session State
 
 **Project:** ResuArchitect AI (HFT26-TEAM-4)  
-**Status:** Phase 4 Complete ➔ Ready for Phase 5  
-**Current Wave:** Wave 4 Complete  
+**Status:** Phase 5 Complete ➔ Ready for Phase 6  
+**Current Wave:** Wave 5 Complete  
 
 ## Phase Progress
 - [x] Phase 1: Foundation, Models & Shell
 - [x] Phase 2: Visual Studio & Live A4 Canvas
 - [x] Phase 3: JD Coverage & Keyword Gap Engine
 - [x] Phase 4: Bounded AI Tailor & Diff Studio
-- [ ] Phase 5: ATS Robot View & Bullet Optimizer
+- [x] Phase 5: ATS Robot View & Bullet Optimizer
 - [ ] Phase 6: Dual ATS Export Engine
 - [ ] Phase 7: URL Reader, Docs & PR Submission
 
@@ -34,3 +34,7 @@
 - Built `DiffCard.tsx` with side-by-side Before/After diffs, keyword badge highlights, Truth Guard badges (green shield vs amber confirmation alert), inline editing, and responsive action buttons (Plan 4.2).
 - Built `DiffReviewer.tsx` with AI generator trigger, 4-stage real-time progress stepper, summary diff, filtered bullet diffs list, bulk "Accept All Verified" action, and live delta score indicators (Plan 4.2).
 - Mounted `DiffReviewer` into the 'ai' tab of `EditorTabs.tsx` (Plan 4.2).
+- Built single-bullet Google XYZ optimizer (`singleBulletOptimizer.ts`, Plan 5.1).
+- Built `BulletOptimizerModal.tsx` and integrated "✨ Optimize" co-pilot buttons in `ExperienceEditor.tsx` and `ProjectsEditor.tsx` (Plan 5.1).
+- Built `ScoreDeltaToast.tsx` floating notification badge and mounted in root studio page (Plan 5.1).
+- Updated `ResumeCanvas.tsx` to dynamically clamp section/bullet spacing (`--section-gap: 0.5rem`, `--bullet-gap: 0.2rem`) and font scaling when `layout.autoFitOnePage` is enabled (Plan 5.1).
