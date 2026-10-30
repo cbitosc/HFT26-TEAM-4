@@ -1,8 +1,8 @@
 # STATE.md — Current Session State
 
 **Project:** ResuArchitect AI (HFT26-TEAM-4)  
-**Status:** Phase 6 Complete ➔ Ready for Phase 7  
-**Current Wave:** Wave 6 Complete  
+**Status:** Phase 7 Complete ➔ All Phases 1-7 Implemented & Verified  
+**Current Wave:** Wave 7 Complete  
 
 ## Phase Progress
 - [x] Phase 1: Foundation, Models & Shell
@@ -11,7 +11,7 @@
 - [x] Phase 4: Bounded AI Tailor & Diff Studio
 - [x] Phase 5: ATS Robot View & Bullet Optimizer
 - [x] Phase 6: Dual ATS Export Engine
-- [ ] Phase 7: URL Reader, Docs & PR Submission
+- [x] Phase 7: URL Reader, Docs & PR Submission
 
 ## Recent Accomplishments
 - Initialized Next.js 14 App Router with Tailwind CSS, Lucide icons, docx, Zustand, Zod.
@@ -42,3 +42,9 @@
 - Implemented vector PDF exporter (`pdfExport.ts`) leveraging `window.print()` with document title naming and print CSS isolation (Plan 6.1).
 - Wired PDF and DOCX export triggers across `Header.tsx` and `ResumeCanvas.tsx` toolbars with loading state (Plan 6.1).
 - Built comprehensive automated unit test suite with 25 tests achieving 100% pass rate (`scoring.test.ts`, `truthGuard.test.ts`, `docxExport.test.ts`, `runAll.ts`) (Plan 6.1).
+- Implemented SSRF-safe public job URL scraper engine (`urlScraper.ts` & `POST /api/scrape-jd`) with DNS pre-resolution, private/cloud IP blocking (127.0.0.1, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.169.254, IPv6 loopback), 5s timeout, 1MB limit, HTML stripping, and anti-bot detection (Plan 7.1).
+- Integrated "Import from URL" toggle, input form, loading state, and clear direct-paste fallback alert in `JdScoringPanel.tsx` (Plan 7.1).
+- Expanded automated test suite to 38 unit tests across 12 suites (`tests/urlScraper.test.ts`, Plan 7.1).
+- Authored exhaustive architectural documentation (`docs/ARCHITECTURE.md`) with 4 Mermaid diagrams covering schemas, deterministic scoring formulas, truth guard algorithm, and OpenXML mapping (Plan 7.1).
+- Completed hackathon README deliverable (`README.md`) with official Team 4 info, problem/solution, Mermaid system architecture, local setup guide, 3-minute demo video script, and PR submission checklist (Plan 7.1).
+
