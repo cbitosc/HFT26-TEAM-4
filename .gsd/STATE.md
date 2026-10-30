@@ -1,8 +1,8 @@
 # STATE.md — Current Session State
 
 **Project:** ResuArchitect AI (HFT26-TEAM-4)  
-**Status:** Phase 5 Complete ➔ Ready for Phase 6  
-**Current Wave:** Wave 5 Complete  
+**Status:** Phase 6 Complete ➔ Ready for Phase 7  
+**Current Wave:** Wave 6 Complete  
 
 ## Phase Progress
 - [x] Phase 1: Foundation, Models & Shell
@@ -10,7 +10,7 @@
 - [x] Phase 3: JD Coverage & Keyword Gap Engine
 - [x] Phase 4: Bounded AI Tailor & Diff Studio
 - [x] Phase 5: ATS Robot View & Bullet Optimizer
-- [ ] Phase 6: Dual ATS Export Engine
+- [x] Phase 6: Dual ATS Export Engine
 - [ ] Phase 7: URL Reader, Docs & PR Submission
 
 ## Recent Accomplishments
@@ -38,3 +38,7 @@
 - Built `BulletOptimizerModal.tsx` and integrated "✨ Optimize" co-pilot buttons in `ExperienceEditor.tsx` and `ProjectsEditor.tsx` (Plan 5.1).
 - Built `ScoreDeltaToast.tsx` floating notification badge and mounted in root studio page (Plan 5.1).
 - Updated `ResumeCanvas.tsx` to dynamically clamp section/bullet spacing (`--section-gap: 0.5rem`, `--bullet-gap: 0.2rem`) and font scaling when `layout.autoFitOnePage` is enabled (Plan 5.1).
+- Implemented native OpenXML `.docx` exporter (`docxExport.ts`) with `HeadingLevel.HEADING_1`, `HeadingLevel.HEADING_2`, right-aligned date tab stops, and bullet point generation with client-side file download (Plan 6.1).
+- Implemented vector PDF exporter (`pdfExport.ts`) leveraging `window.print()` with document title naming and print CSS isolation (Plan 6.1).
+- Wired PDF and DOCX export triggers across `Header.tsx` and `ResumeCanvas.tsx` toolbars with loading state (Plan 6.1).
+- Built comprehensive automated unit test suite with 25 tests achieving 100% pass rate (`scoring.test.ts`, `truthGuard.test.ts`, `docxExport.test.ts`, `runAll.ts`) (Plan 6.1).
