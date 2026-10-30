@@ -18,6 +18,7 @@ import {
   Sparkles,
   Layers,
   ChevronDown,
+  Bot,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import {
@@ -30,11 +31,13 @@ import {
 export interface ResumeCanvasProps {
   className?: string;
   readOnly?: boolean;
+  onToggleAtsView?: () => void;
 }
 
 export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
   className = "",
   readOnly = false,
+  onToggleAtsView,
 }) => {
   const [mounted, setMounted] = useState(false);
   const [zoom, setZoom] = useState<number>(1.0);
@@ -242,6 +245,19 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
               </>
             )}
           </button>
+
+          {/* View as ATS Robot trigger */}
+          {onToggleAtsView && (
+            <button
+              type="button"
+              onClick={onToggleAtsView}
+              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 hover:border-slate-600 transition text-[11px]"
+              title="Inspect raw linearized plain text as parsed by ATS robots"
+            >
+              <Bot className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">ATS Robot</span>
+            </button>
+          )}
 
           {/* Print button */}
           <button
