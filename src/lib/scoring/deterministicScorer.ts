@@ -142,16 +142,19 @@ export function parseJdRequirements(text: string): ParsedRequirementKeyword[] {
     const line = rawLine.trim();
     if (!line) continue;
 
-    // Detect section transitions
-    if (PREFERRED_HEADING_REGEX.test(line)) {
-      currentTier = "preferred";
-      continue;
-    } else if (MUST_HAVE_HEADING_REGEX.test(line)) {
-      currentTier = "must-have";
-      continue;
-    } else if (GENERAL_HEADING_REGEX.test(line)) {
-      currentTier = "general";
-      continue;
+    // Detect section transitions (only on heading lines, not bullet or item lines)
+    const isBulletOrSentence = /^[-*•+\d.)\s]/.test(rawLine) || line.length > 60;
+    if (!isBulletOrSentence) {
+      if (PREFERRED_HEADING_REGEX.test(line)) {
+        currentTier = "preferred";
+        continue;
+      } else if (MUST_HAVE_HEADING_REGEX.test(line)) {
+        currentTier = "must-have";
+        continue;
+      } else if (GENERAL_HEADING_REGEX.test(line)) {
+        currentTier = "general";
+        continue;
+      }
     }
 
     // Determine line-specific tier modifier
