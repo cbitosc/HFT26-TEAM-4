@@ -5,6 +5,7 @@ import { User, Target, Sparkles, Palette } from "lucide-react";
 import ProfileEditor from "./ProfileEditor";
 import ThemeCustomizer from "./ThemeCustomizer";
 import JdScoringPanel from "../scoring/JdScoringPanel";
+import DiffReviewer from "../tailor/DiffReviewer";
 
 export type EditorTabId = "profile" | "jd" | "ai" | "theme";
 
@@ -125,54 +126,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
         {activeTab === "jd" && <JdScoringPanel />}
 
         {/* Tab 3: AI Tailoring & Git-Style Diff Reviewer */}
-        {activeTab === "ai" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <h2 className="text-base font-semibold text-white">
-                  Bounded AI Bullet Tailor & Diffs
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Refines experience bullets strictly using your real achievements and JD keywords.
-                </p>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-                Phase 4 Ready
-              </span>
-            </div>
-
-            {/* Guardrail Guarantee Banner */}
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
-              <div className="flex items-center space-x-2 text-emerald-400">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  Code Truth & Anti-Hallucination Guardrails
-                </span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                ResuArchitect AI strictly prevents fabricated companies, roles, and dates. All bullet
-                modifications follow Google-style XYZ formulas (Accomplished [X] as measured by [Y], by doing [Z]).
-              </p>
-            </div>
-
-            {/* Diff Card Mock / Interactive Playground */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                Sample Live Diff Preview
-              </span>
-              <div className="space-y-2 font-mono text-xs">
-                <div className="p-2.5 rounded bg-red-950/20 border border-red-900/40 text-red-300">
-                  <span className="text-red-400 font-bold mr-2">-</span>
-                  Spearheaded migration of legacy REST API to Next.js App Router and Node.js microservices.
-                </div>
-                <div className="p-2.5 rounded bg-emerald-950/30 border border-emerald-800/50 text-emerald-200">
-                  <span className="text-emerald-400 font-bold mr-2">+</span>
-                  Spearheaded migration of legacy REST API to Next.js App Router and Node.js microservices, cutting p95 response latency from 320ms to 95ms for 450k active tenants.
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === "ai" && <DiffReviewer />}
 
         {/* Tab 4: Theme, Layout & Typography */}
         {activeTab === "theme" && <ThemeCustomizer />}
