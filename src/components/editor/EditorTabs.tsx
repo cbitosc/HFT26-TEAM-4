@@ -120,16 +120,24 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
       {/* Tab Content Panes */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-5 custom-scrollbar bg-stone-50/50 dark:bg-stone-950">
         {/* Tab 1: Profile Details */}
-        {activeTab === "profile" && <ProfileEditor />}
+        <div className={activeTab === "profile" ? "block" : "hidden"}>
+          <ProfileEditor />
+        </div>
 
         {/* Tab 2: Job Description & Match Score */}
-        {activeTab === "jd" && <JdScoringPanel />}
+        <div className={activeTab === "jd" ? "block" : "hidden"}>
+          <JdScoringPanel />
+        </div>
 
         {/* Tab 3: AI Tailoring & Git-Style Diff Reviewer */}
-        {activeTab === "ai" && <DiffReviewer />}
+        <div className={activeTab === "ai" ? "block" : "hidden"}>
+          <DiffReviewer />
+        </div>
 
         {/* Tab 4: Theme, Layout & Typography */}
-        {activeTab === "theme" && <ThemeCustomizer />}
+        <div className={activeTab === "theme" ? "block" : "hidden"}>
+          <ThemeCustomizer />
+        </div>
       </div>
     </div>
   );

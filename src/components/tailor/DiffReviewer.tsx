@@ -57,7 +57,6 @@ type FilterTab = "all" | "verified" | "needs_confirmation";
 export const DiffReviewer: React.FC = () => {
   const {
     resume,
-    masterResume,
     jd,
     setJd,
     updateBasics,
@@ -114,7 +113,7 @@ export const DiffReviewer: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          resume: masterResume || resume,
+          resume: resume, // Send active working resume so edits are preserved and tailored
           jd: jd.rawText || jd,
           targetKeywords: jd.keywords || [],
         }),

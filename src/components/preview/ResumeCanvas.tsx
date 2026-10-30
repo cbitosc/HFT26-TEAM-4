@@ -20,6 +20,7 @@ import {
   RotateCcw,
   Bot,
   Download,
+  AlertTriangle,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import {
@@ -47,6 +48,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
   const [copied, setCopied] = useState(false);
   const [exportingDocx, setExportingDocx] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   const { resume } = useResumeStore();
@@ -59,6 +61,22 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
       setZoom(Number(autoScale.toFixed(2)));
     }
   }, []);
+
+  // Check 1-page overflow whenever content or layout changes
+  useEffect(() => {
+    if (!sheetRef.current) return;
+    const checkOverflow = () => {
+      if (sheetRef.current && resume.layout.autoFitOnePage) {
+        const isOverflowing = sheetRef.current.scrollHeight > sheetRef.current.clientHeight + 4;
+        setHasOverflow(isOverflowing);
+      } else {
+        setHasOverflow(false);
+      }
+    };
+    checkOverflow();
+    const timer = setTimeout(checkOverflow, 250);
+    return () => clearTimeout(timer);
+  }, [resume, resume.layout.autoFitOnePage]);
 
   const handleFitWidth = () => {
     if (typeof window !== "undefined") {
@@ -352,6 +370,18 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
           </button>
         </div>
       </div>
+
+      {/* 1-Page Overflow Warning Banner */}
+      {hasOverflow && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 px-3 py-1.5 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between shrink-0 print:hidden animate-in fade-in">
+          <div className="flex items-center space-x-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span className="text-[11px]">
+              <strong>1-Page Fit Warning:</strong> Content overflows 297mm standard A4 (lower sections may be clipped). Switch to &quot;Compact&quot; margins, trim bullet points, or toggle off 1-Page Fit in Theme tab to enable multi-page view.
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Scrollable Viewport Wrapper */}
       <div className="flex-1 overflow-auto p-2 sm:p-6 md:p-8 flex justify-center bg-stone-200/80 dark:bg-stone-950/80 custom-scrollbar print:p-0 print:bg-white print:overflow-visible transition-colors duration-200">

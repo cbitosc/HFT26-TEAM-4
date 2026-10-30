@@ -105,6 +105,20 @@ Preferred Qualifications:
     const parsed = parseJdRequirements("");
     assert.strictEqual(parsed.length, 0);
   });
+
+  it("should not match sub-phrase Spring Framework when JD specifies Spring Boot", () => {
+    const parsed = parseJdRequirements("Requirements:\n- 3+ years of Spring Boot experience.");
+    const skills = parsed.map((p) => p.skill);
+    assert.ok(skills.includes("Spring Boot"), "Spring Boot should be detected");
+    assert.ok(!skills.includes("Spring Framework"), "Spring Framework must not be falsely detected on Spring Boot");
+  });
+
+  it("should match both compound skill and subsequent standalone skill on the same line", () => {
+    const parsed = parseJdRequirements("Requirements:\n- Deep experience with Redux Toolkit and Redux state management.");
+    const skills = parsed.map((p) => p.skill);
+    assert.ok(skills.includes("Redux Toolkit"), "Redux Toolkit should be detected");
+    assert.ok(skills.includes("Redux"), "Standalone Redux should also be detected on the same line");
+  });
 });
 
 describe("Weighted Evidence Calculation & Scoring Engine", () => {

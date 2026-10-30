@@ -148,31 +148,31 @@ export function optimizeSingleBullet(
       measuredY = `achieving ${existingMetrics.join(" and ")} performance gain`;
     }
   } else {
-    // Calibrated Google XYZ metric enhancement
-    measuredY = "cutting latency by 32% and increasing throughput by 2.5x";
+    // Qualitative grounded impact when no numbers exist in candidate profile (never fabricate numbers)
+    measuredY = "elevating operational efficiency and system reliability";
   }
 
   // Clean main action for [X]
   mainAction = mainAction.replace(/^[,;\s]+|[,;\s]+$/g, "");
   if (!mainAction || mainAction.length < 5) {
-    mainAction = "scalable full-stack service architecture";
+    mainAction = "production-grade software solutions";
   }
   accomplishedX = `${chosenVerb} ${mainAction}`;
 
-  // Build [Z] incorporating target keyword
+  // Build [Z] incorporating target keyword without fabricating unverified architecture
   const addedKeywords: string[] = [];
   if (targetKeyword) {
     const keywordRegex = new RegExp(`\\b${targetKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
     const alreadyContains = keywordRegex.test(accomplishedX);
 
     if (!alreadyContains) {
-      byDoingZ = `architecting modular components with ${targetKeyword} and automated CI/CD workflows`;
+      byDoingZ = `leveraging ${targetKeyword} with automated testing and continuous integration`;
       addedKeywords.push(targetKeyword);
     } else {
-      byDoingZ = `implementing resilient system patterns, automated monitoring, and production telemetry`;
+      byDoingZ = `applying clean architecture patterns and rigorous quality validation`;
     }
   } else {
-    byDoingZ = `implementing modular microservices and automated end-to-end telemetry`;
+    byDoingZ = `establishing maintainable patterns, comprehensive test coverage, and structured reviews`;
   }
 
   // Assemble full XYZ sentence

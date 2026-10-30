@@ -239,12 +239,19 @@ export function generateHeuristicTailor(
   const originalSummary = masterProfile.basics.summary || "";
 
   // Grounded tailored summary: preserves candidate's existing experience level and highlights verified skills
-  const tailoredSummary = originalSummary.length > 0
-    ? originalSummary.replace(
-        /^([^.,]+)/,
-        `${targetTitle} with proven expertise in ${skillsPhrase}`
-      )
-    : `Results-driven ${targetTitle} with demonstrated expertise in ${skillsPhrase}. Proven track record designing resilient architectures, driving performance optimizations, and delivering high-impact engineering solutions aligned with production reliability.`;
+  const hasExperience = (masterProfile.experience?.length || 0) > 0;
+  let tailoredSummary = "";
+  if (originalSummary.length > 0) {
+    tailoredSummary = originalSummary.replace(
+      /^([^.,]+)/,
+      `${targetTitle} with proven expertise in ${skillsPhrase}`
+    );
+  } else if (hasExperience) {
+    tailoredSummary = `Results-driven ${targetTitle} with demonstrated expertise in ${skillsPhrase}. Proven track record designing resilient architectures and delivering high-impact engineering solutions.`;
+  } else {
+    // Blank summary and no work experience: do not claim senior track record or enterprise architectures
+    tailoredSummary = `${targetTitle} with project and technical expertise in ${skillsPhrase}. Focused on building high-quality software solutions and applying clean coding principles.`;
+  }
 
   const summaryComparison: SummaryComparison = validateSummary(
     masterProfile,

@@ -94,17 +94,14 @@ function buildSkillRegex(alias: string): RegExp {
   return new RegExp(`${prefix}${escaped}${suffix}`, "i");
 }
 
-// Compile rules once
+// Compile rules once and sort globally by alias length descending for greedy non-overlapping matching
 const SKILL_RULES: SkillMatchRule[] = [];
 
 for (const canonical of ALL_SKILLS) {
   const category = getSkillCategory(canonical);
   const aliases = CANONICAL_TO_ALIASES.get(canonical) ?? [canonical.toLowerCase()];
 
-  // Sort aliases longer-first so specific terms match
-  const sortedAliases = [...aliases].sort((a, b) => b.length - a.length);
-
-  for (const alias of sortedAliases) {
+  for (const alias of aliases) {
     SKILL_RULES.push({
       canonical,
       category,
@@ -113,6 +110,9 @@ for (const canonical of ALL_SKILLS) {
     });
   }
 }
+
+// Sort longest alias first to guarantee specific compound phrases take precedence over substrings
+SKILL_RULES.sort((a, b) => b.alias.length - a.alias.length);
 
 const MUST_HAVE_HEADING_REGEX =
   /(?:requirements|qualifications|what\s+you(?:'ll|\s+will)\s+need|must\s+have|minimum\s+qualifications|basic\s+qualifications|core\s+requirements|what\s+we\s+look\s+for|skills\s+required)/i;
@@ -165,9 +165,32 @@ export function parseJdRequirements(text: string): ParsedRequirementKeyword[] {
       lineTier = "preferred";
     }
 
-    // Match skills against this line
+    // Match skills against this line using non-overlapping span subsumption
+    // (e.g. matching "Spring Boot" prevents substring "Spring" from falsely matching the same token)
+    const matchedSpans: { start: number; end: number }[] = [];
+
     for (const rule of SKILL_RULES) {
-      if (rule.regex.test(line)) {
+      const globalRegex = new RegExp(
+        rule.regex.source,
+        rule.regex.flags.includes("g") ? rule.regex.flags : rule.regex.flags + "g"
+      );
+      let match: RegExpExecArray | null;
+
+      while ((match = globalRegex.exec(line)) !== null) {
+        const start = match.index;
+        const end = start + match[0].length;
+
+        // Discard sub-match if it overlaps with an already-claimed longer skill span
+        const overlaps = matchedSpans.some(
+          (span) => start < span.end && end > span.start
+        );
+
+        if (overlaps) {
+          continue;
+        }
+
+        matchedSpans.push({ start, end });
+
         const canonical = rule.canonical;
         const existing = foundMap.get(canonical);
 
@@ -192,6 +215,7 @@ export function parseJdRequirements(text: string): ParsedRequirementKeyword[] {
             frequency: 1,
           });
         }
+        break; // Matched non-overlapping instance for this rule on this line
       }
     }
   }

@@ -368,33 +368,69 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const response = await fetch(targetUrl.toString(), {
-      signal: controller.signal,
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 (ResuArchitect-JobReader/1.0)",
-        Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Cache-Control": "no-cache",
-      },
-      redirect: "follow",
-    });
+    let currentUrl = targetUrl.toString();
+    let response: Response | null = null;
+    const MAX_REDIRECTS = 3;
 
-    clearTimeout(timeoutId);
+    // Manual redirect follow with strict pre-connection SSRF re-validation per hop
+    for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount++) {
+      const res = await fetch(currentUrl, {
+        signal: controller.signal,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 (ResuArchitect-JobReader/1.0)",
+          Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Cache-Control": "no-cache",
+        },
+        redirect: "manual",
+      });
 
-    // Step 3: Check for redirect SSRF
-    if (response.url && response.url !== targetUrl.toString()) {
-      const redirectCheck = await validateJobUrl(response.url);
-      if (!redirectCheck.valid) {
-        return {
-          success: false,
-          error: `Redirected to restricted destination: ${redirectCheck.error}`,
-          advice: "Please copy and paste the job description text directly into the editor.",
-        };
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get("location");
+        if (!location) {
+          return {
+            success: false,
+            error: "Redirect status received without Location header.",
+            advice: "Please copy and paste the job description text directly into the editor.",
+          };
+        }
+
+        if (redirectCount === MAX_REDIRECTS) {
+          return {
+            success: false,
+            error: "Too many redirects (exceeded 3 hops limit).",
+            advice: "Please copy and paste the job description text directly into the editor.",
+          };
+        }
+
+        // Validate redirect target BEFORE making outbound connection
+        const nextUrlObj = new URL(location, currentUrl);
+        const redirectCheck = await validateJobUrl(nextUrlObj.toString());
+        if (!redirectCheck.valid || !redirectCheck.url) {
+          return {
+            success: false,
+            error: `Redirected to restricted destination: ${redirectCheck.error}`,
+            advice: "Please copy and paste the job description text directly into the editor.",
+          };
+        }
+        currentUrl = nextUrlObj.toString();
+        continue;
       }
+
+      response = res;
+      break;
     }
 
-    // Step 4: Validate Content-Type
+    if (!response) {
+      return {
+        success: false,
+        error: "Failed to establish connection to target URL.",
+        advice: "Please copy and paste the job description text directly into the editor.",
+      };
+    }
+
+    // Step 3: Validate Content-Type
     const contentType = response.headers.get("content-type") || "";
     if (
       !contentType.includes("text/html") &&
@@ -408,7 +444,7 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
       };
     }
 
-    // Step 5: Check Content-Length header limit (1MB)
+    // Step 4: Check Content-Length header limit (1MB)
     const contentLength = response.headers.get("content-length");
     if (contentLength && parseInt(contentLength, 10) > MAX_SIZE_BYTES) {
       return {
@@ -418,14 +454,32 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
       };
     }
 
-    // Step 6: Read body with size safety
-    const html = await response.text();
-    if (Buffer.byteLength(html, "utf8") > MAX_SIZE_BYTES) {
-      return {
-        success: false,
-        error: "Target page response exceeds 1 MB limit.",
-        advice: "Please copy and paste the job description text directly into the editor.",
-      };
+    // Step 5: Stream body chunks with real-time size enforcement (never buffer unrestricted memory)
+    let html = "";
+    if (response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let totalBytes = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          totalBytes += value.byteLength;
+          if (totalBytes > MAX_SIZE_BYTES) {
+            reader.cancel();
+            return {
+              success: false,
+              error: "Target web page exceeds the maximum allowed size (1 MB limit).",
+              advice: "Please copy and paste the job description text directly into the editor.",
+            };
+          }
+          html += decoder.decode(value, { stream: true });
+        }
+      }
+      html += decoder.decode();
+    } else {
+      html = await response.text();
     }
 
     // Step 7: Clean and extract text
@@ -448,8 +502,6 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
       sourceUrl: targetUrl.toString(),
     };
   } catch (err: unknown) {
-    clearTimeout(timeoutId);
-
     if (err instanceof Error && err.name === "AbortError") {
       return {
         success: false,
@@ -464,5 +516,7 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
       error: `Network error while fetching job: ${message}`,
       advice: "Please copy and paste the job description text directly into the editor.",
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

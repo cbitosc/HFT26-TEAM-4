@@ -2,5 +2,5 @@
 import "./scoring.test";
 import "./truthGuard.test";
 import "./docxExport.test";
+import "./pdfExport.test";
 import "./urlScraper.test";
-

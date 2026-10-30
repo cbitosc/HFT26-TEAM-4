@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Sparkles,
   X,
@@ -17,6 +17,10 @@ import {
   optimizeSingleBullet,
   SingleBulletOptimizationResult,
 } from "@/lib/ai/singleBulletOptimizer";
+import {
+  extractProfileGroundedFacts,
+  validateTextAgainstProfile,
+} from "@/lib/ai/truthGuard";
 
 export interface BulletOptimizerModalProps {
   isOpen: boolean;
@@ -58,6 +62,15 @@ export const BulletOptimizerModal: React.FC<BulletOptimizerModalProps> = ({
     setEditedText(optResult.optimizedText);
   }, [isOpen, originalText, roleTitle, roleTechnologies, resume, jd, selectedKeyword]);
 
+  // Dynamically re-verify edited text against grounded candidate profile facts
+  const currentValidation = useMemo(() => {
+    const textToCheck = editedText.trim() || (result ? result.optimizedText : "");
+    const facts = extractProfileGroundedFacts(resume);
+    return validateTextAgainstProfile(facts, textToCheck);
+  }, [resume, editedText, result]);
+
+  const isVerified = currentValidation.truthStatus === "verified";
+
   if (!isOpen || !result) return null;
 
   const handleApply = () => {
@@ -68,8 +81,6 @@ export const BulletOptimizerModal: React.FC<BulletOptimizerModalProps> = ({
   const handleSelectKeyword = (kw: string) => {
     setSelectedKeyword((prev) => (prev === kw ? "" : kw));
   };
-
-  const isVerified = result.truthStatus === "verified";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
@@ -240,11 +251,13 @@ export const BulletOptimizerModal: React.FC<BulletOptimizerModalProps> = ({
                   : "Truth Guard Alert — Requires Candidate Confirmation"}
               </div>
               <p className="text-[11px] opacity-90 leading-tight">
-                {result.explanation}
+                {isVerified
+                  ? "All tools, technologies, and metrics are verified against your profile history."
+                  : "One or more tools or metrics in this bullet are not found in your candidate profile."}
               </p>
-              {result.unverifiedClaims.length > 0 && (
+              {currentValidation.unverifiedClaims.length > 0 && (
                 <ul className="list-disc list-inside text-[10px] text-amber-800 dark:text-amber-300/90 pt-1">
-                  {result.unverifiedClaims.map((claim, idx) => (
+                  {currentValidation.unverifiedClaims.map((claim, idx) => (
                     <li key={idx}>{claim}</li>
                   ))}
                 </ul>
@@ -286,10 +299,20 @@ export const BulletOptimizerModal: React.FC<BulletOptimizerModalProps> = ({
             <button
               type="button"
               onClick={handleApply}
-              className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-md shadow-emerald-900/30 transition"
+              disabled={!isVerified}
+              title={
+                isVerified
+                  ? "Apply verified bullet to resume"
+                  : "Cannot apply unverified claims or fabricated metrics. Please edit text to match genuine candidate experience."
+              }
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow-md transition ${
+                isVerified
+                  ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/30 cursor-pointer"
+                  : "bg-stone-300 dark:bg-slate-800 text-stone-500 dark:text-slate-500 cursor-not-allowed border border-stone-300 dark:border-slate-700"
+              }`}
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Apply to Bullet</span>
+              <span>{isVerified ? "Apply to Bullet" : "Ungrounded (Cannot Apply)"}</span>
             </button>
           </div>
         </div>
