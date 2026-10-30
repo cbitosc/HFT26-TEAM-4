@@ -16,10 +16,18 @@ import {
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import { ExperienceItem, BulletPoint } from "@/lib/schema/resume";
+import BulletOptimizerModal from "./BulletOptimizerModal";
 
 export const ExperienceEditor: React.FC = () => {
   const [expandedId, setExpandedId] = useState<Record<string, boolean>>({});
   const [techInputs, setTechInputs] = useState<Record<string, string>>({});
+  const [optimizingBullet, setOptimizingBullet] = useState<{
+    experienceId: string;
+    bulletId: string;
+    originalText: string;
+    roleTitle: string;
+    roleTechnologies: string[];
+  } | null>(null);
 
   const {
     resume,
@@ -460,6 +468,24 @@ export const ExperienceEditor: React.FC = () => {
 
                               <button
                                 type="button"
+                                onClick={() =>
+                                  setOptimizingBullet({
+                                    experienceId: exp.id,
+                                    bulletId: bullet.id,
+                                    originalText: bullet.text,
+                                    roleTitle: `${exp.company} - ${exp.position}`,
+                                    roleTechnologies: exp.technologies,
+                                  })
+                                }
+                                title="Optimize bullet with AI Co-Pilot (Google XYZ formula)"
+                                className="px-2 py-1 rounded text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/15 border border-emerald-500/30 transition shrink-0 flex items-center space-x-1 group mt-0.5"
+                              >
+                                <Sparkles className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-emerald-400" />
+                                <span className="text-[10px] font-semibold hidden sm:inline">✨ Optimize</span>
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => deleteBullet(exp.id, bullet.id)}
                                 title="Delete bullet point"
                                 className="p-1 rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition pt-1.5 shrink-0"
@@ -478,6 +504,23 @@ export const ExperienceEditor: React.FC = () => {
           })
         )}
       </div>
+
+      {optimizingBullet && (
+        <BulletOptimizerModal
+          isOpen={true}
+          onClose={() => setOptimizingBullet(null)}
+          originalText={optimizingBullet.originalText}
+          roleTitle={optimizingBullet.roleTitle}
+          roleTechnologies={optimizingBullet.roleTechnologies}
+          onApply={(newText) => {
+            updateBullet(
+              optimizingBullet.experienceId,
+              optimizingBullet.bulletId,
+              newText
+            );
+          }}
+        />
+      )}
     </div>
   );
 };
