@@ -5,6 +5,7 @@ import Header from "@/components/navbar/Header";
 import EditorTabs from "@/components/editor/EditorTabs";
 import ResumeCanvas from "@/components/preview/ResumeCanvas";
 import AtsRobotView from "@/components/preview/AtsRobotView";
+import ScoreDeltaToast from "@/components/feedback/ScoreDeltaToast";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import {
   FileText,
@@ -104,6 +105,9 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Floating Coverage Score Increase Notification */}
+      <ScoreDeltaToast />
     </div>
   );
 }

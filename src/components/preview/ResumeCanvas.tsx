@@ -119,9 +119,30 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
   };
   const currentMargin = marginsMap[margins] || marginsMap.normal;
 
-  // Base font size and scaling (standard base 10pt scaled by fontScale)
-  const basePt = (fontScale * 10).toFixed(1);
-  const baseFontSizePx = fontScale * 13.33; // 10pt = 13.33px at 96 DPI
+  // Auto-fit 1-Page dynamic font and spacing clamping
+  const totalBullets =
+    (experience?.reduce((acc, exp) => acc + (exp.bullets?.length || 0), 0) || 0) +
+    (projects?.reduce((acc, proj) => acc + (proj.bullets?.length || 0), 0) || 0);
+
+  const activeSectionsCount = (sectionOrder || []).filter(
+    (s) => sectionVisibility?.[s as SectionId] !== false
+  ).length;
+
+  // Dynamically scale font down when autoFitOnePage is enabled to strictly lock into 1 A4 page
+  let effectiveFontScale = fontScale;
+  if (autoFitOnePage) {
+    if (totalBullets > 10 || activeSectionsCount > 5) {
+      effectiveFontScale = Math.min(fontScale, 0.85);
+    } else if (totalBullets > 6) {
+      effectiveFontScale = Math.min(fontScale, 0.90);
+    } else {
+      effectiveFontScale = Math.min(fontScale, 0.95);
+    }
+  }
+
+  // Base font size and scaling (standard base 10pt scaled by effectiveFontScale)
+  const basePt = (effectiveFontScale * 10).toFixed(1);
+  const baseFontSizePx = effectiveFontScale * 13.33; // 10pt = 13.33px at 96 DPI
 
   // Dynamic theme colors & classes
   const themeConfig = isExecutive
@@ -177,9 +198,9 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             {basePt} pt
           </span>
           {autoFitOnePage && (
-            <span className="hidden md:inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              1-Page Locked
+              1-Page Auto-Fit (0.5rem / 0.2rem Clamped)
             </span>
           )}
         </div>
@@ -287,16 +308,22 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             ref={sheetRef}
             id="resume-a4-sheet"
             className="bg-white text-slate-900 shadow-2xl rounded-sm print:shadow-none print:w-full print:max-w-none print:p-0 transition-all selection:bg-emerald-100 selection:text-emerald-900"
-            style={{
-              width: "210mm",
-              minHeight: "297mm",
-              maxWidth: "794px",
-              padding: currentMargin.padding,
-              fontFamily: appliedFontFamily,
-              fontSize: `${baseFontSizePx}px`,
-              lineHeight: autoFitOnePage ? "1.3" : "1.45",
-              boxSizing: "border-box",
-            }}
+            style={
+              {
+                width: "210mm",
+                minHeight: "297mm",
+                maxHeight: autoFitOnePage ? "297mm" : undefined,
+                overflow: autoFitOnePage ? "hidden" : "visible",
+                maxWidth: "794px",
+                padding: currentMargin.padding,
+                fontFamily: appliedFontFamily,
+                fontSize: `${baseFontSizePx}px`,
+                lineHeight: autoFitOnePage ? "1.25" : "1.45",
+                boxSizing: "border-box",
+                "--section-gap": autoFitOnePage ? "0.5rem" : "1rem",
+                "--bullet-gap": autoFitOnePage ? "0.2rem" : "0.35rem",
+              } as React.CSSProperties
+            }
           >
             {/* Header: Candidate Basics */}
             <header
@@ -395,7 +422,13 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             </header>
 
             {/* Dynamic Sections ordered by layout.sectionOrder */}
-            <div className={autoFitOnePage ? "space-y-2.5" : "space-y-4"}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--section-gap, 0.5rem)",
+              }}
+            >
               {(sectionOrder || [
                 "summary",
                 "experience",
@@ -481,9 +514,12 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
                             {exp.bullets && exp.bullets.length > 0 && (
                               <ul
-                                className={`list-disc list-outside ml-4 text-slate-700 leading-relaxed ${
-                                  autoFitOnePage ? "space-y-0.5" : "space-y-1"
-                                }`}
+                                className="list-disc list-outside ml-4 text-slate-700 leading-relaxed"
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "var(--bullet-gap, 0.2rem)",
+                                }}
                               >
                                 {exp.bullets.map((bullet) => (
                                   <li key={bullet.id}>{bullet.text}</li>
@@ -554,9 +590,12 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
                             {proj.bullets && proj.bullets.length > 0 && (
                               <ul
-                                className={`list-disc list-outside ml-4 text-slate-700 leading-relaxed ${
-                                  autoFitOnePage ? "space-y-0.5" : "space-y-1"
-                                }`}
+                                className="list-disc list-outside ml-4 text-slate-700 leading-relaxed"
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "var(--bullet-gap, 0.2rem)",
+                                }}
                               >
                                 {proj.bullets.map((b) => (
                                   <li key={b.id}>{b.text}</li>
@@ -641,7 +680,14 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
                                 {edu.gpa ? ` • GPA: ${edu.gpa}` : ""}
                               </p>
                               {edu.highlights && edu.highlights.length > 0 && (
-                                <ul className="list-disc list-outside ml-4 mt-0.5 text-slate-600 text-[0.9em]">
+                                <ul
+                                  className="list-disc list-outside ml-4 mt-0.5 text-slate-600 text-[0.9em]"
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "var(--bullet-gap, 0.2rem)",
+                                  }}
+                                >
                                   {edu.highlights.map((h) => (
                                     <li key={h.id}>{h.text}</li>
                                   ))}
