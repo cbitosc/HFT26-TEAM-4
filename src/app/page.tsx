@@ -79,7 +79,7 @@ export default function Home() {
 
         {/* Right Pane: Live A4 Resume Canvas or ATS Robot Stream */}
         <div
-          className={`w-full lg:w-1/2 h-full flex-col bg-stone-100/70 dark:bg-stone-900/40 overflow-hidden print:w-full print:h-auto print:overflow-visible print:bg-white ${
+          className={`w-full lg:w-1/2 h-full flex-col bg-stone-100/70 dark:bg-stone-900/40 overflow-hidden print:!flex print:w-full print:h-auto print:overflow-visible print:bg-white ${
             mobileTab === "preview" ? "flex" : "hidden lg:flex"
           }`}
         >
@@ -144,7 +144,13 @@ export default function Home() {
             {previewMode === "canvas" ? (
               <ResumeCanvas onToggleAtsView={() => setPreviewMode("ats-robot")} />
             ) : (
-              <AtsRobotView onSwitchToCanvas={() => setPreviewMode("canvas")} />
+              <>
+                <AtsRobotView onSwitchToCanvas={() => setPreviewMode("canvas")} />
+                {/* Keep ResumeCanvas in DOM for PDF export and printing, visually hidden in ATS mode */}
+                <div className="hidden print:block" aria-hidden="true">
+                  <ResumeCanvas />
+                </div>
+              </>
             )}
           </div>
         </div>

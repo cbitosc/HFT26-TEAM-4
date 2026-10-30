@@ -32,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
   const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [exportingDocx, setExportingDocx] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -96,11 +97,18 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
     }
   };
 
-  const handlePdfClick = () => {
+  const handlePdfClick = async () => {
     if (onExportPdf) {
       onExportPdf();
-    } else {
-      exportToPdf(resume?.basics?.name);
+      return;
+    }
+    try {
+      setExportingPdf(true);
+      await exportToPdf(resume);
+    } catch (err) {
+      console.error("Failed to export PDF", err);
+    } finally {
+      setExportingPdf(false);
     }
   };
 
@@ -295,11 +303,17 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
             <button
               type="button"
               onClick={handlePdfClick}
-              title="Export as Vector PDF (Clean @media print)"
-              className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 text-xs font-bold transition shadow-sm"
+              disabled={exportingPdf}
+              title="Download ATS-Friendly PDF (.pdf)"
+              className="flex items-center space-x-1 px-2 sm:px-2.5 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700 text-xs font-bold transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Printer className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-              <span>PDF</span>
+              <Printer
+                className={`w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 ${
+                  exportingPdf ? "animate-spin" : ""
+                }`}
+              />
+              <span className="hidden sm:inline">{exportingPdf ? "Wait..." : ""}</span>
+              <span>{exportingPdf ? "..." : "PDF"}</span>
             </button>
 
             {/* DOCX Export Button */}

@@ -110,9 +110,17 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
     }
   };
 
-  // Browser Print trigger (standard A4 vector PDF output)
-  const handlePrint = () => {
-    exportToPdf(basics?.name);
+  // PDF file download trigger
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const handleExportPdf = async () => {
+    try {
+      setExportingPdf(true);
+      await exportToPdf(resume);
+    } catch (err) {
+      console.error("Failed to export PDF", err);
+    } finally {
+      setExportingPdf(false);
+    }
   };
 
   // DOCX file download
@@ -331,15 +339,16 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             <span>{exportingDocx ? "..." : "DOCX"}</span>
           </button>
 
-          {/* Print button */}
+          {/* PDF Export button */}
           <button
             type="button"
-            onClick={handlePrint}
-            className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-stone-950 font-bold shadow-xs transition text-[11px]"
-            title="Print or Export Vector PDF"
+            onClick={handleExportPdf}
+            disabled={exportingPdf}
+            className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-stone-950 font-bold shadow-xs transition text-[11px] disabled:opacity-50"
+            title="Download ATS-Friendly PDF Document (.pdf)"
           >
-            <Printer className="w-3 h-3" />
-            <span>PDF</span>
+            <Printer className={`w-3 h-3 ${exportingPdf ? "animate-spin" : ""}`} />
+            <span>{exportingPdf ? "..." : "PDF"}</span>
           </button>
         </div>
       </div>
@@ -348,6 +357,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
       <div className="flex-1 overflow-auto p-2 sm:p-6 md:p-8 flex justify-center bg-stone-200/80 dark:bg-stone-950/80 custom-scrollbar print:p-0 print:bg-white print:overflow-visible transition-colors duration-200">
         {/* Scale transformation wrapper */}
         <div
+          id="resume-a4-sheet-wrapper"
           className="transition-transform duration-150 ease-out origin-top flex flex-col items-center print:transform-none print:m-0"
           style={{
             transform: `scale(${zoom})`,
