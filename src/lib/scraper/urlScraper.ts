@@ -489,6 +489,7 @@ function fetchPinned(
       });
 
       res.on("end", () => {
+        signal.removeEventListener("abort", onAbort);
         const bodyBuffer = Buffer.concat(chunks);
         resolve({
           status: res.statusCode || 200,

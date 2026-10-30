@@ -235,7 +235,7 @@ export const QUALITATIVE_CLAIM_RULES: QualitativeClaimCheck[] = [
     requiredKeywords: ["architect", "architecture"],
   },
   {
-    pattern: /\b(?:comprehensive|automated|unit|integration|end-to-end|e2e)?\s*test(?:ing|\s+coverage|\s+automation)?\b/i,
+    pattern: /\b(?:comprehensive|automated|unit|integration|end-to-end|e2e)?\s*test(?:s|ing|\s+coverage|\s+automation)?\b/i,
     claimName: "testing / test coverage",
     requiredKeywords: ["test", "testing", "qa", "tdd", "jest", "pytest", "cypress", "playwright", "junit", "test coverage"],
   },
