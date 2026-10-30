@@ -16,6 +16,9 @@ import {
   Filter,
   Layers,
   Award,
+  Globe,
+  Link2,
+  Loader2,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import {
@@ -42,6 +45,13 @@ export const JdScoringPanel: React.FC = () => {
   const [expandedKeyword, setExpandedKeyword] = useState<string | null>(null);
   const [justAddedSkill, setJustAddedSkill] = useState<string | null>(null);
 
+  // URL Importer State
+  const [showUrlImport, setShowUrlImport] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [isScraping, setIsScraping] = useState(false);
+  const [scrapeError, setScrapeError] = useState<{ message: string; advice?: string } | null>(null);
+  const [scrapeSuccess, setScrapeSuccess] = useState<string | null>(null);
+
   // Real-time deterministic coverage calculation (<5ms)
   const report: JdCoverageReport = useMemo(() => {
     return calculateJdCoverage(resume, jd);
@@ -50,6 +60,49 @@ export const JdScoringPanel: React.FC = () => {
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setJd(e.target.value);
   };
+
+  const handleExtractJd = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+
+    setIsScraping(true);
+    setScrapeError(null);
+    setScrapeSuccess(null);
+
+    try {
+      const res = await fetch("/api/scrape-jd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: trimmed }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setScrapeError({
+          message: data.error || "Failed to extract job posting from URL.",
+          advice:
+            data.advice ||
+            "Many job platforms require login or block scrapers. Please copy and paste the job description text directly.",
+        });
+      } else {
+        setJd(data.text);
+        setScrapeSuccess(
+          `Successfully extracted ${data.text.length} characters from ${data.title ? `"${data.title}"` : "job posting"}!`
+        );
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setScrapeError({
+        message: `Network error: ${message}`,
+        advice: "Could not reach the scraping service. Please copy and paste the job description text directly.",
+      });
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
 
   const handleLoadSample = (sample: JdRequirements) => {
     setJd(sample);
@@ -277,8 +330,8 @@ export const JdScoringPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Target Role & Paste Text Area */}
-      <div className="space-y-2">
+      {/* Target Job Description: URL Importer & Text Area */}
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <label
             htmlFor="jd-input-box"
@@ -286,12 +339,118 @@ export const JdScoringPanel: React.FC = () => {
           >
             Target Job Description Text
           </label>
-          <div className="flex items-center space-x-2 text-[11px] text-slate-400 font-mono">
-            <span>{wordCount} words</span>
-            <span>•</span>
-            <span>{charCount} chars</span>
+          <div className="flex items-center space-x-3 text-[11px]">
+            <button
+              type="button"
+              onClick={() => {
+                setShowUrlImport(!showUrlImport);
+                setScrapeError(null);
+                setScrapeSuccess(null);
+              }}
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded transition ${
+                showUrlImport
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                  : "bg-slate-800/80 text-slate-300 hover:text-emerald-400 border border-slate-700/80"
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>{showUrlImport ? "Close URL Importer" : "Import from URL"}</span>
+            </button>
+            <div className="hidden sm:flex items-center space-x-2 text-slate-400 font-mono">
+              <span>{wordCount} words</span>
+              <span>•</span>
+              <span>{charCount} chars</span>
+            </div>
           </div>
         </div>
+
+        {/* Expandable SSRF-Protected URL Reader Box */}
+        {showUrlImport && (
+          <div className="p-3.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 space-y-3 transition">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="text-xs font-semibold text-white">Import from Public Job Posting URL</span>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                  SSRF Protected
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400">Greenhouse, Lever, standard public boards</span>
+            </div>
+
+            <form onSubmit={handleExtractJd} className="flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-1">
+                <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                <input
+                  type="url"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="https://boards.greenhouse.io/company/jobs/..."
+                  disabled={isScraping}
+                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono disabled:opacity-50"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isScraping || !urlInput.trim()}
+                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-sm shrink-0"
+              >
+                {isScraping ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Extracting JD...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Extract JD</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Success Feedback Alert */}
+            {scrapeSuccess && (
+              <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-2 text-xs text-emerald-300">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">{scrapeSuccess}</p>
+                  <p className="text-[11px] text-emerald-400/80 mt-0.5">
+                    Extracted text loaded into the editor below and scored in real-time.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Graceful Fallback Error Alert with Clear Direct-Paste Guidance */}
+            {scrapeError && (
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 space-y-2 text-xs">
+                <div className="flex items-start gap-2 text-amber-300 font-medium">
+                  <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>{scrapeError.message}</span>
+                </div>
+                {scrapeError.advice && (
+                  <p className="text-[11px] text-amber-200/90 pl-6 leading-relaxed">
+                    💡 {scrapeError.advice}
+                  </p>
+                )}
+                <div className="pl-6 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById("jd-input-box");
+                      if (el) el.focus();
+                    }}
+                    className="text-[11px] text-emerald-400 hover:underline font-medium flex items-center gap-1"
+                  >
+                    Paste text manually into editor below &rarr;
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <textarea
           id="jd-input-box"
           rows={7}
