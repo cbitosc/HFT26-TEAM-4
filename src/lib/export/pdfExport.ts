@@ -115,7 +115,6 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
 
   const ensureSpace = (neededMm: number): boolean => {
     if (cursorY + neededMm > bottomThreshold) {
-      if (autoFitOnePage) return false;
       pdf.addPage();
       cursorY = marginMm;
     }
@@ -148,10 +147,18 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
   if (basics?.email) contactParts.push(basics.email);
   if (basics?.phone) contactParts.push(basics.phone);
   if (basics?.location) contactParts.push(basics.location);
-  if (basics?.website) contactParts.push(basics.website.replace(/^https?:\/\//, ""));
+  if (basics?.website) contactParts.push(basics.website.replace(/^https?:\/\//i, ""));
+  if (basics?.linkedin) contactParts.push(basics.linkedin.replace(/^https?:\/\//i, ""));
+  if (basics?.github) contactParts.push(basics.github.replace(/^https?:\/\//i, ""));
   if (basics?.profiles && basics.profiles.length > 0) {
     basics.profiles.forEach((p) => {
-      if (p.url) contactParts.push(p.url.replace(/^https?:\/\//, ""));
+      const url = p.url || p.username;
+      if (url) {
+        const clean = url.replace(/^https?:\/\//i, "");
+        if (!contactParts.some((c) => c.toLowerCase().includes(clean.toLowerCase()))) {
+          contactParts.push(clean);
+        }
+      }
     });
   }
 
@@ -224,6 +231,17 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
         pdf.text(sub, marginMm, cursorY);
         cursorY += szMeta * 0.38 + 2;
 
+        if (exp.description && exp.description.trim()) {
+          pdf.setFont(fontName, "normal");
+          pdf.setFontSize(szBody);
+          pdf.setTextColor(...colorBodyText);
+          const descLines = pdf.splitTextToSize(exp.description, contentWidth);
+          const neededMm = descLines.length * (szBody * 0.38) + 1.5;
+          ensureSpace(neededMm);
+          pdf.text(descLines, marginMm, cursorY);
+          cursorY += descLines.length * (szBody * 0.38) + (autoFitOnePage ? 1.2 : 2.0);
+        }
+
         if (exp.bullets && exp.bullets.length > 0) {
           pdf.setFont(fontName, "normal");
           pdf.setFontSize(szBody);
@@ -243,6 +261,15 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
             cursorY += bLines.length * (szBody * 0.38) + (autoFitOnePage ? 1.2 : 2.2);
           }
         }
+
+        if (exp.technologies && exp.technologies.length > 0) {
+          pdf.setFont(fontName, "italic");
+          pdf.setFontSize(szMeta);
+          pdf.setTextColor(...colorMutedText);
+          pdf.text(`Tech: ${exp.technologies.join(", ")}`, marginMm, cursorY);
+          cursorY += szMeta * 0.38 + (autoFitOnePage ? 1.2 : 2.0);
+        }
+
         cursorY += autoFitOnePage ? 1.5 : 2.5;
       }
     },
@@ -273,6 +300,17 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
           pdf.setTextColor(...colorMutedText);
           pdf.text(`Tech: ${proj.technologies.join(", ")}`, marginMm, cursorY);
           cursorY += szMeta * 0.38 + 2;
+        }
+
+        if (proj.description && proj.description.trim()) {
+          pdf.setFont(fontName, "normal");
+          pdf.setFontSize(szBody);
+          pdf.setTextColor(...colorBodyText);
+          const descLines = pdf.splitTextToSize(proj.description, contentWidth);
+          const neededMm = descLines.length * (szBody * 0.38) + 1.5;
+          ensureSpace(neededMm);
+          pdf.text(descLines, marginMm, cursorY);
+          cursorY += descLines.length * (szBody * 0.38) + (autoFitOnePage ? 1.2 : 2.0);
         }
 
         if (proj.bullets && proj.bullets.length > 0) {
@@ -356,7 +394,30 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
         pdf.setTextColor(...colorBodyText);
         const instStr = edu.gpa ? `${edu.institution}  •  GPA: ${edu.gpa}` : edu.institution;
         pdf.text(instStr, marginMm, cursorY);
-        cursorY += szMeta * 0.38 + (autoFitOnePage ? 1.5 : 2.5);
+        cursorY += szMeta * 0.38 + 1.5;
+
+        if (edu.highlights && edu.highlights.length > 0) {
+          pdf.setFont(fontName, "normal");
+          pdf.setFontSize(szBody);
+          pdf.setTextColor(...colorBodyText);
+          const bulletIndent = 3.5;
+          const bulletWidth = contentWidth - bulletIndent;
+
+          for (const h of edu.highlights) {
+            const hText = typeof h === "string" ? h : h.text;
+            if (!hText || !hText.trim()) continue;
+            const hLines = pdf.splitTextToSize(hText, bulletWidth);
+            const neededMm = hLines.length * (szBody * 0.38) + 1.5;
+            ensureSpace(neededMm);
+
+            pdf.setTextColor(...colorPrimary);
+            pdf.text("•", marginMm + 0.5, cursorY);
+            pdf.setTextColor(...colorBodyText);
+            pdf.text(hLines, marginMm + bulletIndent, cursorY);
+            cursorY += hLines.length * (szBody * 0.38) + (autoFitOnePage ? 1.2 : 2.2);
+          }
+        }
+        cursorY += autoFitOnePage ? 1.5 : 2.5;
       }
     },
 

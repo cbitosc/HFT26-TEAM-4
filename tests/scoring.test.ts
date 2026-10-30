@@ -119,6 +119,12 @@ Preferred Qualifications:
     assert.ok(skills.includes("Redux Toolkit"), "Redux Toolkit should be detected");
     assert.ok(skills.includes("Redux"), "Standalone Redux should also be detected on the same line");
   });
+
+  it("should not match Next.js for plain English phrase 'next generation platform'", () => {
+    const parsed = parseJdRequirements("Responsibilities:\n- Build the next generation platform for global payments.");
+    const skills = parsed.map((p) => p.skill);
+    assert.ok(!skills.includes("Next.js"), "Next.js must not be falsely detected on 'next generation'");
+  });
 });
 
 describe("Weighted Evidence Calculation & Scoring Engine", () => {

@@ -1,4 +1,6 @@
-import dns from "node:dns/promises";
+import dns from "node:dns";
+import http from "node:http";
+import https from "node:https";
 import net from "node:net";
 
 export interface ScrapeResult {
@@ -103,14 +105,61 @@ export function isPrivateOrReservedIp(ip: string): boolean {
   return isPrivateOrReservedIPv4(ip);
 }
 
+export interface UrlValidationResult {
+  valid: boolean;
+  url?: URL;
+  error?: string;
+  pinnedIp?: string;
+}
+
+/**
+ * Resolves hostname with an AbortSignal so DNS resolution is bounded by total timeout.
+ */
+async function lookupWithSignal(
+  hostname: string,
+  options: dns.LookupAllOptions,
+  signal?: AbortSignal
+): Promise<dns.LookupAddress[]> {
+  if (signal?.aborted) {
+    throw new DOMException("The operation was aborted", "AbortError");
+  }
+  return new Promise<dns.LookupAddress[]>((resolve, reject) => {
+    let settled = false;
+    const onAbort = () => {
+      if (settled) return;
+      settled = true;
+      reject(new DOMException("The operation was aborted", "AbortError"));
+    };
+    if (signal) {
+      signal.addEventListener("abort", onAbort, { once: true });
+    }
+
+    dns.lookup(hostname, options, (err, addresses) => {
+      if (signal) {
+        signal.removeEventListener("abort", onAbort);
+      }
+      if (settled) return;
+      settled = true;
+      if (err) {
+        return reject(err);
+      }
+      resolve(addresses as dns.LookupAddress[]);
+    });
+  });
+}
+
 /**
  * Validates URL syntax and performs strict SSRF pre-flight validation.
+ * Returns the verified public pinnedIp to prevent DNS rebinding.
  */
-export async function validateJobUrl(urlStr: string): Promise<{
-  valid: boolean;
-  error?: string;
-  url?: URL;
-}> {
+export async function validateJobUrl(
+  urlStr: string,
+  signal?: AbortSignal
+): Promise<UrlValidationResult> {
+  if (signal?.aborted) {
+    throw new DOMException("The operation was aborted", "AbortError");
+  }
+
   let parsed: URL;
   try {
     parsed = new URL(urlStr.trim());
@@ -153,6 +202,8 @@ export async function validateJobUrl(urlStr: string): Promise<{
     };
   }
 
+  let pinnedIp: string;
+
   // Check if hostname is directly an IP literal
   if (net.isIP(hostname) !== 0) {
     if (isPrivateOrReservedIp(hostname)) {
@@ -161,10 +212,11 @@ export async function validateJobUrl(urlStr: string): Promise<{
         error: "Access to private or reserved IP addresses is blocked (SSRF protection).",
       };
     }
+    pinnedIp = hostname;
   } else {
     // DNS pre-resolution check to prevent DNS rebinding or internal DNS aliases
     try {
-      const lookupResults = await dns.lookup(hostname, { all: true });
+      const lookupResults = await lookupWithSignal(hostname, { all: true }, signal);
       if (!lookupResults || lookupResults.length === 0) {
         return {
           valid: false,
@@ -180,7 +232,11 @@ export async function validateJobUrl(urlStr: string): Promise<{
           };
         }
       }
+      pinnedIp = lookupResults[0].address;
     } catch (err: unknown) {
+      if (err instanceof Error && (err.name === "AbortError" || err.message.includes("aborted"))) {
+        throw err;
+      }
       const errMsg = err instanceof Error ? err.message : String(err);
       return {
         valid: false,
@@ -189,7 +245,7 @@ export async function validateJobUrl(urlStr: string): Promise<{
     }
   }
 
-  return { valid: true, url: parsed };
+  return { valid: true, url: parsed, pinnedIp };
 }
 
 /**
@@ -354,43 +410,155 @@ export function detectAntiBotWall(
 }
 
 /**
+ * Performs a network request with DNS pinned strictly to the verified public IP.
+ * Guarantees zero SSRF DNS rebinding and streams chunks with strict byte limit.
+ */
+function fetchPinned(
+  targetUrl: URL,
+  pinnedIp: string,
+  signal: AbortSignal,
+  headers: Record<string, string>
+): Promise<{
+  status: number;
+  headers: { get: (name: string) => string | null };
+  body: string;
+}> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      return reject(new DOMException("The operation was aborted", "AbortError"));
+    }
+
+    // Double-check pinned IP restriction at connection boundary
+    if (isPrivateOrReservedIp(pinnedIp)) {
+      return reject(new Error(`SSRF protection: pinned IP (${pinnedIp}) is restricted.`));
+    }
+
+    const isHttps = targetUrl.protocol === "https:";
+    const transport = isHttps ? https : http;
+    const defaultPort = isHttps ? 443 : 80;
+    const port = targetUrl.port ? parseInt(targetUrl.port, 10) : defaultPort;
+
+    const reqOptions: http.RequestOptions = {
+      protocol: targetUrl.protocol,
+      hostname: targetUrl.hostname,
+      port,
+      path: (targetUrl.pathname || "/") + (targetUrl.search || ""),
+      method: "GET",
+      headers: {
+        ...headers,
+        Host: targetUrl.host,
+      },
+      // Hard-pin DNS resolution to the pre-validated public IP address
+      // eliminating the SSRF DNS rebinding race condition entirely
+      lookup: (_hostname, options, cb) => {
+        if (isPrivateOrReservedIp(pinnedIp)) {
+          return cb(new Error("SSRF blocked: pinned IP is private/reserved"), "", 4);
+        }
+        const family = pinnedIp.includes(":") ? 6 : 4;
+        if (options && (options as any).all) {
+          cb(null, [{ address: pinnedIp, family }] as any);
+        } else {
+          cb(null, pinnedIp, family);
+        }
+      },
+      ...(isHttps ? { servername: targetUrl.hostname } : {}),
+    };
+
+    const req = transport.request(reqOptions, (res) => {
+      const headersMap = new Map<string, string>();
+      for (const [key, value] of Object.entries(res.headers)) {
+        if (value !== undefined) {
+          headersMap.set(key.toLowerCase(), Array.isArray(value) ? value.join(", ") : value);
+        }
+      }
+
+      const headersHelper = {
+        get: (name: string) => headersMap.get(name.toLowerCase()) || null,
+      };
+
+      let totalBytes = 0;
+      const chunks: Buffer[] = [];
+
+      res.on("data", (chunk: Buffer) => {
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_SIZE_BYTES) {
+          req.destroy(new Error("Target web page exceeds the maximum allowed size (1 MB limit)."));
+        } else {
+          chunks.push(chunk);
+        }
+      });
+
+      res.on("end", () => {
+        const bodyBuffer = Buffer.concat(chunks);
+        resolve({
+          status: res.statusCode || 200,
+          headers: headersHelper,
+          body: bodyBuffer.toString("utf-8"),
+        });
+      });
+
+      res.on("error", (err) => {
+        reject(err);
+      });
+    });
+
+    const onAbort = () => {
+      req.destroy(new DOMException("The operation was aborted", "AbortError"));
+    };
+
+    signal.addEventListener("abort", onAbort, { once: true });
+
+    req.on("error", (err) => {
+      signal.removeEventListener("abort", onAbort);
+      reject(err);
+    });
+
+    req.end();
+  });
+}
+
+/**
  * Scrapes a public job URL safely with SSRF protection, strict timeouts, and size limits.
  */
 export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
-  // Step 1: Pre-flight URL & SSRF Validation
-  const validation = await validateJobUrl(urlStr);
-  if (!validation.valid || !validation.url) {
-    return {
-      success: false,
-      error: validation.error || "Invalid or restricted URL.",
-      advice: "Please copy and paste the job description text directly into the editor.",
-    };
-  }
-
-  const targetUrl = validation.url;
-
-  // Step 2: Set up timeout abort controller (5s timeout)
+  // Global timeout covers initial URL/DNS validation, connection, redirects, and streaming
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    let currentUrl = targetUrl.toString();
-    let response: Response | null = null;
+    // Step 1: Pre-flight URL & SSRF Validation (with timeout signal)
+    const validation = await validateJobUrl(urlStr, controller.signal);
+    if (!validation.valid || !validation.url || !validation.pinnedIp) {
+      return {
+        success: false,
+        error: validation.error || "Invalid or restricted URL.",
+        advice: "Please copy and paste the job description text directly into the editor.",
+      };
+    }
+
+    let currentUrlObj = validation.url;
+    let currentPinnedIp = validation.pinnedIp;
+    let response: {
+      status: number;
+      headers: { get: (name: string) => string | null };
+      body: string;
+    } | null = null;
     const MAX_REDIRECTS = 3;
 
-    // Manual redirect follow with strict pre-connection SSRF re-validation per hop
+    // Manual redirect follow with strict pinned-IP SSRF re-validation per hop
     for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount++) {
-      const res = await fetch(currentUrl, {
-        signal: controller.signal,
-        headers: {
+      const res = await fetchPinned(
+        currentUrlObj,
+        currentPinnedIp,
+        controller.signal,
+        {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 (ResuArchitect-JobReader/1.0)",
           Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
           "Accept-Language": "en-US,en;q=0.9",
           "Cache-Control": "no-cache",
-        },
-        redirect: "manual",
-      });
+        }
+      );
 
       if (res.status >= 300 && res.status < 400) {
         const location = res.headers.get("location");
@@ -411,16 +579,17 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
         }
 
         // Validate redirect target BEFORE making outbound connection
-        const nextUrlObj = new URL(location, currentUrl);
-        const redirectCheck = await validateJobUrl(nextUrlObj.toString());
-        if (!redirectCheck.valid || !redirectCheck.url) {
+        const nextUrlObj = new URL(location, currentUrlObj.toString());
+        const redirectCheck = await validateJobUrl(nextUrlObj.toString(), controller.signal);
+        if (!redirectCheck.valid || !redirectCheck.url || !redirectCheck.pinnedIp) {
           return {
             success: false,
             error: `Redirected to restricted destination: ${redirectCheck.error}`,
             advice: "Please copy and paste the job description text directly into the editor.",
           };
         }
-        currentUrl = nextUrlObj.toString();
+        currentUrlObj = redirectCheck.url;
+        currentPinnedIp = redirectCheck.pinnedIp;
         continue;
       }
 
@@ -460,38 +629,12 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
       };
     }
 
-    // Step 5: Stream body chunks with real-time size enforcement (never buffer unrestricted memory)
-    let html = "";
-    if (response.body) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let totalBytes = 0;
+    const html = response.body;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (value) {
-          totalBytes += value.byteLength;
-          if (totalBytes > MAX_SIZE_BYTES) {
-            reader.cancel();
-            return {
-              success: false,
-              error: "Target web page exceeds the maximum allowed size (1 MB limit).",
-              advice: "Please copy and paste the job description text directly into the editor.",
-            };
-          }
-          html += decoder.decode(value, { stream: true });
-        }
-      }
-      html += decoder.decode();
-    } else {
-      html = await response.text();
-    }
-
-    // Step 7: Clean and extract text
+    // Step 5: Clean and extract text
     const { title, text } = extractReadableText(html);
 
-    // Step 8: Detect anti-bot / authentication wall
+    // Step 6: Detect anti-bot / authentication wall
     const antiBotCheck = detectAntiBotWall(response.status, html, text);
     if (antiBotCheck.isBlocked) {
       return {
@@ -505,10 +648,10 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
       success: true,
       text,
       title: title || undefined,
-      sourceUrl: targetUrl.toString(),
+      sourceUrl: currentUrlObj.toString(),
     };
   } catch (err: unknown) {
-    if (err instanceof Error && err.name === "AbortError") {
+    if (err instanceof Error && (err.name === "AbortError" || err.message.includes("aborted"))) {
       return {
         success: false,
         error: "Job fetch request timed out after 5 seconds.",

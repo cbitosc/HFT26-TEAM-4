@@ -1,5 +1,6 @@
 import test, { describe, it } from "node:test";
 import assert from "node:assert";
+import net from "node:net";
 import {
   isPrivateOrReservedIPv4,
   isPrivateOrReservedIPv6,
@@ -94,6 +95,17 @@ describe("SSRF Protection & IP Validation", () => {
     const privateNetworkResult = await validateJobUrl("http://192.168.1.50/job");
     assert.strictEqual(privateNetworkResult.valid, false);
     assert.ok(privateNetworkResult.error?.includes("SSRF") || privateNetworkResult.error?.includes("private"));
+  });
+
+  it("should return validated pinnedIp for public domain and public IP literal to prevent DNS rebinding", async () => {
+    const publicResult = await validateJobUrl("https://example.com");
+    assert.strictEqual(publicResult.valid, true);
+    assert.ok(publicResult.pinnedIp, "Should return pinnedIp for SSRF DNS rebinding prevention");
+    assert.strictEqual(net.isIP(publicResult.pinnedIp!) !== 0, true);
+
+    const publicIpResult = await validateJobUrl("http://8.8.8.8/job");
+    assert.strictEqual(publicIpResult.valid, true);
+    assert.strictEqual(publicIpResult.pinnedIp, "8.8.8.8");
   });
 });
 

@@ -33,7 +33,7 @@ export const RAW_ALIAS_DEFINITIONS: Record<string, string[]> = {
 
   // Frontend
   React: ["react", "react.js", "reactjs", "react js"],
-  "Next.js": ["next.js", "nextjs", "next js", "next"],
+  "Next.js": ["next.js", "nextjs", "next js"],
   "Vue.js": ["vue", "vue.js", "vuejs", "vue 3", "vue 2"],
   "Nuxt.js": ["nuxt", "nuxt.js", "nuxtjs", "nuxt 3"],
   Angular: ["angular", "angular.js", "angularjs", "angular 2+"],

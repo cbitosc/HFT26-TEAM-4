@@ -222,6 +222,45 @@ export function extractMetricsFromText(text: string): string[] {
   return Array.from(found);
 }
 
+interface QualitativeClaimCheck {
+  pattern: RegExp;
+  claimName: string;
+  requiredKeywords: string[];
+}
+
+export const QUALITATIVE_CLAIM_RULES: QualitativeClaimCheck[] = [
+  {
+    pattern: /\b(?:architect(?:ed|ing|ure|ures)?)\b/i,
+    claimName: "resilient/system architecture",
+    requiredKeywords: ["architect", "architecture"],
+  },
+  {
+    pattern: /\b(?:comprehensive|automated|unit|integration|end-to-end|e2e)?\s*test(?:ing|\s+coverage|\s+automation)?\b/i,
+    claimName: "testing / test coverage",
+    requiredKeywords: ["test", "testing", "qa", "tdd", "jest", "pytest", "cypress", "playwright", "junit", "test coverage"],
+  },
+  {
+    pattern: /\bcontinuous integration\b|\bci\/cd\b/i,
+    claimName: "CI/CD / continuous integration",
+    requiredKeywords: ["ci/cd", "continuous integration", "jenkins", "github actions", "gitlab ci", "circleci", "travis"],
+  },
+  {
+    pattern: /\bstructured reviews?\b|\bcode reviews?\b/i,
+    claimName: "code/structured reviews",
+    requiredKeywords: ["review", "reviews", "reviewer", "pr review"],
+  },
+  {
+    pattern: /\b(?:system\s+)?reliability\b|\boperational efficiency\b/i,
+    claimName: "system reliability / operational efficiency",
+    requiredKeywords: ["reliability", "sre", "resilience", "fault-tolerant", "uptime", "availability", "operational efficiency"],
+  },
+  {
+    pattern: /\bproven track record\b/i,
+    claimName: "proven track record",
+    requiredKeywords: ["track record", "proven", "senior", "lead", "principal", "staff"],
+  },
+];
+
 export interface TruthValidationResult {
   truthStatus: TruthStatus;
   unverifiedClaims: string[];
@@ -275,6 +314,20 @@ export function validateTextAgainstProfile(
       unverifiedClaims.push(
         `Metric "${metric}" was not found in your Master Profile (unverified metric)`
       );
+    }
+  }
+
+  // Check qualitative claims (architecture, test coverage, reliability, track record)
+  for (const rule of QUALITATIVE_CLAIM_RULES) {
+    if (rule.pattern.test(text)) {
+      const isGrounded = rule.requiredKeywords.some(
+        (kw) => facts.allTextLower.includes(kw) || facts.tools.has(kw)
+      );
+      if (!isGrounded) {
+        unverifiedClaims.push(
+          `Qualitative claim "${rule.claimName}" is not supported by evidence in your Master Profile`
+        );
+      }
     }
   }
 

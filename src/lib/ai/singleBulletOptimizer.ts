@@ -148,8 +148,13 @@ export function optimizeSingleBullet(
       measuredY = `achieving ${existingMetrics.join(" and ")} performance gain`;
     }
   } else {
-    // Qualitative grounded impact when no numbers exist in candidate profile (never fabricate numbers)
-    measuredY = "elevating operational efficiency and system reliability";
+    // Qualitative grounded impact when no numbers exist in candidate profile (never fabricate numbers or reliability claims)
+    const purposeMatch = cleaned.match(/(?:to|in order to|for)\s+([^,.]+)/i);
+    if (purposeMatch && purposeMatch[1]) {
+      measuredY = `enhancing ${purposeMatch[1].trim()}`;
+    } else {
+      measuredY = "supporting core engineering workflows";
+    }
   }
 
   // Clean main action for [X]
@@ -159,20 +164,20 @@ export function optimizeSingleBullet(
   }
   accomplishedX = `${chosenVerb} ${mainAction}`;
 
-  // Build [Z] incorporating target keyword without fabricating unverified architecture
+  // Build [Z] incorporating target keyword without fabricating unverified architecture or testing
   const addedKeywords: string[] = [];
   if (targetKeyword) {
     const keywordRegex = new RegExp(`\\b${targetKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
     const alreadyContains = keywordRegex.test(accomplishedX);
 
     if (!alreadyContains) {
-      byDoingZ = `leveraging ${targetKeyword} with automated testing and continuous integration`;
+      byDoingZ = `utilizing ${targetKeyword}`;
       addedKeywords.push(targetKeyword);
     } else {
-      byDoingZ = `applying clean architecture patterns and rigorous quality validation`;
+      byDoingZ = `applying clean code standards`;
     }
   } else {
-    byDoingZ = `establishing maintainable patterns, comprehensive test coverage, and structured reviews`;
+    byDoingZ = `applying clean code standards and iterative delivery`;
   }
 
   // Assemble full XYZ sentence

@@ -67,7 +67,9 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
     if (!sheetRef.current) return;
     const checkOverflow = () => {
       if (sheetRef.current && resume.layout.autoFitOnePage) {
-        const isOverflowing = sheetRef.current.scrollHeight > sheetRef.current.clientHeight + 4;
+        // Standard A4 height in CSS pixels (96 DPI: 297mm * 96 / 25.4 ≈ 1122.5px)
+        const a4HeightPx = (297 * 96) / 25.4;
+        const isOverflowing = sheetRef.current.scrollHeight > a4HeightPx + 8;
         setHasOverflow(isOverflowing);
       } else {
         setHasOverflow(false);
@@ -403,8 +405,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
               {
                 width: "210mm",
                 minHeight: "297mm",
-                maxHeight: autoFitOnePage ? "297mm" : undefined,
-                overflow: autoFitOnePage ? "hidden" : "visible",
+                overflow: "visible",
                 maxWidth: "794px",
                 padding: currentMargin.padding,
                 fontFamily: appliedFontFamily,

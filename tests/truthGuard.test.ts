@@ -8,6 +8,8 @@ import {
   validateSuggestion,
   validateSummary,
 } from "../src/lib/ai/truthGuard";
+import { optimizeSingleBullet } from "../src/lib/ai/singleBulletOptimizer";
+import { generateHeuristicTailor } from "../src/lib/ai/heuristicTailor";
 import { ResumeDocument } from "../src/lib/schema/resume";
 import { TailoredSuggestion } from "../src/lib/ai/aiTypes";
 
@@ -219,6 +221,88 @@ describe("Deterministic Truth Guard Engine", () => {
       assert.ok(summaryResult.unverifiedClaims.length > 0);
       assert.ok(summaryResult.unverifiedClaims.some((c) => c.includes("Kubernetes")));
       assert.ok(summaryResult.unverifiedClaims.some((c) => c.includes("$20M") || c.includes("20M")));
+    });
+  });
+
+  describe("Anti-Hallucination: Qualitative Grounding (Architecture, Testing, Reliability)", () => {
+    const minimalProfile: ResumeDocument = {
+      ...groundedProfile,
+      basics: {
+        ...groundedProfile.basics,
+        headline: "Operations Associate",
+        summary: "",
+      },
+      experience: [
+        {
+          id: "exp-min",
+          company: "Acme Logistics",
+          position: "Operations Associate",
+          startDate: "2023-01",
+          endDate: "2024-01",
+          current: false,
+          bullets: [{ id: "b-min", text: "Filed weekly paperwork." }],
+          technologies: [],
+        },
+      ],
+      projects: [],
+      skills: [],
+    };
+
+    it("should flag unsupported qualitative claims as needs_confirmation", () => {
+      const unsupportedText = "Architected dashboard improving system reliability, test coverage, and structured reviews.";
+      const result = validateTextAgainstProfile(minimalProfile, unsupportedText);
+
+      assert.strictEqual(result.truthStatus, "needs_confirmation");
+      assert.ok(result.unverifiedClaims.length >= 2, "Should flag unsupported qualitative claims");
+      assert.ok(result.unverifiedClaims.some((c) => c.includes("architecture")));
+      assert.ok(result.unverifiedClaims.some((c) => c.includes("test coverage") || c.includes("testing")));
+      assert.ok(result.unverifiedClaims.some((c) => c.includes("reliability")));
+      assert.ok(result.unverifiedClaims.some((c) => c.includes("reviews")));
+    });
+
+    it("should produce grounded XYZ bullet without fabricating metrics or unverified reliability", () => {
+      const opt = optimizeSingleBullet({
+        bulletText: "Built a dashboard",
+        roleTitle: "Operations Associate",
+        roleTechnologies: [],
+        candidateResume: minimalProfile,
+        jdRequirements: "Looking for an engineer to build operational dashboards.",
+      });
+
+      assert.strictEqual(opt.truthStatus, "verified");
+      assert.strictEqual(opt.unverifiedClaims.length, 0);
+      assert.ok(!opt.optimizedText.includes("32%"));
+      assert.ok(!opt.optimizedText.includes("2.5x"));
+      assert.ok(!opt.optimizedText.includes("microservices"));
+      assert.ok(!opt.optimizedText.includes("telemetry"));
+      assert.ok(!opt.optimizedText.includes("resilient architectures"));
+    });
+
+    it("should not claim proven track record or resilient architectures for blank-summary entry profile", () => {
+      const blankProfileWithSkills: ResumeDocument = {
+        ...minimalProfile,
+        experience: [],
+        skills: [
+          {
+            id: "sk-1",
+            category: "Frontend",
+            skills: ["React", "TypeScript"],
+          },
+        ],
+      };
+
+      const tailored = generateHeuristicTailor(
+        blankProfileWithSkills,
+        "Frontend Engineer position requiring React and TypeScript."
+      );
+
+      assert.ok(tailored.summaryComparison, "summaryComparison should be generated");
+      assert.strictEqual(tailored.summaryComparison!.truthStatus, "verified");
+      assert.strictEqual(tailored.summaryComparison!.unverifiedClaims.length, 0);
+      assert.ok(!tailored.summaryComparison!.suggested.includes("proven track record"));
+      assert.ok(!tailored.summaryComparison!.suggested.includes("resilient architectures"));
+      assert.ok(tailored.summaryComparison!.suggested.includes("React"));
+      assert.ok(tailored.summaryComparison!.suggested.includes("TypeScript"));
     });
   });
 });

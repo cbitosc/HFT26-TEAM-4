@@ -234,12 +234,39 @@ export function generateHeuristicTailor(
   }
 
   // 2. Synthesize Tailored Professional Summary
-  const topSkills = matchedKeywords.length > 0 ? matchedKeywords : ["Distributed Systems", "TypeScript", "PostgreSQL"];
-  const skillsPhrase = topSkills.slice(0, 4).join(", ");
+  const candidateSkills = (masterProfile.skills || []).flatMap((g) => g.skills || []);
+  const topSkills = matchedKeywords.length > 0
+    ? matchedKeywords
+    : candidateSkills.length > 0
+    ? candidateSkills.slice(0, 4)
+    : [];
+  const skillsPhrase = topSkills.length > 0 ? topSkills.join(", ") : "software engineering";
   const originalSummary = masterProfile.basics.summary || "";
 
   // Grounded tailored summary: preserves candidate's existing experience level and highlights verified skills
   const hasExperience = (masterProfile.experience?.length || 0) > 0;
+  const profileCorpusLower = [
+    originalSummary,
+    ...(masterProfile.experience || []).map(
+      (e) => `${e.position} ${e.company} ${e.description || ""} ${e.bullets.map((b) => b.text).join(" ")}`
+    ),
+    ...(masterProfile.projects || []).map(
+      (p) => `${p.name} ${p.description || ""} ${p.bullets.map((b) => b.text).join(" ")}`
+    ),
+    ...(masterProfile.skills || []).flatMap((g) => g.skills),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const hasArchitectureEvidence = profileCorpusLower.includes("architect");
+  const hasSeniorityEvidence =
+    profileCorpusLower.includes("proven") ||
+    profileCorpusLower.includes("track record") ||
+    profileCorpusLower.includes("senior") ||
+    profileCorpusLower.includes("lead") ||
+    profileCorpusLower.includes("principal") ||
+    profileCorpusLower.includes("staff");
+
   let tailoredSummary = "";
   if (originalSummary.length > 0) {
     tailoredSummary = originalSummary.replace(
@@ -247,10 +274,14 @@ export function generateHeuristicTailor(
       `${targetTitle} with proven expertise in ${skillsPhrase}`
     );
   } else if (hasExperience) {
-    tailoredSummary = `Results-driven ${targetTitle} with demonstrated expertise in ${skillsPhrase}. Proven track record designing resilient architectures and delivering high-impact engineering solutions.`;
+    if (hasArchitectureEvidence && hasSeniorityEvidence) {
+      tailoredSummary = `Results-driven ${targetTitle} with demonstrated expertise in ${skillsPhrase}. Proven track record designing resilient architectures and delivering high-impact engineering solutions.`;
+    } else {
+      tailoredSummary = `Results-driven ${targetTitle} with demonstrated expertise in ${skillsPhrase} and delivering reliable engineering solutions.`;
+    }
   } else {
     // Blank summary and no work experience: do not claim senior track record or enterprise architectures
-    tailoredSummary = `${targetTitle} with project and technical expertise in ${skillsPhrase}. Focused on building high-quality software solutions and applying clean coding principles.`;
+    tailoredSummary = `${targetTitle} with technical expertise in ${skillsPhrase}. Focused on building high-quality software solutions and applying clean coding principles.`;
   }
 
   const summaryComparison: SummaryComparison = validateSummary(

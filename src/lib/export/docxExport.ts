@@ -93,6 +93,17 @@ export function createDocxDocument(resume: ResumeDocument): Document {
   if (basics.linkedin) contactParts.push(basics.linkedin.replace(/^https?:\/\//i, ""));
   if (basics.github) contactParts.push(basics.github.replace(/^https?:\/\//i, ""));
   if (basics.website) contactParts.push(basics.website.replace(/^https?:\/\//i, ""));
+  if (basics.profiles && basics.profiles.length > 0) {
+    basics.profiles.forEach((p) => {
+      const url = p.url || p.username;
+      if (url) {
+        const clean = url.replace(/^https?:\/\//i, "");
+        if (!contactParts.some((c) => c.toLowerCase().includes(clean.toLowerCase()))) {
+          contactParts.push(clean);
+        }
+      }
+    });
+  }
 
   if (contactParts.length > 0) {
     children.push(
@@ -236,6 +247,22 @@ export function createDocxDocument(resume: ResumeDocument): Document {
               ],
             })
           );
+
+          if (exp.description && exp.description.trim()) {
+            children.push(
+              new Paragraph({
+                spacing: { before: 10, after: 30 },
+                children: [
+                  new TextRun({
+                    text: exp.description,
+                    size: baseFontSize,
+                    font: fontName,
+                    color: "334155",
+                  }),
+                ],
+              })
+            );
+          }
 
           // Bullets with genuine bullet points
           for (const b of exp.bullets ?? []) {
