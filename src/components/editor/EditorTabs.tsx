@@ -1,25 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  User,
-  Briefcase,
-  Target,
-  Sparkles,
-  Palette,
-  Layers,
-  FileText,
-  Sliders,
-  CheckCircle2,
-  FileCheck,
-  Type,
-  Minimize2,
-  Maximize2,
-  AlertCircle,
-} from "lucide-react";
-import { useResumeStore } from "@/lib/store/useResumeStore";
+import React, { useState } from "react";
+import { User, Target, Sparkles, Palette } from "lucide-react";
 import ProfileEditor from "./ProfileEditor";
 import ThemeCustomizer from "./ThemeCustomizer";
+import JdScoringPanel from "../scoring/JdScoringPanel";
 
 export type EditorTabId = "profile" | "jd" | "ai" | "theme";
 
@@ -72,28 +57,12 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
   onTabChange,
 }) => {
   const [activeTab, setActiveTab] = useState<EditorTabId>(defaultTab);
-  const [mounted, setMounted] = useState(false);
-
-  const {
-    resume,
-    jd,
-    updateTheme,
-    setJd,
-  } = useResumeStore();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleTabClick = (tabId: EditorTabId) => {
     setActiveTab(tabId);
     if (onTabChange) {
       onTabChange(tabId);
     }
-  };
-
-  const handleJdTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setJd(e.target.value);
   };
 
   return (
@@ -153,84 +122,7 @@ export const EditorTabs: React.FC<EditorTabsProps> = ({
         {activeTab === "profile" && <ProfileEditor />}
 
         {/* Tab 2: Job Description & Match Score */}
-        {activeTab === "jd" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <h2 className="text-base font-semibold text-white">
-                  Target Job Description & Matching Engine
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Paste any job listing to trigger deterministic keyword extraction and match scoring.
-                </p>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-                {mounted && jd.title ? jd.title : "Target JD"}
-              </span>
-            </div>
-
-            {/* Target Role & Company info */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
-                <span className="text-[11px] text-slate-400 uppercase font-mono">Target Role / Title</span>
-                <p className="text-sm font-semibold text-white mt-1">
-                  {mounted && jd.title ? jd.title : "Senior Full-Stack Engineer"}
-                </p>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
-                <span className="text-[11px] text-slate-400 uppercase font-mono">Target Company</span>
-                <p className="text-sm font-semibold text-white mt-1">
-                  {mounted && jd.company ? jd.company : "Stripe"}
-                </p>
-              </div>
-            </div>
-
-            {/* Job Description Text Area */}
-            <div className="space-y-2">
-              <label
-                htmlFor="jd-raw-text"
-                className="block text-xs font-semibold text-slate-300"
-              >
-                Paste Target Job Description (Text or Markdown)
-              </label>
-              <textarea
-                id="jd-raw-text"
-                rows={8}
-                value={mounted ? jd.rawText : ""}
-                onChange={handleJdTextChange}
-                placeholder="Paste the full job posting here (responsibilities, qualifications, technologies)..."
-                className="w-full px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 font-mono leading-relaxed resize-y"
-              />
-            </div>
-
-            {/* Extracted Requirements Preview */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                  Target Required Keywords ({mounted ? jd.keywords.length : 0})
-                </span>
-                <span className="text-[10px] text-slate-400">
-                  Extracted with 400+ tech taxonomy in Phase 3
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(mounted ? jd.keywords : []).slice(0, 15).map((kw, i) => (
-                  <span
-                    key={`${kw}-${i}`}
-                    className="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-200 border border-slate-700/60 font-mono"
-                  >
-                    {kw}
-                  </span>
-                ))}
-                {mounted && jd.keywords.length === 0 && (
-                  <p className="text-xs text-slate-500 italic">
-                    Load a sample preset above or paste a job description to populate extracted keywords.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === "jd" && <JdScoringPanel />}
 
         {/* Tab 3: AI Tailoring & Git-Style Diff Reviewer */}
         {activeTab === "ai" && (
