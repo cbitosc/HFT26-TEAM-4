@@ -140,12 +140,14 @@ export default function Home() {
           </div>
 
           {/* Active View Container */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-hidden flex flex-col print:overflow-visible print:h-auto">
             {previewMode === "canvas" ? (
               <ResumeCanvas onToggleAtsView={() => setPreviewMode("ats-robot")} />
             ) : (
               <>
-                <AtsRobotView onSwitchToCanvas={() => setPreviewMode("canvas")} />
+                <div className="flex-1 flex flex-col overflow-hidden print:hidden">
+                  <AtsRobotView onSwitchToCanvas={() => setPreviewMode("canvas")} />
+                </div>
                 {/* Keep ResumeCanvas in DOM for PDF export and printing, visually hidden in ATS mode */}
                 <div className="hidden print:block" aria-hidden="true">
                   <ResumeCanvas />

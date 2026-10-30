@@ -219,7 +219,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
       };
 
   return (
-    <div className={`flex flex-col h-full bg-stone-100 dark:bg-stone-950 overflow-hidden transition-colors duration-200 ${className}`}>
+    <div className={`flex flex-col h-full bg-stone-100 dark:bg-stone-950 overflow-hidden print:overflow-visible print:h-auto transition-colors duration-200 ${className}`}>
       {/* Canvas Interactive Top Toolbar */}
       <div className="border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur px-2.5 sm:px-4 py-2 flex items-center justify-between shrink-0 text-xs print:hidden shadow-xs">
         {/* Left: View & Theme Info */}
@@ -345,7 +345,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             onClick={handleExportPdf}
             disabled={exportingPdf}
             className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-stone-950 font-bold shadow-xs transition text-[11px] disabled:opacity-50"
-            title="Download ATS-Friendly PDF Document (.pdf)"
+            title="Download ATS-Friendly PDF Document (.pdf) (or Ctrl+P for Vector Print)"
           >
             <Printer className={`w-3 h-3 ${exportingPdf ? "animate-spin" : ""}`} />
             <span>{exportingPdf ? "..." : "PDF"}</span>

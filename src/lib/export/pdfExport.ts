@@ -75,7 +75,8 @@ export async function exportToPdf(
     clone.style.left = "0";
     clone.style.width = "794px"; // 210mm at 96dpi standard A4
     clone.style.minHeight = "1123px"; // 297mm at 96dpi standard A4
-    clone.style.maxHeight = "none";
+    clone.style.maxHeight = sourceElement.style.maxHeight || "none";
+    clone.style.overflow = sourceElement.style.overflow || "visible";
     clone.style.transform = "none";
     clone.style.margin = "0";
     clone.style.boxShadow = "none";
