@@ -46,6 +46,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
   const [zoom, setZoom] = useState<number>(1.0);
   const [copied, setCopied] = useState(false);
   const [exportingDocx, setExportingDocx] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   const { resume } = useResumeStore();
@@ -111,7 +112,6 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
   };
 
   // PDF file download trigger
-  const [exportingPdf, setExportingPdf] = useState(false);
   const handleExportPdf = async () => {
     try {
       setExportingPdf(true);
