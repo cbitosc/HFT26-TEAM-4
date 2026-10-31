@@ -97,27 +97,27 @@ export const DiffCard: React.FC<DiffCardProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-4 transition duration-200 space-y-3.5 relative shadow-sm ${
+      className={`rounded-2xl border p-4 sm:p-5 transition-all duration-150 space-y-4 relative shadow-sm hover:-translate-y-0.5 ${
         isAccepted
-          ? "bg-emerald-50/50 dark:bg-stone-900/95 border-emerald-400 dark:border-emerald-500/40"
+          ? "bg-emerald-50/50 dark:bg-obsidian-900/95 border-emerald-500/40 ring-1 ring-emerald-500/20 shadow-glow-emerald"
           : isRejected
-          ? "bg-stone-100/50 dark:bg-stone-900/40 border-stone-200 dark:border-slate-800/80 opacity-60"
-          : "bg-white dark:bg-stone-900 border-stone-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-slate-700"
+          ? "bg-slate-100/50 dark:bg-obsidian-900/40 border-slate-200 dark:border-white/[0.04] opacity-50"
+          : "bg-white dark:bg-obsidian-900/90 border-slate-200 dark:border-white/[0.08] hover:border-emerald-500/30 dark:hover:border-white/20"
       }`}
     >
       {/* Header: Section Context Badge & Status Badges */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-          <span className="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-700/80">
+          <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-obsidian-850 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.08]">
             {suggestion.section}
           </span>
           {suggestion.itemTitle && (
-            <span className="text-xs font-semibold text-stone-900 dark:text-slate-200">
+            <span className="text-xs font-semibold text-slate-900 dark:text-white tracking-tight">
               {suggestion.itemTitle}
             </span>
           )}
           {suggestion.bulletId && (
-            <span className="text-[10px] font-mono text-stone-400 dark:text-slate-500">
+            <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
               • ID: {suggestion.bulletId}
             </span>
           )}
@@ -126,14 +126,14 @@ export const DiffCard: React.FC<DiffCardProps> = ({
         {/* Accepted / Rejected Indicator or Status Pill */}
         <div className="flex items-center space-x-2">
           {isAccepted && (
-            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40">
-              <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+            <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+              <Check className="w-3 h-3 text-emerald-500" />
               <span>Accepted</span>
             </span>
           )}
           {isRejected && (
-            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 dark:bg-red-500/10 text-rose-800 dark:text-red-400 border border-rose-300 dark:border-red-500/30">
-              <X className="w-3 h-3 text-rose-600 dark:text-red-400" />
+            <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/30">
+              <X className="w-3 h-3 text-rose-500" />
               <span>Rejected</span>
             </span>
           )}
@@ -143,19 +143,19 @@ export const DiffCard: React.FC<DiffCardProps> = ({
       {/* Truth Guard Verification Banner */}
       <div>
         {isVerified ? (
-          <div className="flex items-center space-x-2 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 text-xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span className="font-medium">
-              ✓ Verified from Master Profile
+          <div className="flex items-center space-x-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 text-xs shadow-glow-emerald">
+            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span className="font-semibold tracking-tight">
+              ✓ Grounded in Master Profile
             </span>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400/80 ml-auto hidden sm:inline">
+            <span className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 ml-auto hidden sm:inline">
               Safe to apply
             </span>
           </div>
         ) : (
-          <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-900 dark:text-amber-200 text-xs space-y-1.5">
-            <div className="flex items-center space-x-2 text-amber-700 dark:text-amber-400 font-semibold">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-900 dark:text-amber-200 text-xs space-y-1.5 shadow-glow-amber">
+            <div className="flex items-center space-x-2 text-amber-700 dark:text-amber-400 font-semibold tracking-tight">
+              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
               <span>
                 ⚠️ Requires Confirmation: Unverified claims detected
               </span>

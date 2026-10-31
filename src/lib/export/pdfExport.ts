@@ -1,4 +1,4 @@
-import type { ResumeDocument, SectionId } from "@/lib/schema/resume";
+import { ResumeDocument, SectionId, normalizeSectionOrder } from "@/lib/schema/resume";
 
 export interface PdfExportOptions {
   mode?: "vector" | "print" | "raster";
@@ -79,9 +79,11 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
     fontScale = 1.0,
     margins = "normal",
     autoFitOnePage = false,
-    sectionOrder = ["summary", "experience", "projects", "skills", "education", "certifications"],
+    sectionOrder,
     sectionVisibility,
   } = layout || {};
+
+  const resolvedSectionOrder = normalizeSectionOrder(sectionOrder);
 
   // Dimensions
   const pageWidth = 210;
@@ -207,10 +209,11 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
     },
 
     experience: () => {
-      if (!experience || experience.length === 0) return;
+      if (!experience || experience.length === 0 || experience.every((e) => e.hidden)) return;
       renderSectionHeader("Work Experience");
 
       for (const exp of experience) {
+        if (exp.hidden) continue;
         ensureSpace(14);
         pdf.setFont(fontName, "bold");
         pdf.setFontSize(szSubHeading);
@@ -250,6 +253,7 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
           const bulletWidth = contentWidth - bulletIndent;
 
           for (const b of exp.bullets) {
+            if (b.hidden || !b.text || !b.text.trim()) continue;
             const bLines = pdf.splitTextToSize(b.text, bulletWidth);
             const neededMm = bLines.length * (szBody * 0.38) + 1.5;
             ensureSpace(neededMm);
@@ -279,6 +283,7 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
       renderSectionHeader("Key Projects");
 
       for (const proj of projects) {
+        if (proj.hidden) continue;
         ensureSpace(14);
         pdf.setFont(fontName, "bold");
         pdf.setFontSize(szSubHeading);
@@ -321,6 +326,7 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
           const bulletWidth = contentWidth - bulletIndent;
 
           for (const b of proj.bullets) {
+            if (b.hidden || !b.text || !b.text.trim()) continue;
             const bLines = pdf.splitTextToSize(b.text, bulletWidth);
             const neededMm = bLines.length * (szBody * 0.38) + 1.5;
             ensureSpace(neededMm);
@@ -375,6 +381,7 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
       renderSectionHeader("Education");
 
       for (const edu of education) {
+        if (edu.hidden) continue;
         ensureSpace(12);
         pdf.setFont(fontName, "bold");
         pdf.setFontSize(szSubHeading);
@@ -404,6 +411,7 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
           const bulletWidth = contentWidth - bulletIndent;
 
           for (const h of edu.highlights) {
+            if (h && typeof h === "object" && h.hidden) continue;
             const hText = typeof h === "string" ? h : h.text;
             if (!hText || !hText.trim()) continue;
             const hLines = pdf.splitTextToSize(hText, bulletWidth);
@@ -426,6 +434,7 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
       renderSectionHeader("Certifications");
 
       for (const cert of certifications) {
+        if (cert.hidden) continue;
         ensureSpace(10);
         pdf.setFont(fontName, "bold");
         pdf.setFontSize(szSubHeading);
@@ -452,7 +461,7 @@ export async function generateVectorPdf(resume: ResumeDocument, filename?: strin
   };
 
   // Render sections strictly in ordered layout
-  for (const secId of sectionOrder) {
+  for (const secId of resolvedSectionOrder) {
     if (sectionVisibility && sectionVisibility[secId] === false) {
       continue;
     }

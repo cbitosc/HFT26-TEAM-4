@@ -150,23 +150,23 @@ export const ProjectsEditor: React.FC = () => {
   };
 
   return (
-    <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/70 overflow-hidden shadow-sm">
+    <div className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-obsidian-900 overflow-hidden shadow-sm hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors">
       {/* Section Header */}
-      <div className="px-4 py-3 bg-stone-50/80 dark:bg-stone-850/80 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+      <div className="px-4 py-3 bg-slate-50/70 dark:bg-obsidian-850/60 border-b border-slate-200 dark:border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
             <Code className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
                 Key Technical Projects
               </h3>
-              <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700">
+              <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-slate-200 dark:bg-obsidian-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/[0.06]">
                 {resume.projects.length} Projects
               </span>
             </div>
-            <p className="text-[11px] text-stone-500 dark:text-stone-400">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
               Open-source libraries, web systems, and technical architectures
             </p>
           </div>
@@ -175,7 +175,7 @@ export const ProjectsEditor: React.FC = () => {
         <button
           type="button"
           onClick={handleAddNewProject}
-          className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 transition"
+          className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 hover:-translate-y-0.5 active:scale-95 transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Project</span>
@@ -185,7 +185,7 @@ export const ProjectsEditor: React.FC = () => {
       {/* Projects List */}
       <div className="p-4 space-y-3.5">
         {resume.projects.length === 0 ? (
-          <div className="text-center py-8 border border-dashed border-stone-300 dark:border-stone-800 rounded-lg text-stone-400 text-xs">
+          <div className="text-center py-8 border border-dashed border-slate-300 dark:border-white/[0.1] rounded-lg text-slate-400 text-xs">
             No projects added yet. Click &quot;Add Project&quot; to showcase your technical portfolio.
           </div>
         ) : (
@@ -197,24 +197,24 @@ export const ProjectsEditor: React.FC = () => {
             return (
               <div
                 key={proj.id}
-                className="rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-950/90 overflow-hidden transition shadow-sm"
+                className="rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-50/80 dark:bg-obsidian-950/70 overflow-hidden transition-all shadow-xs"
               >
                 {/* Project Header Bar */}
-                <div className="px-3.5 py-2.5 bg-stone-100/90 dark:bg-stone-900 flex items-center justify-between border-b border-stone-200 dark:border-stone-800/80">
+                <div className="px-3.5 py-2.5 bg-slate-100/90 dark:bg-obsidian-850 flex items-center justify-between border-b border-slate-200 dark:border-white/[0.06]">
                   <button
                     type="button"
                     onClick={() => toggleExpand(proj.id)}
                     className="flex items-center space-x-2 text-left min-w-0"
                   >
-                    <span className="w-5 h-5 rounded flex items-center justify-center bg-stone-200 dark:bg-stone-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold shrink-0">
+                    <span className="w-5 h-5 rounded flex items-center justify-center bg-slate-200 dark:bg-obsidian-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold shrink-0">
                       {pIdx + 1}
                     </span>
                     <div className="truncate">
-                      <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                         {proj.name || "Project Name"}
                       </span>
                       {proj.role && (
-                        <span className="text-[11px] text-stone-500 dark:text-stone-400 ml-1.5 hidden sm:inline">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 ml-1.5 hidden sm:inline">
                           • {proj.role}
                         </span>
                       )}
@@ -227,7 +227,7 @@ export const ProjectsEditor: React.FC = () => {
                       disabled={isFirst}
                       onClick={() => handleMoveProject(pIdx, "up")}
                       title="Move project up"
-                      className="p-1 rounded text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="p-1 rounded text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-obsidian-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
                     </button>
@@ -236,23 +236,23 @@ export const ProjectsEditor: React.FC = () => {
                       disabled={isLast}
                       onClick={() => handleMoveProject(pIdx, "down")}
                       title="Move project down"
-                      className="p-1 rounded text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 disabled:opacity-30 disabled:hover:bg-transparent"
+                      className="p-1 rounded text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-obsidian-800 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                     >
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
-                    <div className="w-[1px] h-3 bg-stone-200 dark:bg-stone-800 mx-0.5" />
+                    <div className="w-[1px] h-3 bg-slate-200 dark:border-white/[0.1] mx-0.5" />
                     <button
                       type="button"
                       onClick={() => deleteProject(proj.id)}
                       title="Delete project"
-                      className="p-1 rounded text-stone-400 hover:text-red-500 hover:bg-red-500/10 transition"
+                      className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleExpand(proj.id)}
-                      className="p-1 rounded text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition"
+                      className="p-1 rounded text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
                     >
                       {isExpanded ? (
                         <ChevronUp className="w-3.5 h-3.5" />
@@ -269,8 +269,8 @@ export const ProjectsEditor: React.FC = () => {
                     {/* Project Name & Role */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
-                          Project Name <span className="text-amber-500 dark:text-emerald-400">*</span>
+                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
+                          Project Name <span className="text-emerald-500 dark:text-emerald-400">*</span>
                         </label>
                         <input
                           type="text"
@@ -279,12 +279,12 @@ export const ProjectsEditor: React.FC = () => {
                             updateProject(proj.id, { name: e.target.value })
                           }
                           placeholder="e.g. HyperGraph Engine"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                           Your Role / Contribution
                         </label>
                         <input
@@ -294,14 +294,14 @@ export const ProjectsEditor: React.FC = () => {
                             updateProject(proj.id, { role: e.target.value })
                           }
                           placeholder="e.g. Creator & Maintainer, Lead Architect"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                         />
                       </div>
                     </div>
 
                     {/* Description */}
                     <div>
-                      <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                      <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                         High-Level Overview
                       </label>
                       <input
@@ -311,16 +311,16 @@ export const ProjectsEditor: React.FC = () => {
                           updateProject(proj.id, { description: e.target.value })
                         }
                         placeholder="e.g. High-performance in-memory graph query engine with WebAssembly acceleration."
-                        className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                        className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                       />
                     </div>
 
                     {/* URLs & Dates */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                           <span className="flex items-center gap-1">
-                            <Globe className="w-3 h-3 text-stone-400" />
+                            <Globe className="w-3 h-3 text-slate-400" />
                             Live Demo URL
                           </span>
                         </label>
@@ -331,14 +331,14 @@ export const ProjectsEditor: React.FC = () => {
                             updateProject(proj.id, { url: e.target.value })
                           }
                           placeholder="https://hypergraph.dev"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                           <span className="flex items-center gap-1">
-                            <Github className="w-3 h-3 text-stone-400" />
+                            <Github className="w-3 h-3 text-slate-400" />
                             GitHub Repository
                           </span>
                         </label>
@@ -349,14 +349,14 @@ export const ProjectsEditor: React.FC = () => {
                             updateProject(proj.id, { githubUrl: e.target.value })
                           }
                           placeholder="https://github.com/org/repo"
-                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                          className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                           <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-stone-400" />
+                            <Calendar className="w-3 h-3 text-slate-400" />
                             Dates (Start – End)
                           </span>
                         </label>
@@ -368,7 +368,7 @@ export const ProjectsEditor: React.FC = () => {
                               updateProject(proj.id, { startDate: e.target.value })
                             }
                             placeholder="2023-01"
-                            className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 font-mono text-center focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                            className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 font-mono text-center focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                           />
                           <input
                             type="text"
@@ -377,7 +377,7 @@ export const ProjectsEditor: React.FC = () => {
                               updateProject(proj.id, { endDate: e.target.value })
                             }
                             placeholder="Present"
-                            className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 font-mono text-center focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                            className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 font-mono text-center focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                           />
                         </div>
                       </div>
@@ -385,20 +385,20 @@ export const ProjectsEditor: React.FC = () => {
 
                     {/* Technologies Tag Manager */}
                     <div className="space-y-1.5 pt-1">
-                      <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                      <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">
                         Technologies Stack
                       </label>
                       <div className="flex flex-wrap gap-1.5 items-center">
                         {proj.technologies.map((tech) => (
                           <span
                             key={tech}
-                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-stone-200/70 dark:bg-stone-850 text-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-750 text-xs"
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded bg-slate-200/70 dark:bg-obsidian-800 text-slate-800 dark:text-slate-200 border border-slate-300/60 dark:border-white/[0.08] text-xs"
                           >
                             <span>{tech}</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveTech(proj.id, tech)}
-                              className="text-stone-400 hover:text-red-500 transition"
+                              className="text-slate-400 hover:text-red-500 transition-colors"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -422,12 +422,12 @@ export const ProjectsEditor: React.FC = () => {
                               }
                             }}
                             placeholder="+ Add technology..."
-                            className="px-2 py-0.5 rounded bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-amber-500 dark:focus:border-emerald-500 w-32"
+                            className="px-2 py-0.5 rounded bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-32 transition-all"
                           />
                           <button
                             type="button"
                             onClick={() => handleAddTech(proj.id)}
-                            className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs"
+                            className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-obsidian-800 hover:bg-slate-300 dark:hover:bg-obsidian-750 text-slate-700 dark:text-slate-300 text-xs transition-colors"
                           >
                             Add
                           </button>
@@ -436,15 +436,15 @@ export const ProjectsEditor: React.FC = () => {
                     </div>
 
                     {/* Bullet Points Section */}
-                    <div className="pt-2 border-t border-stone-200 dark:border-stone-800/80 space-y-2">
+                    <div className="pt-2 border-t border-slate-200 dark:border-white/[0.06] space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">
                           Key Project Contributions ({proj.bullets.length})
                         </span>
                         <button
                           type="button"
                           onClick={() => handleAddBullet(proj.id)}
-                          className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 font-medium flex items-center space-x-1"
+                          className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-medium flex items-center space-x-1 transition-colors"
                         >
                           <Plus className="w-3 h-3" />
                           <span>Add Bullet</span>
@@ -459,7 +459,7 @@ export const ProjectsEditor: React.FC = () => {
                           return (
                             <div
                               key={bullet.id}
-                              className="flex items-start space-x-2 bg-white dark:bg-stone-900/60 p-2 rounded-lg border border-stone-200 dark:border-stone-850 shadow-sm"
+                              className="flex items-start space-x-2 bg-white dark:bg-obsidian-900 p-2 rounded-lg border border-slate-200 dark:border-white/[0.08] shadow-xs"
                             >
                               <div className="flex flex-col items-center space-y-0.5 pt-1 shrink-0">
                                 <button
@@ -468,7 +468,7 @@ export const ProjectsEditor: React.FC = () => {
                                   onClick={() =>
                                     handleMoveBullet(proj.id, bIdx, "up")
                                   }
-                                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 disabled:opacity-20"
+                                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 disabled:opacity-20 transition-colors"
                                 >
                                   <ChevronUp className="w-3 h-3" />
                                 </button>
@@ -481,7 +481,7 @@ export const ProjectsEditor: React.FC = () => {
                                   onClick={() =>
                                     handleMoveBullet(proj.id, bIdx, "down")
                                   }
-                                  className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 disabled:opacity-20"
+                                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 disabled:opacity-20 transition-colors"
                                 >
                                   <ChevronDown className="w-3 h-3" />
                                 </button>
@@ -494,7 +494,7 @@ export const ProjectsEditor: React.FC = () => {
                                   updateProjectBullet(proj.id, bullet.id, e.target.value)
                                 }
                                 placeholder="Describe technical accomplishment or scale..."
-                                className="flex-1 px-2.5 py-1.5 rounded bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 leading-relaxed resize-y"
+                                className="flex-1 px-2.5 py-1.5 rounded bg-slate-50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 leading-relaxed resize-y transition-all"
                               />
 
                               <button
@@ -509,17 +509,17 @@ export const ProjectsEditor: React.FC = () => {
                                   })
                                 }
                                 title="Optimize bullet with AI Co-Pilot (Google XYZ formula)"
-                                className="px-2 py-1 rounded text-amber-700 dark:text-emerald-400 hover:text-amber-800 dark:hover:text-emerald-300 hover:bg-amber-100 dark:hover:bg-emerald-500/15 border border-amber-300 dark:border-emerald-500/30 transition shrink-0 flex items-center space-x-1 group mt-0.5 shadow-sm"
+                                className="px-2 py-1 rounded text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/15 border border-emerald-300/60 dark:border-emerald-500/30 transition-all shrink-0 flex items-center space-x-1 group mt-0.5 shadow-xs hover:-translate-y-0.5 active:scale-95"
                               >
-                                <Sparkles className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-amber-600 dark:text-emerald-400" />
-                                <span className="text-[10px] font-semibold hidden sm:inline">✨ Optimize</span>
+                                <Sparkles className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-emerald-600 dark:text-emerald-400" />
+                                <span className="text-[10px] font-semibold hidden sm:inline font-mono">✨ Optimize</span>
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => handleDeleteBullet(proj.id, bullet.id)}
                                 title="Delete bullet point"
-                                className="p-1 rounded text-stone-400 hover:text-red-500 hover:bg-red-500/10 transition pt-1.5 shrink-0"
+                                className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors pt-1.5 shrink-0"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>

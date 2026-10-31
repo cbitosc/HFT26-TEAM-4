@@ -131,7 +131,7 @@ export const ThemeCustomizer: React.FC = () => {
 
   if (!mounted) {
     return (
-      <div className="p-6 text-center text-stone-400 dark:text-slate-400 text-xs animate-pulse">
+      <div className="p-6 text-center text-slate-400 text-xs animate-pulse">
         Loading theme customizer...
       </div>
     );
@@ -171,22 +171,22 @@ export const ThemeCustomizer: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-slate-800">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.08]">
         <div>
           <div className="flex items-center space-x-2">
             <Palette className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <h2 className="text-base font-semibold text-stone-900 dark:text-white">
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white tracking-tight">
               Visual Theme & Typography Studio
             </h2>
           </div>
-          <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             100% ATS-guaranteed typography hierarchy, margin scales, and single-page constraint controls.
           </p>
         </div>
         <button
           type="button"
           onClick={handleResetDefaults}
-          className="flex items-center space-x-1.5 px-2.5 py-1 text-[11px] text-stone-600 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-slate-900 border border-stone-200 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 rounded-lg transition"
+          className="flex items-center space-x-1.5 px-2.5 py-1 text-[11px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-obsidian-850 border border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/[0.14] rounded-lg transition-all"
           title="Reset to recommended layout defaults"
         >
           <RotateCcw className="w-3 h-3" />
@@ -197,7 +197,7 @@ export const ThemeCustomizer: React.FC = () => {
       {/* 1. Theme Selection Cards */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold text-stone-700 dark:text-slate-200 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wider font-mono">
             1. Select ATS Theme Preset
           </label>
           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
@@ -220,47 +220,47 @@ export const ThemeCustomizer: React.FC = () => {
                     updateTheme({ theme: th.id });
                   }
                 }}
-                className={`p-4 rounded-xl text-left transition cursor-pointer border relative shadow-sm ${
+                className={`p-4 rounded-xl text-left transition-all cursor-pointer border relative shadow-xs hover:-translate-y-0.5 ${
                   isSelected
-                    ? "bg-amber-50/40 dark:bg-stone-900/90 border-amber-500/80 dark:border-emerald-500/80 ring-1 ring-amber-500/40 dark:ring-emerald-500/50"
-                    : "bg-white dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-slate-700 text-stone-700 dark:text-slate-300"
+                    ? "bg-emerald-50/40 dark:bg-obsidian-850 border-emerald-500/70 dark:border-emerald-500/60 ring-1 ring-emerald-500/40 shadow-glow-emerald"
+                    : "bg-white dark:bg-obsidian-900 border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/[0.14] text-slate-700 dark:text-slate-300"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center space-x-2">
                     <div
-                      className={`w-3 h-3 rounded-full ${th.accentColor} shrink-0 ring-2 ring-stone-200 dark:ring-slate-800`}
+                      className={`w-3 h-3 rounded-full ${th.accentColor} shrink-0 ring-2 ring-slate-200 dark:ring-white/[0.1]`}
                     />
-                    <h3 className="text-sm font-bold text-stone-900 dark:text-white tracking-tight">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
                       {th.name}
                     </h3>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded font-mono font-medium ${
                         isSelected
-                          ? "bg-amber-100 dark:bg-emerald-500/20 text-amber-800 dark:text-emerald-300 border border-amber-300 dark:border-emerald-500/40"
-                          : "bg-stone-100 dark:bg-slate-800 text-stone-600 dark:text-slate-400 border border-stone-200 dark:border-slate-700"
+                          ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40"
+                          : "bg-slate-100 dark:bg-obsidian-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/[0.06]"
                       }`}
                     >
                       {th.badge}
                     </span>
                   </div>
                   {isSelected && (
-                    <div className="w-5 h-5 rounded-full bg-amber-500/20 dark:bg-emerald-500/20 text-amber-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-amber-500/40 dark:border-emerald-500/40">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/40 shadow-glow-emerald">
                       <Check className="w-3.5 h-3.5" />
                     </div>
                   )}
                 </div>
 
-                <p className="text-xs text-stone-700 dark:text-slate-300 mt-1.5 font-medium">
+                <p className="text-xs text-slate-700 dark:text-slate-300 mt-1.5 font-medium">
                   {th.tagline}
                 </p>
-                <p className="text-[11px] text-stone-500 dark:text-slate-400 mt-1 leading-relaxed">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                   {th.description}
                 </p>
 
-                <div className="mt-3 pt-2.5 border-t border-stone-200 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-stone-500 dark:text-slate-400">
+                <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                   <span className="font-mono">
-                    Typography: <span className="text-stone-800 dark:text-slate-300 font-semibold">{th.sampleFont}</span>
+                    Typography: <span className="text-slate-800 dark:text-slate-200 font-semibold">{th.sampleFont}</span>
                   </span>
                   <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-mono text-[10px] gap-1">
                     <ShieldCheck className="w-3 h-3" />
@@ -276,10 +276,10 @@ export const ThemeCustomizer: React.FC = () => {
       {/* 2. Font Family Picker */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold text-stone-700 dark:text-slate-200 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wider font-mono">
             2. Typography Font Family
           </label>
-          <span className="text-[10px] text-stone-400 dark:text-slate-400 font-mono">
+          <span className="text-[10px] text-slate-400 font-mono">
             Universally Available ATS Fonts
           </span>
         </div>
@@ -292,25 +292,25 @@ export const ThemeCustomizer: React.FC = () => {
                 key={f.id}
                 type="button"
                 onClick={() => updateTheme({ fontFamily: f.id })}
-                className={`p-3 rounded-xl text-left transition border shadow-sm ${
+                className={`p-3 rounded-xl text-left transition-all border shadow-xs hover:-translate-y-0.5 ${
                   isSelected
-                    ? "bg-amber-50/50 dark:bg-stone-900/90 border-amber-500/70 dark:border-emerald-500/70 text-stone-900 dark:text-white ring-1 ring-amber-500/30 dark:ring-emerald-500/30"
-                    : "bg-white dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-400 hover:border-amber-300 dark:hover:border-slate-700 hover:text-stone-900 dark:hover:text-slate-200"
+                    ? "bg-emerald-50/50 dark:bg-obsidian-850 border-emerald-500/70 dark:border-emerald-500/60 text-slate-900 dark:text-white ring-1 ring-emerald-500/30 shadow-glow-emerald"
+                    : "bg-white dark:bg-obsidian-900 border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/[0.14] hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-sm font-bold ${f.fontClass} text-stone-900 dark:text-white`}>
+                  <span className={`text-sm font-bold ${f.fontClass} text-slate-900 dark:text-white`}>
                     {f.name}
                   </span>
                   {isSelected && (
-                    <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-emerald-400" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-glow-emerald" />
                   )}
                 </div>
-                <span className="block text-[10px] text-stone-500 dark:text-slate-400 mt-0.5">
+                <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                   {f.category}
                 </span>
                 <p
-                  className={`text-xs mt-2 text-stone-600 dark:text-slate-300 truncate opacity-80 ${f.fontClass}`}
+                  className={`text-xs mt-2 text-slate-600 dark:text-slate-300 truncate opacity-80 ${f.fontClass}`}
                 >
                   Aa Bb Gg 123
                 </p>
@@ -321,24 +321,24 @@ export const ThemeCustomizer: React.FC = () => {
       </div>
 
       {/* 3. Font Scale Slider (9.5pt to 11.5pt) */}
-      <div className="p-4 rounded-xl bg-stone-50/80 dark:bg-stone-900/60 border border-stone-200 dark:border-slate-800 space-y-3 shadow-sm">
+      <div className="p-4 rounded-xl bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] space-y-3 shadow-xs hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors">
         <div className="flex items-center justify-between">
           <div>
             <label
               htmlFor="font-scale-slider"
-              className="text-xs font-semibold text-stone-700 dark:text-slate-200 uppercase tracking-wider"
+              className="text-xs font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wider font-mono"
             >
               3. Font Scale Slider (9.5pt – 11.5pt)
             </label>
-            <p className="text-[11px] text-stone-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
               Adjust body & heading text sizes proportionally while preserving ATS vertical rhythm.
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-1 rounded bg-stone-200 dark:bg-slate-800 text-amber-700 dark:text-emerald-400 border border-stone-300 dark:border-slate-700 font-mono text-xs font-bold">
+            <span className="px-2.5 py-1 rounded bg-slate-100 dark:bg-obsidian-800 text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-white/[0.08] font-mono text-xs font-bold tabular-nums">
               {currentPt} pt
             </span>
-            <span className="text-[10px] text-stone-500 dark:text-slate-500 font-mono">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono tabular-nums">
               ({Math.round(fontScale * 100)}%)
             </span>
           </div>
@@ -353,9 +353,9 @@ export const ThemeCustomizer: React.FC = () => {
             step="0.25"
             value={currentPt}
             onChange={handleScaleChange}
-            className="w-full h-2 bg-stone-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 dark:accent-emerald-500 focus:outline-none"
+            className="w-full h-2 bg-slate-200 dark:bg-obsidian-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 focus:outline-none"
           />
-          <div className="flex justify-between text-[10px] font-mono text-stone-500 dark:text-slate-500 mt-1.5 px-0.5">
+          <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-slate-500 mt-1.5 px-0.5">
             <span>9.5 pt (Dense)</span>
             <span>10.0 pt (Standard)</span>
             <span>10.5 pt</span>
@@ -380,10 +380,10 @@ export const ThemeCustomizer: React.FC = () => {
                 onClick={() =>
                   updateTheme({ fontScale: parseFloat((preset.pt / 10).toFixed(3)) })
                 }
-                className={`px-2 py-1 rounded text-[10px] font-mono transition border ${
+                className={`px-2 py-1 rounded text-[10px] font-mono transition-all border ${
                   isCurrent
-                    ? "bg-amber-100 dark:bg-emerald-500/20 text-amber-800 dark:text-emerald-300 border-amber-400 dark:border-emerald-500/40"
-                    : "bg-white dark:bg-slate-800/80 text-stone-600 dark:text-slate-400 border-stone-200 dark:border-slate-700/60 hover:text-stone-900 dark:hover:text-slate-200"
+                    ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-400 dark:border-emerald-500/40 shadow-glow-emerald"
+                    : "bg-white dark:bg-obsidian-800/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/[0.06] hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300"
                 }`}
               >
                 {preset.label}
@@ -396,10 +396,10 @@ export const ThemeCustomizer: React.FC = () => {
       {/* 4. Page Margins Selector */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold text-stone-700 dark:text-slate-200 uppercase tracking-wider">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wider font-mono">
             4. Page Margins
           </label>
-          <span className="text-[10px] text-stone-400 dark:text-slate-400 font-mono">
+          <span className="text-[10px] text-slate-400 font-mono">
             A4 Standard Bounds
           </span>
         </div>
@@ -412,22 +412,22 @@ export const ThemeCustomizer: React.FC = () => {
                 key={m.id}
                 type="button"
                 onClick={() => updateTheme({ margins: m.id })}
-                className={`p-3 rounded-xl text-left transition border shadow-sm ${
+                className={`p-3 rounded-xl text-left transition-all border shadow-xs hover:-translate-y-0.5 ${
                   isSelected
-                    ? "bg-amber-50/50 dark:bg-stone-900/90 border-amber-500/70 dark:border-emerald-500/70 text-stone-900 dark:text-white ring-1 ring-amber-500/30 dark:ring-emerald-500/30"
-                    : "bg-white dark:bg-stone-900/40 border-stone-200 dark:border-slate-800 text-stone-600 dark:text-slate-400 hover:border-amber-300 dark:hover:border-slate-700 hover:text-stone-900 dark:hover:text-slate-200"
+                    ? "bg-emerald-50/50 dark:bg-obsidian-850 border-emerald-500/70 dark:border-emerald-500/60 text-slate-900 dark:text-white ring-1 ring-emerald-500/30 shadow-glow-emerald"
+                    : "bg-white dark:bg-obsidian-900 border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/[0.14] hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-stone-900 dark:text-white">{m.label}</span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">{m.label}</span>
                   {isSelected && (
-                    <span className="w-2 h-2 rounded-full bg-amber-500 dark:bg-emerald-400" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shadow-glow-emerald" />
                   )}
                 </div>
-                <span className="block text-[10px] text-amber-700 dark:text-emerald-400 font-mono mt-0.5">
+                <span className="block text-[10px] text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
                   {m.size}
                 </span>
-                <p className="text-[11px] text-stone-500 dark:text-slate-400 mt-1.5 leading-snug">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-snug">
                   {m.desc}
                 </p>
               </button>
@@ -437,19 +437,19 @@ export const ThemeCustomizer: React.FC = () => {
       </div>
 
       {/* 5. Auto-Fit to 1-Page Constraint Toggle */}
-      <div className="p-4 rounded-xl bg-stone-50/80 dark:bg-stone-900/80 border border-stone-200 dark:border-slate-800 space-y-3 shadow-sm">
+      <div className="p-4 rounded-xl bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] space-y-3 shadow-xs hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Minimize2
               className={`w-4 h-4 ${
-                autoFitOnePage ? "text-amber-600 dark:text-emerald-400" : "text-stone-400 dark:text-slate-400"
+                autoFitOnePage ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
               }`}
             />
             <div>
-              <span className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wider">
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
                 5. Auto-Fit to 1-Page Constraint
               </span>
-              <p className="text-[11px] text-stone-500 dark:text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Automatically condenses line-height and vertical padding to ensure zero 2-page spill.
               </p>
             </div>
@@ -461,7 +461,7 @@ export const ThemeCustomizer: React.FC = () => {
             aria-checked={autoFitOnePage}
             onClick={() => updateTheme({ autoFitOnePage: !autoFitOnePage })}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              autoFitOnePage ? "bg-amber-500 dark:bg-emerald-500" : "bg-stone-300 dark:bg-slate-700"
+              autoFitOnePage ? "bg-emerald-500 shadow-glow-emerald" : "bg-slate-300 dark:bg-obsidian-750"
             }`}
           >
             <span
@@ -473,8 +473,8 @@ export const ThemeCustomizer: React.FC = () => {
         </div>
 
         {autoFitOnePage && (
-          <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-emerald-950/30 border border-amber-200 dark:border-emerald-800/40 text-[11px] text-amber-800 dark:text-emerald-300 flex items-center space-x-2">
-            <ShieldCheck className="w-4 h-4 shrink-0 text-amber-600 dark:text-emerald-400" />
+          <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-500/30 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center space-x-2">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <span>
               1-Page Auto-Fit Active: CSS line-height compressed to 1.3 and section padding reduced by 30%.
             </span>

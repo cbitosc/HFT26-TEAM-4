@@ -52,6 +52,22 @@ const config: Config = {
           900: "#1c1917",
           950: "#0c0a09",
         },
+        // Linear / Vercel Layered Obsidian Surfaces
+        obsidian: {
+          950: "#08090d", // Root deepest background
+          900: "#0e111a", // Panel & sheet backing
+          850: "#141824", // Elevated card surfaces
+          800: "#1c2233", // Hover surfaces / active items
+          750: "#252d43", // Borders & separators
+          700: "#323c57",
+        },
+      },
+      boxShadow: {
+        "glow-emerald": "0 0 24px rgba(16, 185, 129, 0.14), 0 0 48px rgba(16, 185, 129, 0.04)",
+        "glow-amber": "0 0 24px rgba(245, 158, 11, 0.14), 0 0 48px rgba(245, 158, 11, 0.04)",
+        "glow-cyan": "0 0 24px rgba(6, 182, 212, 0.14), 0 0 48px rgba(6, 182, 212, 0.04)",
+        "sheet-ambient": "0 24px 64px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06)",
+        "glass-elevated": "0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08)",
       },
     },
   },

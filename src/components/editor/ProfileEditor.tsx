@@ -29,7 +29,6 @@ import SkillsEditor from "./SkillsEditor";
 import { EducationItem, BulletPoint, CertificationItem } from "@/lib/schema/resume";
 
 export const ProfileEditor: React.FC = () => {
-  const [mounted, setMounted] = useState(false);
   const [expandedEdu, setExpandedEdu] = useState<Record<string, boolean>>({});
   const [masterSavedToast, setMasterSavedToast] = useState(false);
 
@@ -44,19 +43,6 @@ export const ProfileEditor: React.FC = () => {
     saveAsMaster,
     resetToMaster,
   } = useResumeStore();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-28 bg-stone-200 dark:bg-stone-900/60 rounded-xl" />
-        <div className="h-64 bg-stone-200 dark:bg-stone-900/60 rounded-xl" />
-      </div>
-    );
-  }
 
   const { basics, education, certifications } = resume;
 
@@ -135,11 +121,14 @@ export const ProfileEditor: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Master Profile Sync & Snapshot Toolbar */}
-      <div className="flex items-center justify-between p-3 rounded-xl bg-stone-100/90 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs shadow-xs">
-        <div className="flex items-center space-x-2 min-w-0">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-          <span className="font-semibold text-stone-800 dark:text-stone-200 truncate">Master Profile</span>
-          <span className="text-[10px] text-stone-500 dark:text-stone-400 hidden sm:inline">• Save baseline or restore untailored draft</span>
+      <div className="flex items-center justify-between p-3 rounded-xl bg-white/80 dark:bg-obsidian-900/90 border border-slate-200 dark:border-white/[0.08] backdrop-blur-md text-xs shadow-xs">
+        <div className="flex items-center space-x-2.5 min-w-0">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </div>
+          <span className="font-semibold text-slate-800 dark:text-slate-200 tracking-tight truncate">Master Profile</span>
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:inline">• Save baseline or restore untailored draft</span>
         </div>
         <div className="flex items-center space-x-1.5 shrink-0">
           <button
@@ -149,7 +138,7 @@ export const ProfileEditor: React.FC = () => {
                 resetToMaster();
               }
             }}
-            className="px-2.5 py-1 rounded-md text-xs font-medium text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-200 dark:hover:bg-stone-800 transition border border-stone-300 dark:border-stone-700/60"
+            className="px-2.5 py-1 rounded-md text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-obsidian-800 transition-all border border-slate-200 dark:border-white/[0.08]"
           >
             Revert
           </button>
@@ -160,7 +149,7 @@ export const ProfileEditor: React.FC = () => {
               setMasterSavedToast(true);
               setTimeout(() => setMasterSavedToast(false), 2500);
             }}
-            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition"
+            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-glow-emerald hover:-translate-y-0.5 active:scale-95 transition-all"
           >
             {masterSavedToast ? "Saved!" : "Save Master"}
           </button>
@@ -173,17 +162,17 @@ export const ProfileEditor: React.FC = () => {
       </section>
 
       {/* 2. Personal & Contact Basics Form */}
-      <section id="basics-form" className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/70 overflow-hidden shadow-sm">
-        <div className="px-4 py-3 bg-stone-50/80 dark:bg-stone-850/80 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+      <section id="basics-form" className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-obsidian-900 overflow-hidden shadow-sm hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors">
+        <div className="px-4 py-3 bg-slate-50/70 dark:bg-obsidian-850/60 border-b border-slate-200 dark:border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <User className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
                 Personal Contact & Identification
               </h3>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Full name, target headline, email, phone, location & profiles
               </p>
             </div>
@@ -196,9 +185,9 @@ export const ProfileEditor: React.FC = () => {
             <div>
               <label
                 htmlFor="basics-name"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
-                Full Name <span className="text-amber-500 dark:text-emerald-400">*</span>
+                Full Name <span className="text-emerald-500 dark:text-emerald-400">*</span>
               </label>
               <input
                 id="basics-name"
@@ -206,14 +195,14 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.name}
                 onChange={(e) => updateBasics({ name: e.target.value })}
                 placeholder="e.g. Alex Morgan"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500 font-medium"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 font-medium transition-all"
               />
             </div>
 
             <div>
               <label
                 htmlFor="basics-headline"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
                 Target Title / Headline
               </label>
@@ -223,7 +212,7 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.headline}
                 onChange={(e) => updateBasics({ headline: e.target.value })}
                 placeholder="e.g. Senior Full-Stack Engineer"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500 font-medium"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 font-medium transition-all"
               />
             </div>
           </div>
@@ -233,10 +222,10 @@ export const ProfileEditor: React.FC = () => {
             <div>
               <label
                 htmlFor="basics-email"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
                 <span className="flex items-center gap-1">
-                  <Mail className="w-3 h-3 text-stone-400 dark:text-stone-400" />
+                  <Mail className="w-3 h-3 text-slate-400" />
                   Email
                 </span>
               </label>
@@ -246,17 +235,17 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.email}
                 onChange={(e) => updateBasics({ email: e.target.value })}
                 placeholder="alex.morgan@example.com"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
               />
             </div>
 
             <div>
               <label
                 htmlFor="basics-phone"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
                 <span className="flex items-center gap-1">
-                  <Phone className="w-3 h-3 text-stone-400 dark:text-stone-400" />
+                  <Phone className="w-3 h-3 text-slate-400" />
                   Phone
                 </span>
               </label>
@@ -266,17 +255,17 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.phone}
                 onChange={(e) => updateBasics({ phone: e.target.value })}
                 placeholder="+1 (555) 234-5678"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
               />
             </div>
 
             <div>
               <label
                 htmlFor="basics-location"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-stone-400 dark:text-stone-400" />
+                  <MapPin className="w-3 h-3 text-slate-400" />
                   Location
                 </span>
               </label>
@@ -286,7 +275,7 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.location}
                 onChange={(e) => updateBasics({ location: e.target.value })}
                 placeholder="San Francisco, CA"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
               />
             </div>
           </div>
@@ -296,10 +285,10 @@ export const ProfileEditor: React.FC = () => {
             <div>
               <label
                 htmlFor="basics-website"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
                 <span className="flex items-center gap-1">
-                  <Globe className="w-3 h-3 text-stone-400 dark:text-stone-400" />
+                  <Globe className="w-3 h-3 text-slate-400" />
                   Website / Portfolio
                 </span>
               </label>
@@ -309,17 +298,17 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.website || ""}
                 onChange={(e) => updateBasics({ website: e.target.value })}
                 placeholder="https://alexmorgan.dev"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
               />
             </div>
 
             <div>
               <label
                 htmlFor="basics-linkedin"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
                 <span className="flex items-center gap-1">
-                  <Linkedin className="w-3 h-3 text-stone-400 dark:text-stone-400" />
+                  <Linkedin className="w-3 h-3 text-slate-400" />
                   LinkedIn
                 </span>
               </label>
@@ -329,17 +318,17 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.linkedin || ""}
                 onChange={(e) => updateBasics({ linkedin: e.target.value })}
                 placeholder="https://linkedin.com/in/username"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
               />
             </div>
 
             <div>
               <label
                 htmlFor="basics-github"
-                className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1"
+                className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-mono"
               >
                 <span className="flex items-center gap-1">
-                  <Github className="w-3 h-3 text-stone-400 dark:text-stone-400" />
+                  <Github className="w-3 h-3 text-slate-400" />
                   GitHub
                 </span>
               </label>
@@ -349,7 +338,7 @@ export const ProfileEditor: React.FC = () => {
                 value={basics.github || ""}
                 onChange={(e) => updateBasics({ github: e.target.value })}
                 placeholder="https://github.com/username"
-                className="w-full px-3 py-2 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
               />
             </div>
           </div>
@@ -357,17 +346,17 @@ export const ProfileEditor: React.FC = () => {
       </section>
 
       {/* 3. Professional Summary Form */}
-      <section id="summary-form" className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/70 overflow-hidden shadow-sm">
-        <div className="px-4 py-3 bg-stone-50/80 dark:bg-stone-850/80 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+      <section id="summary-form" className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-obsidian-900 overflow-hidden shadow-sm hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors">
+        <div className="px-4 py-3 bg-slate-50/70 dark:bg-obsidian-850/60 border-b border-slate-200 dark:border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <FileText className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
                 Professional Summary
               </h3>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Concise executive overview tailored to your target industry
               </p>
             </div>
@@ -392,11 +381,11 @@ export const ProfileEditor: React.FC = () => {
             value={basics.summary}
             onChange={(e) => updateBasics({ summary: e.target.value })}
             placeholder="Write a high-impact 2-4 sentence summary highlighting your core expertise, years of experience, and quantifiable achievements..."
-            className="w-full px-3.5 py-2.5 rounded-lg bg-stone-50/50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500 focus:border-amber-500 dark:focus:border-emerald-500 leading-relaxed resize-y"
+            className="w-full px-3.5 py-2.5 rounded-lg bg-slate-50/50 dark:bg-obsidian-950 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 leading-relaxed resize-y transition-all"
           />
-          <div className="flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400">
-            <span className="flex items-center gap-1 text-stone-500 dark:text-stone-400">
-              <Sparkles className="w-3 h-3 text-amber-500 dark:text-emerald-400" />
+          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
               Tip: Include 2-3 target keywords and a concrete metric (e.g. 40% latency reduction).
             </span>
           </div>
@@ -419,17 +408,17 @@ export const ProfileEditor: React.FC = () => {
       </section>
 
       {/* 7. Education Form */}
-      <section id="education-form" className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/70 overflow-hidden shadow-sm">
-        <div className="px-4 py-3 bg-stone-50/80 dark:bg-stone-850/80 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+      <section id="education-form" className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-obsidian-900 overflow-hidden shadow-sm hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors">
+        <div className="px-4 py-3 bg-slate-50/70 dark:bg-obsidian-850/60 border-b border-slate-200 dark:border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <GraduationCap className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
                 Education & Degrees
               </h3>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Universities, degrees, honors, and relevant academic highlights
               </p>
             </div>
@@ -438,7 +427,7 @@ export const ProfileEditor: React.FC = () => {
           <button
             type="button"
             onClick={handleAddNewEducation}
-            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 transition"
+            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 hover:-translate-y-0.5 active:scale-95 transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Education</span>
@@ -447,7 +436,7 @@ export const ProfileEditor: React.FC = () => {
 
         <div className="p-4 space-y-3">
           {education.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-stone-300 dark:border-stone-800 rounded-lg text-stone-400 text-xs">
+            <div className="text-center py-6 border border-dashed border-slate-300 dark:border-white/[0.1] rounded-lg text-slate-400 text-xs">
               No education entries added yet. Click &quot;Add Education&quot; above to add your university or degree.
             </div>
           ) : (
@@ -456,23 +445,23 @@ export const ProfileEditor: React.FC = () => {
               return (
                 <div
                   key={edu.id}
-                  className="rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-950/80 overflow-hidden transition shadow-sm"
+                  className="rounded-lg border border-slate-200 dark:border-white/[0.08] bg-slate-50/80 dark:bg-obsidian-950/70 overflow-hidden transition-all shadow-xs"
                 >
                   {/* Card Header */}
-                  <div className="px-3.5 py-2.5 bg-stone-100/90 dark:bg-stone-900 flex items-center justify-between border-b border-stone-200 dark:border-stone-800/80">
+                  <div className="px-3.5 py-2.5 bg-slate-100/90 dark:bg-obsidian-850 flex items-center justify-between border-b border-slate-200 dark:border-white/[0.06]">
                     <button
                       type="button"
                       onClick={() => toggleEdu(edu.id)}
                       className="flex items-center space-x-2 text-left min-w-0"
                     >
-                      <span className="w-5 h-5 rounded flex items-center justify-center bg-stone-200 dark:bg-stone-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold">
+                      <span className="w-5 h-5 rounded flex items-center justify-center bg-slate-200 dark:bg-obsidian-800 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-bold">
                         {idx + 1}
                       </span>
                       <div className="truncate">
-                        <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                           {edu.degree || "Degree"} in {edu.field || "Field"}
                         </span>
-                        <span className="text-[11px] text-stone-500 dark:text-stone-400 ml-1.5 hidden sm:inline">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 ml-1.5 hidden sm:inline">
                           • {edu.institution || "Institution"}
                         </span>
                       </div>
@@ -482,7 +471,7 @@ export const ProfileEditor: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => deleteEducation(edu.id)}
-                        className="p-1 rounded text-stone-400 hover:text-red-500 hover:bg-red-500/10 transition"
+                        className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                         title="Delete education entry"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -490,7 +479,7 @@ export const ProfileEditor: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => toggleEdu(edu.id)}
-                        className="p-1 rounded text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 transition"
+                        className="p-1 rounded text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
                       >
                         {isExpanded ? (
                           <ChevronUp className="w-3.5 h-3.5" />
@@ -506,7 +495,7 @@ export const ProfileEditor: React.FC = () => {
                     <div className="p-3.5 space-y-3">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                          <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                             Institution / University
                           </label>
                           <input
@@ -516,12 +505,12 @@ export const ProfileEditor: React.FC = () => {
                               updateEducation(edu.id, { institution: e.target.value })
                             }
                             placeholder="e.g. UC Berkeley"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                          <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                             Degree
                           </label>
                           <input
@@ -531,14 +520,14 @@ export const ProfileEditor: React.FC = () => {
                               updateEducation(edu.id, { degree: e.target.value })
                             }
                             placeholder="e.g. Bachelor of Science"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                          <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                             Field of Study / Major
                           </label>
                           <input
@@ -548,12 +537,12 @@ export const ProfileEditor: React.FC = () => {
                               updateEducation(edu.id, { field: e.target.value })
                             }
                             placeholder="e.g. Computer Science"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                          <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                             Graduation Date / Period
                           </label>
                           <div className="grid grid-cols-2 gap-1.5">
@@ -564,7 +553,7 @@ export const ProfileEditor: React.FC = () => {
                                 updateEducation(edu.id, { startDate: e.target.value })
                               }
                               placeholder="2013-08"
-                              className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 font-mono text-center focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                              className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 font-mono text-center focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                             />
                             <input
                               type="text"
@@ -573,13 +562,13 @@ export const ProfileEditor: React.FC = () => {
                                 updateEducation(edu.id, { endDate: e.target.value })
                               }
                               placeholder="2017-05"
-                              className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 font-mono text-center focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                              className="w-full px-2 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 font-mono text-center focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">
+                          <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 font-mono">
                             GPA / Honors (Optional)
                           </label>
                           <input
@@ -589,21 +578,21 @@ export const ProfileEditor: React.FC = () => {
                               updateEducation(edu.id, { gpa: e.target.value })
                             }
                             placeholder="e.g. 3.85 / 4.0"
-                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                           />
                         </div>
                       </div>
 
                       {/* Academic Highlights / Honors Bullets */}
-                      <div className="pt-2 border-t border-stone-200 dark:border-stone-800/80 space-y-2">
+                      <div className="pt-2 border-t border-slate-200 dark:border-white/[0.06] space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">
                             Honors & Coursework ({edu.highlights.length})
                           </span>
                           <button
                             type="button"
                             onClick={() => handleAddHighlight(edu.id)}
-                            className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 font-medium flex items-center space-x-1"
+                            className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-medium flex items-center space-x-1 transition-colors"
                           >
                             <Plus className="w-3 h-3" />
                             <span>Add Highlight</span>
@@ -613,7 +602,7 @@ export const ProfileEditor: React.FC = () => {
                         <div className="space-y-1.5">
                           {edu.highlights.map((h) => (
                             <div key={h.id} className="flex items-center space-x-2">
-                              <span className="text-stone-400 dark:text-stone-500 text-xs">•</span>
+                              <span className="text-slate-400 dark:text-slate-500 text-xs">•</span>
                               <input
                                 type="text"
                                 value={h.text}
@@ -621,12 +610,12 @@ export const ProfileEditor: React.FC = () => {
                                   handleUpdateHighlight(edu.id, h.id, e.target.value)
                                 }
                                 placeholder="e.g. Dean's Honor List, Distributed Systems Coursework"
-                                className="flex-1 px-2.5 py-1 rounded bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-900 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:focus:ring-emerald-500"
+                                className="flex-1 px-2.5 py-1 rounded bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/[0.08] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
                               />
                               <button
                                 type="button"
                                 onClick={() => handleDeleteHighlight(edu.id, h.id)}
-                                className="p-1 rounded text-stone-400 hover:text-red-500 transition"
+                                className="p-1 rounded text-slate-400 hover:text-red-500 transition-colors"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -644,17 +633,17 @@ export const ProfileEditor: React.FC = () => {
       </section>
 
       {/* 8. Certifications Form */}
-      <section id="certifications-form" className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/70 overflow-hidden shadow-sm">
-        <div className="px-4 py-3 bg-stone-50/80 dark:bg-stone-850/80 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
+      <section id="certifications-form" className="rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-obsidian-900 overflow-hidden shadow-sm hover:border-slate-300 dark:hover:border-white/[0.12] transition-colors">
+        <div className="px-4 py-3 bg-slate-50/70 dark:bg-obsidian-850/60 border-b border-slate-200 dark:border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Award className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-stone-900 dark:text-white uppercase tracking-wide">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
                 Certifications & Credentials
               </h3>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Industry credentials, cloud certifications, and licenses
               </p>
             </div>
@@ -663,7 +652,7 @@ export const ProfileEditor: React.FC = () => {
           <button
             type="button"
             onClick={handleAddCertification}
-            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 transition"
+            className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1 hover:-translate-y-0.5 active:scale-95 transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Certification</span>
@@ -672,25 +661,25 @@ export const ProfileEditor: React.FC = () => {
 
         <div className="p-4 space-y-2.5">
           {certifications.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-stone-300 dark:border-stone-800 rounded-lg text-stone-400 text-xs">
+            <div className="text-center py-6 border border-dashed border-slate-300 dark:border-white/[0.1] rounded-lg text-slate-400 text-xs">
               No certifications added yet. Click &quot;Add Certification&quot; to add your credentials.
             </div>
           ) : (
             certifications.map((cert) => (
               <div
                 key={cert.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-stone-50/80 dark:bg-stone-950/80 border border-stone-200 dark:border-stone-800"
+                className="flex items-center justify-between p-3 rounded-lg bg-slate-50/80 dark:bg-obsidian-950/70 border border-slate-200 dark:border-white/[0.08]"
               >
                 <div>
-                  <p className="text-xs font-bold text-stone-900 dark:text-white">{cert.name}</p>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                    {cert.issuer} • <span className="font-mono text-amber-600 dark:text-emerald-400">{cert.date}</span>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{cert.name}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {cert.issuer} • <span className="font-mono text-emerald-600 dark:text-emerald-400">{cert.date}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => deleteCertification(cert.id)}
-                  className="p-1 rounded text-stone-400 hover:text-red-500 transition"
+                  className="p-1 rounded text-slate-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

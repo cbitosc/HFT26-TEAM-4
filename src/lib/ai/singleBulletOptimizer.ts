@@ -212,7 +212,7 @@ export function optimizeSingleBullet(
     );
     estimatedCoverageDelta = isMustHave ? 7 : 4;
   } else {
-    estimatedCoverageDelta = 2; // Sharp Google XYZ verbs still improve score
+    estimatedCoverageDelta = 0; // Verb sharpening improves quality/density, not JD keyword coverage %
   }
 
   return {

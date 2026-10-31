@@ -4,30 +4,49 @@
 
 :root {
   --background: #fafaf9;
-  --foreground: #1c1917;
+  --foreground: #0f172a;
   --card-bg: #ffffff;
-  --card-border: #e7e5e4;
+  --card-border: #e2e8f0;
 }
 
 .dark {
-  --background: #0c0a09;
-  --foreground: #fafaf9;
-  --card-bg: #1c1917;
-  --card-border: #292524;
+  --background: #08090d;
+  --foreground: #f8fafc;
+  --card-bg: #141824;
+  --card-border: rgba(255, 255, 255, 0.08);
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Studio Ambient Grid & Gradients */
+.studio-grid-bg {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+:root:not(.dark) .studio-grid-bg {
+  background-image: radial-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.ambient-glow-emerald {
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.09) 0%, transparent 70%);
+}
+
+.ambient-glow-amber {
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.09) 0%, transparent 70%);
+}
+
 /* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -35,20 +54,20 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #a8a29e;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #44403c;
+  background: #252d43;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #78716c;
+  background: #94a3b8;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #57534e;
+  background: #323c57;
 }
 
 /* Print Styles for ATS Vector PDF Export */

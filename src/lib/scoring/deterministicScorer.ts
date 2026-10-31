@@ -42,6 +42,7 @@ export interface JdCoverageReport {
   mustHaveScore: number; // 0 - 100
   preferredScore: number; // 0 - 100
   bulletEvidenceScore: number; // % of matched skills proven in bullets
+  actionMetricDensityPercent?: number;
   totalRequiredKeywords: number;
   matchedCount: number;
   missingCount: number;
@@ -51,6 +52,16 @@ export interface JdCoverageReport {
   missingKeywords: MissingKeyword[];
   executionTimeMs: number;
 }
+
+const ACTION_VERBS_LIST = [
+  "architected", "engineered", "developed", "built", "designed", "implemented",
+  "optimized", "spearheaded", "accelerated", "reduced", "scaled", "automated",
+  "led", "orchestrated", "refactored", "delivered", "deployed", "streamlined",
+  "formulated", "established", "revamped", "transformed", "pioneered", "enhanced",
+  "authored", "instituted", "championed", "trained", "fine-tuned", "audited",
+];
+
+const ACTION_VERBS_REGEX = new RegExp(`\\b(?:${ACTION_VERBS_LIST.join("|")})\\b`, "i");
 
 // Precompile regex cache for skills and aliases
 interface SkillMatchRule {
@@ -114,14 +125,14 @@ for (const canonical of ALL_SKILLS) {
 // Sort longest alias first to guarantee specific compound phrases take precedence over substrings
 SKILL_RULES.sort((a, b) => b.alias.length - a.alias.length);
 
-const MUST_HAVE_HEADING_REGEX =
-  /(?:requirements|qualifications|what\s+you(?:'ll|\s+will)\s+need|must\s+have|minimum\s+qualifications|basic\s+qualifications|core\s+requirements|what\s+we\s+look\s+for|skills\s+required)/i;
+export const PREFERRED_HEADING_REGEX =
+  /^(?:[-*•+\d.)\s]*)(?:#+\s*|\*\*\s*)?(?:(?:preferred|desired|additional|bonus|optional)\s+(?:qualifications|requirements|skills|experience|competencies)|nice\s+to\s+have|bonus\s*(?:points|qualifications)?|what\s+we'd\s+love\s+to\s+see|pluses|great\s+to\s+have)(?:[:\-–—\s*]|$)/i;
 
-const PREFERRED_HEADING_REGEX =
-  /(?:nice\s+to\s+have|preferred\s+qualifications|bonus|pluses|preferred\s+skills|what\s+we'd\s+love\s+to\s+see|desired\s+qualifications|additional\s+qualifications)/i;
+export const MUST_HAVE_HEADING_REGEX =
+  /^(?:[-*•+\d.)\s]*)(?:#+\s*|\*\*\s*)?(?:(?:required|minimum|basic|core|key|mandatory|essential)\s+(?:qualifications|requirements|skills|experience|competencies)|qualifications|requirements|skills\s+required|what\s+you(?:'ll|\s+will)\s+need|must\s+have|what\s+we(?:'re|\s+are)\s+looking\s+for|what\s+you\s+bring|who\s+you\s+are)(?:[:\-–—\s*]|$)/i;
 
-const GENERAL_HEADING_REGEX =
-  /(?:responsibilities|what\s+you(?:'ll|\s+will)\s+do|about\s+the\s+role|role\s+overview|job\s+summary|duties|about\s+us)/i;
+export const GENERAL_HEADING_REGEX =
+  /^(?:[-*•+\d.)\s]*)(?:#+\s*|\*\*\s*)?(?:(?:core\s+|primary\s+|key\s+)?responsibilities|what\s+you(?:'ll|\s+will)\s+do|about\s+the\s+role|role\s+overview|job\s+summary|duties|about\s+us|the\s+role)(?:[:\-–—\s*]|$)/i;
 
 /**
  * Deterministically parses JD text into categorized skills with must-have, preferred,
@@ -142,19 +153,31 @@ export function parseJdRequirements(text: string): ParsedRequirementKeyword[] {
     const line = rawLine.trim();
     if (!line) continue;
 
-    // Detect section transitions (only on heading lines, not bullet or item lines)
-    const isBulletOrSentence = /^[-*•+\d.)\s]/.test(rawLine) || line.length > 60;
-    if (!isBulletOrSentence) {
-      if (PREFERRED_HEADING_REGEX.test(line)) {
-        currentTier = "preferred";
-        continue;
-      } else if (MUST_HAVE_HEADING_REGEX.test(line)) {
-        currentTier = "must-have";
-        continue;
-      } else if (GENERAL_HEADING_REGEX.test(line)) {
-        currentTier = "general";
-        continue;
-      }
+    // Heading regexes matching at line start (resilient across markdown hashes, bullets, and bold markers)
+    const preferredHeadingMatch = line.match(PREFERRED_HEADING_REGEX);
+    const mustHaveHeadingMatch = !preferredHeadingMatch && line.match(MUST_HAVE_HEADING_REGEX);
+    const generalHeadingMatch = !preferredHeadingMatch && !mustHaveHeadingMatch && line.match(GENERAL_HEADING_REGEX);
+
+    let lineToParse = line;
+    let headingMatched = false;
+
+    if (preferredHeadingMatch) {
+      currentTier = "preferred";
+      headingMatched = true;
+      lineToParse = line.slice(preferredHeadingMatch[0].length).replace(/^[:\-–—\s*]+/, "").trim();
+    } else if (mustHaveHeadingMatch) {
+      currentTier = "must-have";
+      headingMatched = true;
+      lineToParse = line.slice(mustHaveHeadingMatch[0].length).replace(/^[:\-–—\s*]+/, "").trim();
+    } else if (generalHeadingMatch) {
+      currentTier = "general";
+      headingMatched = true;
+      lineToParse = line.slice(generalHeadingMatch[0].length).replace(/^[:\-–—\s*]+/, "").trim();
+    }
+
+    // If this line was purely a heading with no trailing content on the same line, advance to next line
+    if (headingMatched && !lineToParse) {
+      continue;
     }
 
     // Determine line-specific tier modifier
@@ -176,7 +199,7 @@ export function parseJdRequirements(text: string): ParsedRequirementKeyword[] {
       );
       let match: RegExpExecArray | null;
 
-      while ((match = globalRegex.exec(line)) !== null) {
+      while ((match = globalRegex.exec(lineToParse)) !== null) {
         const start = match.index;
         const end = start + match[0].length;
 
@@ -328,6 +351,7 @@ export function calculateJdCoverage(
       mustHaveScore: 0,
       preferredScore: 0,
       bulletEvidenceScore: 0,
+      actionMetricDensityPercent: 0,
       totalRequiredKeywords: 0,
       matchedCount: 0,
       missingCount: 0,
@@ -340,52 +364,76 @@ export function calculateJdCoverage(
   }
 
   // 2. Pre-index Resume Content for rapid matching
+  const sectionVisibility = resume?.layout?.sectionVisibility;
+  const isSectionVisible = (sec: "summary" | "experience" | "projects" | "skills" | "education" | "certifications") =>
+    sectionVisibility?.[sec] !== false;
+
   // Bullet index: array of { text, location }
   const bulletItems: { text: string; location: string }[] = [];
 
-  for (const exp of resume.experience ?? []) {
-    const loc = `${exp.company} (${exp.position})`;
-    for (const b of exp.bullets ?? []) {
-      bulletItems.push({ text: b.text, location: loc });
+  if (isSectionVisible("experience")) {
+    for (const exp of resume.experience ?? []) {
+      if (exp.hidden) continue;
+      const loc = `${exp.company} (${exp.position})`;
+      for (const b of exp.bullets ?? []) {
+        if (b.hidden || !b.text?.trim()) continue;
+        bulletItems.push({ text: b.text, location: loc });
+      }
     }
   }
 
-  for (const proj of resume.projects ?? []) {
-    const loc = `Project: ${proj.name}`;
-    for (const b of proj.bullets ?? []) {
-      bulletItems.push({ text: b.text, location: loc });
+  if (isSectionVisible("projects")) {
+    for (const proj of resume.projects ?? []) {
+      if (proj.hidden) continue;
+      const loc = `Project: ${proj.name}`;
+      for (const b of proj.bullets ?? []) {
+        if (b.hidden || !b.text?.trim()) continue;
+        bulletItems.push({ text: b.text, location: loc });
+      }
     }
   }
 
-  for (const edu of resume.education ?? []) {
-    const loc = `${edu.institution}`;
-    for (const h of edu.highlights ?? []) {
-      bulletItems.push({ text: h.text, location: loc });
+  if (isSectionVisible("education")) {
+    for (const edu of resume.education ?? []) {
+      if (edu.hidden) continue;
+      const loc = `${edu.institution}`;
+      for (const h of edu.highlights ?? []) {
+        if (h.hidden || !h.text?.trim()) continue;
+        bulletItems.push({ text: h.text, location: loc });
+      }
     }
   }
 
   // Skills list index: set of lowercase strings and canonical representations
   const skillsListStrings: { text: string; location: string }[] = [];
 
-  for (const group of resume.skills ?? []) {
-    for (const s of group.skills ?? []) {
-      skillsListStrings.push({ text: s, location: `Skills: ${group.category}` });
+  if (isSectionVisible("skills")) {
+    for (const group of resume.skills ?? []) {
+      for (const s of group.skills ?? []) {
+        skillsListStrings.push({ text: s, location: `Skills: ${group.category}` });
+      }
     }
   }
 
-  for (const exp of resume.experience ?? []) {
-    for (const tech of exp.technologies ?? []) {
-      skillsListStrings.push({ text: tech, location: `${exp.company} Technologies` });
+  if (isSectionVisible("experience")) {
+    for (const exp of resume.experience ?? []) {
+      if (exp.hidden) continue;
+      for (const tech of exp.technologies ?? []) {
+        skillsListStrings.push({ text: tech, location: `${exp.company} Technologies` });
+      }
     }
   }
 
-  for (const proj of resume.projects ?? []) {
-    for (const tech of proj.technologies ?? []) {
-      skillsListStrings.push({ text: tech, location: `${proj.name} Tech Stack` });
+  if (isSectionVisible("projects")) {
+    for (const proj of resume.projects ?? []) {
+      if (proj.hidden) continue;
+      for (const tech of proj.technologies ?? []) {
+        skillsListStrings.push({ text: tech, location: `${proj.name} Tech Stack` });
+      }
     }
   }
 
-  if (resume.basics?.summary) {
+  if (isSectionVisible("summary") && resume.basics?.summary) {
     skillsListStrings.push({ text: resume.basics.summary, location: "Professional Summary" });
   }
 
@@ -514,6 +562,16 @@ export function calculateJdCoverage(
   // Sort matched keywords: Tier descending, then Credit descending
   matchedKeywords.sort((a, b) => b.weight - a.weight || b.credit - a.credit || a.skill.localeCompare(b.skill));
 
+  let metricCount = 0;
+  const metricRegex = /\b\d+(?:\.\d+)?(?:%|x|ms|s|k|m)?\+?(?!\w)/i;
+  for (const b of bulletItems) {
+    const hasVerb = ACTION_VERBS_REGEX.test(b.text);
+    const hasMetric = metricRegex.test(b.text);
+    if (hasVerb && hasMetric) metricCount++;
+  }
+  const actionMetricDensityPercent =
+    bulletItems.length > 0 ? Math.min(100, Math.round((metricCount / bulletItems.length) * 100)) : 0;
+
   const endTime = typeof performance !== "undefined" ? performance.now() : Date.now();
   const executionTimeMs = Math.max(0.1, Number((endTime - startTime).toFixed(2)));
 
@@ -522,6 +580,7 @@ export function calculateJdCoverage(
     mustHaveScore: Math.min(100, Math.max(0, mustHaveScore)),
     preferredScore: Math.min(100, Math.max(0, preferredScore)),
     bulletEvidenceScore: Math.min(100, Math.max(0, bulletEvidenceScore)),
+    actionMetricDensityPercent,
     totalRequiredKeywords: targetSkillsMap.size,
     matchedCount: matchedKeywords.length,
     missingCount: missingKeywords.length,

@@ -8,6 +8,8 @@ import {
   validateJobUrl,
   extractReadableText,
   detectAntiBotWall,
+  extractFromLdJson,
+  extractFromNextData,
 } from "../src/lib/scraper/urlScraper";
 
 describe("SSRF Protection & IP Validation", () => {
@@ -54,6 +56,35 @@ describe("SSRF Protection & IP Validation", () => {
     assert.strictEqual(isPrivateOrReservedIPv6("fd12:3456:789a::1"), true);
     assert.strictEqual(isPrivateOrReservedIPv6("::ffff:127.0.0.1"), true);
     assert.strictEqual(isPrivateOrReservedIPv6("::ffff:192.168.1.1"), true);
+    // Extended IPv6 blocks: 6to4, NAT64, Teredo, Documentation
+    assert.strictEqual(isPrivateOrReservedIPv6("2002:c0a8:0101::1"), true, "6to4 should be blocked");
+    assert.strictEqual(isPrivateOrReservedIPv6("64:ff9b::192.0.2.1"), true, "NAT64 should be blocked");
+    assert.strictEqual(isPrivateOrReservedIPv6("2001:0000:4136:e378:8000:63bf:3fff:fdd2"), true, "Teredo should be blocked");
+    assert.strictEqual(isPrivateOrReservedIPv6("2001:db8::1"), true, "Documentation prefix should be blocked");
+  });
+
+  it("should reject URLs containing embedded credentials (user/password)", async () => {
+    const credResult = await validateJobUrl("http://admin:secret123@example.com/job");
+    assert.strictEqual(credResult.valid, false);
+    assert.ok(credResult.error?.includes("credentials"));
+
+    const userOnlyResult = await validateJobUrl("http://user@example.com/job");
+    assert.strictEqual(userOnlyResult.valid, false);
+    assert.ok(userOnlyResult.error?.includes("credentials"));
+  });
+
+  it("should block wildcard DNS rebinding domains (.nip.io, .sslip.io, .localtest.me)", async () => {
+    const nipResult = await validateJobUrl("http://127.0.0.1.nip.io/job");
+    assert.strictEqual(nipResult.valid, false);
+    assert.ok(nipResult.error?.includes("rebinding") || nipResult.error?.includes("SSRF"));
+
+    const sslipResult = await validateJobUrl("http://192-168-1-1.sslip.io/job");
+    assert.strictEqual(sslipResult.valid, false);
+    assert.ok(sslipResult.error?.includes("rebinding") || sslipResult.error?.includes("SSRF"));
+
+    const localtestResult = await validateJobUrl("http://app.localtest.me/job");
+    assert.strictEqual(localtestResult.valid, false);
+    assert.ok(localtestResult.error?.includes("rebinding") || localtestResult.error?.includes("SSRF"));
   });
 
   it("should reject non-HTTP/HTTPS protocols", async () => {
@@ -155,6 +186,211 @@ describe("HTML Parser & Job Text Extraction", () => {
     assert.ok(text.includes("AT&T"));
     assert.ok(text.includes('"smart"'));
     assert.ok(text.includes("SQL > 5 yrs"));
+  });
+
+  it("should extract structured JobPosting from JSON-LD schema (e.g. Microsoft, Greenhouse, Lever)", () => {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Careers at Microsoft</title>
+          <script type="application/ld+json">
+          {
+            "@context": "http://schema.org",
+            "@type": "JobPosting",
+            "title": "Senior Software Engineer, Full-Stack",
+            "hiringOrganization": { "@type": "Organization", "name": "Microsoft" },
+            "jobLocation": {
+              "@type": "Place",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Redmond",
+                "addressRegion": "WA",
+                "addressCountry": { "@type": "Country", "name": "US" }
+              }
+            },
+            "employmentType": "FULL_TIME",
+            "description": "Design and build highly scalable distributed backend systems and cloud platforms.",
+            "responsibilities": ["Architect microservices in Go and C#", "Lead system telemetry and monitoring"],
+            "qualifications": "6+ years software engineering experience in distributed systems and cloud platforms.",
+            "skills": ["Distributed Systems", "Kubernetes", "C#", "Go", "Cloud"]
+          }
+          </script>
+        </head>
+        <body>
+          <code id="pcsx-data" style="display:none;">{"themeOptions":{"customTheme":{"varTheme":{"primary":"#000"}}}}</code>
+          <main>SPA Shell with dynamic loading</main>
+        </body>
+      </html>
+    `;
+
+    const { title, text } = extractReadableText(html);
+    assert.strictEqual(title, "Senior Software Engineer, Full-Stack");
+    assert.ok(text.includes("Company: Microsoft"));
+    assert.ok(text.includes("Location: Redmond, WA, US"));
+    assert.ok(text.includes("Employment Type: FULL_TIME"));
+    assert.ok(text.includes("Design and build highly scalable distributed backend systems"));
+    assert.ok(text.includes("Architect microservices in Go and C#"));
+    assert.ok(text.includes("6+ years software engineering experience"));
+    assert.ok(text.includes("Distributed Systems, Kubernetes, C#, Go, Cloud"));
+    // Ensure hidden JSON configuration is never present
+    assert.ok(!text.includes("themeOptions"));
+    assert.ok(!text.includes("varTheme"));
+  });
+
+  it("should extract JobPosting nested within JSON-LD @graph array", () => {
+    const html = `
+      <html>
+        <head>
+          <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@graph": [
+              { "@type": "WebSite", "name": "Tech Corp" },
+              {
+                "@type": "JobPosting",
+                "title": "Lead Cloud Architect",
+                "hiringOrganization": "Tech Corp",
+                "description": "<p>Lead our enterprise multi-cloud strategy on AWS and GCP.</p>",
+                "skills": "AWS, GCP, Terraform, Kubernetes"
+              }
+            ]
+          }
+          </script>
+        </head>
+        <body><div>Content</div></body>
+      </html>
+    `;
+
+    const result = extractFromLdJson(html);
+    assert.ok(result);
+    assert.strictEqual(result.title, "Lead Cloud Architect");
+    assert.ok(result.text.includes("Company: Tech Corp"));
+    assert.ok(result.text.includes("Lead our enterprise multi-cloud strategy on AWS and GCP."));
+    assert.ok(result.text.includes("AWS, GCP, Terraform, Kubernetes"));
+  });
+
+  it("should strip hidden code tags, serialized JSON blobs, and Phenom career portal config", () => {
+    const html = `
+      <html>
+        <head><title>Staff Engineer - Data Platform</title></head>
+        <body>
+          <code id="branding-data" style="display: none;">{"themeOptions": {"customTheme": {"navbar-height": "0px"}}}</code>
+          <code id="pcsx-data" style="display:none;" data-nosnippet>{"questionsApplyV2": {"country": ["US", "CA", "UK"]}}</code>
+          <div style="display:none;">{"careers-analyticskey": "123456789"}</div>
+          <main>
+            <h1>Staff Engineer - Data Platform</h1>
+            <p>We are seeking a Staff Engineer to build real-time streaming architectures using Apache Kafka and Apache Flink.</p>
+            <ul>
+              <li>7+ years experience in distributed streaming</li>
+              <li>Proficiency in Java, Scala, or Rust</li>
+            </ul>
+          </main>
+        </body>
+      </html>
+    `;
+
+    const { title, text } = extractReadableText(html);
+    assert.strictEqual(title, "Staff Engineer - Data Platform");
+    assert.ok(!text.includes("themeOptions"));
+    assert.ok(!text.includes("questionsApplyV2"));
+    assert.ok(!text.includes("careers-analyticskey"));
+    assert.ok(text.includes("Staff Engineer - Data Platform"));
+    assert.ok(text.includes("streaming architectures using Apache Kafka"));
+    assert.ok(text.includes("• 7+ years experience in distributed streaming"));
+  });
+
+  it("should extract job details from Next.js __NEXT_DATA__ props if JSON-LD is absent", () => {
+    const nextHtml = `
+      <html>
+        <head><title>Backend Engineer</title></head>
+        <body>
+          <script id="__NEXT_DATA__" type="application/json">
+          {
+            "props": {
+              "pageProps": {
+                "job": {
+                  "title": "Principal Systems Engineer",
+                  "company": "NextGen Systems",
+                  "location": "New York, NY",
+                  "description": "<p>Design ultra-low latency trading systems in C++ and Linux kernel tuning.</p>"
+                }
+              }
+            }
+          }
+          </script>
+          <div>Loading application...</div>
+        </body>
+      </html>
+    `;
+
+    const result = extractFromNextData(nextHtml);
+    assert.ok(result);
+    assert.strictEqual(result.title, "Principal Systems Engineer");
+    assert.ok(result.text.includes("Company: NextGen Systems"));
+    assert.ok(result.text.includes("Location: New York, NY"));
+    assert.ok(result.text.includes("Design ultra-low latency trading systems in C++"));
+  });
+
+  it("should extract Microsoft Careers Phenom People JobPosting (pid 1970393557023248) with isolated headings and bullets", () => {
+    const msftHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Machine Learning Engineer - Microsoft Careers</title>
+          <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "JobPosting",
+            "title": "Senior Machine Learning Engineer",
+            "hiringOrganization": { "@type": "Organization", "name": "Microsoft" },
+            "jobLocation": {
+              "@type": "Place",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Redmond",
+                "addressRegion": "WA",
+                "addressCountry": "US"
+              }
+            },
+            "description": "<p>Join the Azure AI team to build generative AI solutions at scale.</p><p><strong>Required Qualifications:</strong></p><ul><li>5+ years experience in Python and C++</li><li>Experience with PyTorch, TensorFlow, and Docker</li></ul><p><strong>Preferred Qualifications:</strong></p><ul><li>Experience deploying models on Kubernetes and Azure</li><li>Strong knowledge of distributed systems</li></ul>"
+          }
+          </script>
+        </head>
+        <body>
+          <code id="pcsx-data" style="display:none;">{"themeOptions":{"customTheme":{"primary":"#000"}}}</code>
+          <div style="display:none;">{"careers-analyticskey": "987654321"}</div>
+          <main>Careers at Microsoft</main>
+        </body>
+      </html>
+    `;
+
+    const { title, text } = extractReadableText(msftHtml);
+    assert.strictEqual(title, "Senior Machine Learning Engineer");
+    assert.ok(text.includes("Company: Microsoft"));
+    assert.ok(text.includes("Location: Redmond, WA, US"));
+    assert.ok(!text.includes("themeOptions"));
+    assert.ok(!text.includes("careers-analyticskey"));
+    assert.ok(text.includes("### Required Qualifications"));
+    assert.ok(text.includes("### Preferred Qualifications"));
+    assert.ok(text.includes("• 5+ years experience in Python and C++"));
+    assert.ok(text.includes("• Experience with PyTorch, TensorFlow, and Docker"));
+    assert.ok(text.includes("• Experience deploying models on Kubernetes and Azure"));
+  });
+
+  it("should repair glued inline headings and mashed text without block boundaries (Tier 3 Post-Processing)", () => {
+    const mashedHtml = `
+      <div>
+        <h1>Cloud Solutions Architect</h1>
+        <p>Architect large-scale enterprise services across multi-region environments.Required Qualifications: 5+ years in Go and Kubernetes.Preferred Qualifications: Deep expertise in Terraform and AWS.</p>
+      </div>
+    `;
+
+    const { text } = extractReadableText(mashedHtml);
+    assert.ok(text.includes("### Required Qualifications"));
+    assert.ok(text.includes("### Preferred Qualifications"));
+    assert.ok(text.includes("5+ years in Go and Kubernetes"));
+    assert.ok(text.includes("Deep expertise in Terraform and AWS"));
   });
 });
 

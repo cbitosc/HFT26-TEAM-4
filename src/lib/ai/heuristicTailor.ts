@@ -309,6 +309,22 @@ export function generateHeuristicTailor(
       );
 
       if (wasModified && enhancedText !== b.text) {
+        const hypotheticalResume: ResumeDocument = {
+          ...masterProfile,
+          experience: (masterProfile.experience ?? []).map((e) =>
+            e.id === exp.id
+              ? {
+                  ...e,
+                  bullets: (e.bullets ?? []).map((bullet) =>
+                    bullet.id === b.id ? { ...bullet, text: enhancedText } : bullet
+                  ),
+                }
+              : e
+          ),
+        };
+        const hypoReport = calculateJdCoverage(hypotheticalResume, jdInput);
+        const dynamicDelta = Math.max(0, hypoReport.overallScore - coverage.overallScore);
+
         const rawSuggestion: TailoredSuggestion = {
           id: `sugg-exp-${suggestionIndex++}`,
           section: "experience",
@@ -317,13 +333,13 @@ export function generateHeuristicTailor(
           itemTitle: roleTitle,
           originalText: b.text,
           suggestedText: enhancedText,
-          targetKeywords: addedKeywords.length > 0 ? addedKeywords : matchedKeywords.slice(0, 2),
+          targetKeywords: addedKeywords,
           truthStatus: "verified",
           unverifiedClaims: [],
-          explanation: `Sharpened action verb to strengthen executive impact${
-            addedKeywords.length > 0 ? ` and reinforced proven skill (${addedKeywords.join(", ")})` : ""
-          }.`,
-          coverageDeltaEstimate: addedKeywords.length > 0 ? 4 : 2,
+          explanation: addedKeywords.length > 0
+            ? `Sharpened action verb to strengthen executive impact and reinforced proven skill (${addedKeywords.join(", ")}).`
+            : `Sharpened action verb to strengthen executive impact without altering underlying facts.`,
+          coverageDeltaEstimate: dynamicDelta,
         };
 
         // Run through Truth Guard
@@ -352,6 +368,22 @@ export function generateHeuristicTailor(
         );
 
         if (wasModified && enhancedText !== b.text) {
+          const hypotheticalResume: ResumeDocument = {
+            ...masterProfile,
+            projects: (masterProfile.projects ?? []).map((p) =>
+              p.id === proj.id
+                ? {
+                    ...p,
+                    bullets: (p.bullets ?? []).map((bullet) =>
+                      bullet.id === b.id ? { ...bullet, text: enhancedText } : bullet
+                    ),
+                  }
+                : p
+            ),
+          };
+          const hypoReport = calculateJdCoverage(hypotheticalResume, jdInput);
+          const dynamicDelta = Math.max(0, hypoReport.overallScore - coverage.overallScore);
+
           const rawSuggestion: TailoredSuggestion = {
             id: `sugg-proj-${suggestionIndex++}`,
             section: "projects",
@@ -363,8 +395,10 @@ export function generateHeuristicTailor(
             targetKeywords: addedKeywords,
             truthStatus: "verified",
             unverifiedClaims: [],
-            explanation: "Sharpened technical action phrasing and highlighted implementation focus.",
-            coverageDeltaEstimate: 2,
+            explanation: addedKeywords.length > 0
+              ? `Sharpened technical action phrasing and integrated verified skill (${addedKeywords.join(", ")}).`
+              : "Sharpened technical action phrasing and highlighted implementation focus.",
+            coverageDeltaEstimate: dynamicDelta,
           };
           suggestions.push(validateSuggestion(masterProfile, rawSuggestion));
         }

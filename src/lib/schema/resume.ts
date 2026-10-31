@@ -3,6 +3,7 @@ import { z } from "zod";
 export const BulletPointSchema = z.object({
   id: z.string(),
   text: z.string(),
+  hidden: z.boolean().optional(),
 });
 export type BulletPoint = z.infer<typeof BulletPointSchema>;
 
@@ -36,6 +37,7 @@ export const ExperienceItemSchema = z.object({
   endDate: z.string().default(""),
   current: z.boolean().default(false),
   description: z.string().optional(),
+  hidden: z.boolean().optional(),
   bullets: z.array(BulletPointSchema).default([]),
   technologies: z.array(z.string()).default([]),
 });
@@ -51,6 +53,7 @@ export const EducationItemSchema = z.object({
   endDate: z.string().default(""),
   current: z.boolean().default(false),
   gpa: z.string().optional(),
+  hidden: z.boolean().optional(),
   highlights: z.array(BulletPointSchema).default([]),
 });
 export type EducationItem = z.infer<typeof EducationItemSchema>;
@@ -64,6 +67,7 @@ export const ProjectItemSchema = z.object({
   githubUrl: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  hidden: z.boolean().optional(),
   bullets: z.array(BulletPointSchema).default([]),
   technologies: z.array(z.string()).default([]),
 });
@@ -82,6 +86,7 @@ export const CertificationItemSchema = z.object({
   issuer: z.string(),
   date: z.string(),
   url: z.string().optional(),
+  hidden: z.boolean().optional(),
 });
 export type CertificationItem = z.infer<typeof CertificationItemSchema>;
 
@@ -94,6 +99,41 @@ export const SectionIdSchema = z.enum([
   "certifications",
 ]);
 export type SectionId = z.infer<typeof SectionIdSchema>;
+
+export const ALL_SECTIONS: readonly SectionId[] = [
+  "summary",
+  "experience",
+  "projects",
+  "skills",
+  "education",
+  "certifications",
+] as const;
+
+export function normalizeSectionOrder(order?: unknown): SectionId[] {
+  const defaultOrder: SectionId[] = [...ALL_SECTIONS];
+  if (!Array.isArray(order) || order.length === 0) return defaultOrder;
+
+  const seen = new Set<SectionId>();
+  const sanitized: SectionId[] = [];
+
+  for (const item of order) {
+    if (typeof item === "string" && (ALL_SECTIONS as readonly string[]).includes(item)) {
+      const key = item as SectionId;
+      if (!seen.has(key)) {
+        seen.add(key);
+        sanitized.push(key);
+      }
+    }
+  }
+
+  for (const s of ALL_SECTIONS) {
+    if (!seen.has(s)) {
+      sanitized.push(s);
+    }
+  }
+
+  return sanitized;
+}
 
 export const ResumeThemeSchema = z.enum([
   "modern",
@@ -117,14 +157,10 @@ export const ResumeLayoutSchema = z.object({
   fontScale: z.number().min(0.75).max(1.3).default(1.0),
   margins: ResumeMarginsSchema.default("normal"),
   autoFitOnePage: z.boolean().default(false),
-  sectionOrder: z.array(SectionIdSchema).default([
-    "summary",
-    "experience",
-    "projects",
-    "skills",
-    "education",
-    "certifications",
-  ]),
+  sectionOrder: z
+    .array(z.string())
+    .default([...ALL_SECTIONS])
+    .transform((val) => normalizeSectionOrder(val)),
   sectionVisibility: z.record(SectionIdSchema, z.boolean()).default({
     summary: true,
     experience: true,
@@ -152,14 +188,7 @@ export const ResumeDocumentSchema = z.object({
     fontScale: 1.0,
     margins: "normal",
     autoFitOnePage: false,
-    sectionOrder: [
-      "summary",
-      "experience",
-      "projects",
-      "skills",
-      "education",
-      "certifications",
-    ],
+    sectionOrder: [...ALL_SECTIONS],
     sectionVisibility: {
       summary: true,
       experience: true,

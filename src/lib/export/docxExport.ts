@@ -9,7 +9,7 @@ import {
   BorderStyle,
   AlignmentType,
 } from "docx";
-import { ResumeDocument, SectionId } from "../schema/resume";
+import { ResumeDocument, SectionId, normalizeSectionOrder } from "../schema/resume";
 
 /**
  * Creates an OpenXML Document model from a ResumeDocument
@@ -156,14 +156,7 @@ export function createDocxDocument(resume: ResumeDocument): Document {
   // ==========================================
   // 2. DYNAMIC SECTION ORDER RENDERING
   // ==========================================
-  const order = sectionOrder ?? [
-    "summary",
-    "experience",
-    "projects",
-    "skills",
-    "education",
-    "certifications",
-  ];
+  const order = normalizeSectionOrder(sectionOrder);
 
   for (const sectionId of order) {
     if (sectionVisibility && sectionVisibility[sectionId as SectionId] === false) {
@@ -197,10 +190,11 @@ export function createDocxDocument(resume: ResumeDocument): Document {
       // EXPERIENCE
       // ----------------------------------------
       case "experience": {
-        if (!experience || experience.length === 0) break;
+        if (!experience || experience.length === 0 || experience.every((e) => e.hidden)) break;
         children.push(buildSectionHeading("Experience"));
 
         for (const exp of experience) {
+          if (exp.hidden) continue;
           const dateRange = `${exp.startDate || ""} – ${exp.current ? "Present" : exp.endDate || ""}`.trim();
 
           // Role title (bold) with right-aligned Date tab stop
@@ -266,7 +260,7 @@ export function createDocxDocument(resume: ResumeDocument): Document {
 
           // Bullets with genuine bullet points
           for (const b of exp.bullets ?? []) {
-            if (!b.text || !b.text.trim()) continue;
+            if (b.hidden || !b.text || !b.text.trim()) continue;
             children.push(
               new Paragraph({
                 bullet: { level: 0 },
@@ -314,10 +308,11 @@ export function createDocxDocument(resume: ResumeDocument): Document {
       // PROJECTS
       // ----------------------------------------
       case "projects": {
-        if (!projects || projects.length === 0) break;
+        if (!projects || projects.length === 0 || projects.every((p) => p.hidden)) break;
         children.push(buildSectionHeading("Projects"));
 
         for (const proj of projects) {
+          if (proj.hidden) continue;
           const dateRange = proj.startDate
             ? `${proj.startDate} – ${proj.endDate || "Present"}`
             : "";
@@ -375,7 +370,7 @@ export function createDocxDocument(resume: ResumeDocument): Document {
           }
 
           for (const b of proj.bullets ?? []) {
-            if (!b.text || !b.text.trim()) continue;
+            if (b.hidden || !b.text || !b.text.trim()) continue;
             children.push(
               new Paragraph({
                 bullet: { level: 0 },
@@ -455,10 +450,11 @@ export function createDocxDocument(resume: ResumeDocument): Document {
       // EDUCATION
       // ----------------------------------------
       case "education": {
-        if (!education || education.length === 0) break;
+        if (!education || education.length === 0 || education.every((e) => e.hidden)) break;
         children.push(buildSectionHeading("Education"));
 
         for (const edu of education) {
+          if (edu.hidden) continue;
           const dateRange = `${edu.startDate || ""} – ${edu.current ? "Present" : edu.endDate || ""}`.trim();
           const degreeLine = edu.field ? `${edu.degree} in ${edu.field}` : edu.degree;
 
@@ -507,7 +503,7 @@ export function createDocxDocument(resume: ResumeDocument): Document {
           );
 
           for (const h of edu.highlights ?? []) {
-            if (!h.text || !h.text.trim()) continue;
+            if (h.hidden || !h.text || !h.text.trim()) continue;
             children.push(
               new Paragraph({
                 bullet: { level: 0 },
@@ -531,10 +527,11 @@ export function createDocxDocument(resume: ResumeDocument): Document {
       // CERTIFICATIONS
       // ----------------------------------------
       case "certifications": {
-        if (!certifications || certifications.length === 0) break;
+        if (!certifications || certifications.length === 0 || certifications.every((c) => c.hidden)) break;
         children.push(buildSectionHeading("Certifications"));
 
         for (const cert of certifications) {
+          if (cert.hidden) continue;
           children.push(
             new Paragraph({
               tabStops: [rightTabStop],

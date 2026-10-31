@@ -169,6 +169,42 @@ export const RAW_ALIAS_DEFINITIONS: Record<string, string[]> = {
   "Load Balancing": ["load balancing", "load balancer", "load balancers", "alb", "nlb"],
   "Database Sharding": ["sharding", "database sharding", "partitioning"],
   "Caching Strategies": ["caching", "cache", "caching strategies", "in-memory caching"],
+
+  // Product & Leadership
+  "Product Management": ["product management", "product manager", "pm"],
+  "Technical Product Management": ["technical product management", "technical product manager", "tpm"],
+  "Product Strategy": ["product strategy", "product vision"],
+  "Roadmapping": ["roadmapping", "roadmap", "roadmaps", "product roadmap", "product roadmaps"],
+  "Technical PRD": ["prd", "prds", "technical prd", "product requirements document", "product requirements"],
+  "User Stories": ["user stories", "user story", "acceptance criteria"],
+  "User Research": ["user research", "user interviews", "usability testing", "ux research"],
+  "Customer Discovery": ["customer discovery", "customer interviews"],
+  "A/B Testing": ["a/b testing", "ab testing", "a/b tests", "split testing", "experimentation"],
+  "Stakeholder Management": ["stakeholder management", "managing stakeholders", "stakeholder alignment"],
+  "Cross-Functional Leadership": ["cross-functional leadership", "cross-functional collaboration", "cross-functional teams", "cross functional", "cross-functional initiatives"],
+  "Engineering Management": ["engineering management", "engineering manager", "em"],
+  Mentorship: ["mentorship", "mentoring", "coaching engineers"],
+  "Team Leadership": ["team leadership", "technical leadership", "tech lead"],
+  "Project Management": ["project management", "project manager", "pmp"],
+  OKRs: ["okr", "okrs", "objectives and key results"],
+  KPIs: ["kpi", "kpis", "key performance indicators"],
+  "Feature Prioritization": ["feature prioritization", "backlog prioritization", "prioritization"],
+  Looker: ["looker"],
+  Amplitude: ["amplitude"],
+  Tableau: ["tableau"],
+  Mixpanel: ["mixpanel"],
+  "Power BI": ["power bi", "powerbi"],
+
+  // Methodologies & Collaboration
+  Agile: ["agile", "agile methodology", "agile development"],
+  Scrum: ["scrum", "scrum master", "scrum methodology"],
+  Kanban: ["kanban", "kanban board"],
+  "Sprint Planning": ["sprint planning", "sprints"],
+  Confluence: ["confluence", "atlassian confluence"],
+  Notion: ["notion"],
+  Slack: ["slack"],
+  "Code Review": ["code review", "code reviews", "pr review", "pull request reviews"],
+  "Technical Writing": ["technical writing", "technical documentation"],
 };
 
 /**

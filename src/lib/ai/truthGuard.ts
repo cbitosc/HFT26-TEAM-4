@@ -7,14 +7,13 @@ import {
   TruthStatus,
 } from "./aiTypes";
 
-interface GroundedProfileFacts {
+export interface GroundedProfileFacts {
   allTextLower: string;
-  tools: Set<string>; // Canonical lowercased tool/skill names
-  numbers: Set<string>; // Isolated numbers found in profile (e.g. "42", "95", "450")
-  metricsExact: Set<string>; // Exact normalized metric strings (e.g. "42%", "$1.2m", "3.5x")
+  tools: Set<string>;
+  numbers: Set<string>;
+  metricsExact: Set<string>;
 }
 
-// Cache of regexes for skills
 const TOOL_REGEX_CACHE = new Map<string, RegExp>();
 
 function escapeRegex(str: string): string {
@@ -22,7 +21,7 @@ function escapeRegex(str: string): string {
 }
 
 function getSkillRegex(alias: string): RegExp {
-  let cached = TOOL_REGEX_CACHE.get(alias);
+  const cached = TOOL_REGEX_CACHE.get(alias);
   if (cached) return cached;
 
   const lower = alias.toLowerCase().trim();
@@ -51,18 +50,21 @@ function getSkillRegex(alias: string): RegExp {
   return regex;
 }
 
+const SIGNED_METRIC_TOKEN_REGEX =
+  /[+-]?[$€£₹]?\b\d+(?:,\d{3})*(?:\.\d+)?(?:%|x|ms|s|sec|mins?|minutes?|hours?|k|m|b|\+)?(?!\w)/gi;
+
 // Regex patterns for detecting metrics in text
 const METRIC_PATTERNS = [
-  // Percentages: 42%, 99.9%, +15%
-  /[+-]?\b\d+(?:\.\d+)?%/g,
-  // Currency: $1.2M, $500k, $50,000, 100k USD
-  /\$\s*\d+(?:,\d{3})*(?:\.\d+)?\s*(?:[kKmMbBtT]|thousand|million|billion)?\b/gi,
-  // Multipliers: 3.5x, 10X, 2.0x
-  /\b\d+(?:\.\d+)?[xX]\b/g,
+  // Percentages: 42%, -20%, 99.9%, +15%
+  /(?:^|(?<=[\s(;:,]))[+-]?\d+(?:\.\d+)?%/g,
+  // Currency: $1.2M, $500k, $50,000, -$10k
+  /(?:^|(?<=[\s(;:,]))[+-]?\$\s*\d+(?:,\d{3})*(?:\.\d+)?\s*(?:[kKmMbBtT]|thousand|million|billion)?\b/gi,
+  // Multipliers: 3.5x, -2x, 10X
+  /(?:^|(?<=[\s(;:,]))[+-]?\d+(?:\.\d+)?[xX]\b/g,
   // Scale counts with suffix: 450k, 15M+, 500k DAU, 400k QPS
-  /\b\d+(?:\.\d+)?\s*(?:k\+|m\+|b\+|[kKmMbB]|million|billion|thousand)\s*(?:dau|mau|rps|qps|tps|users|tenants|customers|events|requests|operations|downloads|stars)?\b/gi,
+  /(?:^|(?<=[\s(;:,]))[+-]?\d+(?:\.\d+)?\s*(?:k\+|m\+|b\+|[kKmMbB]|million|billion|thousand)\s*(?:dau|mau|rps|qps|tps|users|tenants|customers|events|requests|operations|downloads|stars)?\b/gi,
   // Latency & duration: 95ms, 320ms, 45 minutes, 6 hours
-  /\b\d+(?:\.\d+)?\s*(?:ms|milliseconds?|seconds?|mins?|minutes?|hours?)\b/gi,
+  /(?:^|(?<=[\s(;:,]))[+-]?\d+(?:\.\d+)?\s*(?:ms|milliseconds?|seconds?|mins?|minutes?|hours?)\b/gi,
 ];
 
 function normalizeMetricString(metric: string): string {
@@ -82,8 +84,8 @@ export function extractProfileGroundedFacts(
   const textCorpus: string[] = [];
 
   // 1. Gather all raw strings from master profile
-  if (profile.basics.headline) textCorpus.push(profile.basics.headline);
-  if (profile.basics.summary) textCorpus.push(profile.basics.summary);
+  if (profile.basics?.headline) textCorpus.push(profile.basics.headline);
+  if (profile.basics?.summary) textCorpus.push(profile.basics.summary);
 
   for (const exp of profile.experience ?? []) {
     if (exp.company) textCorpus.push(exp.company);
@@ -154,7 +156,7 @@ export function extractProfileGroundedFacts(
     }
   }
 
-  // 3. Extract all metrics and isolated numbers from profile text
+  // 3. Extract exact metric phrases and raw numbers
   for (const pattern of METRIC_PATTERNS) {
     const matches = combinedText.match(pattern);
     if (matches) {
@@ -164,11 +166,17 @@ export function extractProfileGroundedFacts(
     }
   }
 
-  // Extract isolated numeric digits (e.g. "42", "95", "450", "3.5")
-  const rawNumberMatches = combinedText.match(/\b\d+(?:\.\d+)?\b/g);
+  const signedMatches = combinedText.match(SIGNED_METRIC_TOKEN_REGEX);
+  if (signedMatches) {
+    for (const m of signedMatches) {
+      metricsExact.add(normalizeMetricString(m));
+    }
+  }
+
+  const rawNumberMatches = combinedText.match(/(?:^|(?<=[\s(;:,]))[+-]?\d+(?:\.\d+)?\b/g);
   if (rawNumberMatches) {
     for (const n of rawNumberMatches) {
-      numbers.add(n);
+      numbers.add(n.trim());
     }
   }
 
@@ -181,12 +189,12 @@ export function extractProfileGroundedFacts(
 }
 
 /**
- * Extracts candidate tools/skills mentioned in a given piece of text.
+ * Extracts tool/technology mentions from arbitrary text.
  */
 export function extractToolsFromText(text: string): string[] {
   if (!text || !text.trim()) return [];
-
   const detected: string[] = [];
+
   for (const skill of ALL_SKILLS) {
     const aliases = getSkillAliases(skill);
     for (const alias of aliases) {
@@ -197,17 +205,17 @@ export function extractToolsFromText(text: string): string[] {
       }
     }
   }
+
   return detected;
 }
 
 /**
- * Extracts candidate numeric metrics (percentages, dollar amounts, scale counts, latencies)
- * from a given piece of text.
+ * Extracts metric patterns from arbitrary text.
  */
 export function extractMetricsFromText(text: string): string[] {
   if (!text || !text.trim()) return [];
-
   const found = new Set<string>();
+
   for (const pattern of METRIC_PATTERNS) {
     const matches = text.match(pattern);
     if (matches) {
@@ -219,6 +227,7 @@ export function extractMetricsFromText(text: string): string[] {
       }
     }
   }
+
   return Array.from(found);
 }
 
@@ -270,12 +279,17 @@ export interface TruthValidationResult {
 
 /**
  * Validates text against the master profile facts, detecting any
- * ungrounded tool names or fabricated numeric metrics.
+ * ungrounded tool names, fabricated numeric metrics, sign-flips, or precision changes.
+ * When originalBulletText is provided, metrics and tools are strictly grounded
+ * against that specific bullet and its parent role/project.
  */
 export function validateTextAgainstProfile(
   profileOrFacts: ResumeDocument | GroundedProfileFacts,
-  text: string
+  text: string,
+  originalBulletText?: string,
+  targetItemId?: string
 ): TruthValidationResult {
+  const isFullProfile = typeof profileOrFacts === "object" && "experience" in profileOrFacts;
   const facts =
     "tools" in profileOrFacts
       ? profileOrFacts
@@ -285,35 +299,134 @@ export function validateTextAgainstProfile(
   const detectedMetrics = extractMetricsFromText(text);
   const unverifiedClaims: string[] = [];
 
+  // Check length bounds (conciseness for ATS 1-page fit)
+  if (text.length > 180) {
+    unverifiedClaims.push(
+      `Text exceeds recommended ATS line limit (${text.length} chars > 180 chars)`
+    );
+  }
+
+  // If a full profile and originalBulletText (or targetItemId) are available,
+  // tie tools strictly to that specific role or project.
+  let roleGroundedTools: Set<string> | null = null;
+  let roleContextTitle = "";
+
+  if (isFullProfile && (originalBulletText || targetItemId)) {
+    const origTrim = (originalBulletText || "").trim();
+    const expItem = (profileOrFacts.experience ?? []).find(
+      (e) => (targetItemId && e.id === targetItemId) || (origTrim && e.bullets?.some((b) => b.text.trim() === origTrim))
+    );
+    const projItem = !expItem
+      ? (profileOrFacts.projects ?? []).find(
+          (p) => (targetItemId && p.id === targetItemId) || (origTrim && p.bullets?.some((b) => b.text.trim() === origTrim))
+        )
+      : null;
+
+    if (expItem) {
+      roleGroundedTools = new Set<string>();
+      roleContextTitle = expItem.company;
+      for (const t of expItem.technologies ?? []) {
+        roleGroundedTools.add(t.toLowerCase());
+        const canon = normalizeSkill(t);
+        if (canon) roleGroundedTools.add(canon.toLowerCase());
+      }
+      if (originalBulletText) {
+        for (const t of extractToolsFromText(originalBulletText)) {
+          roleGroundedTools.add(t.toLowerCase());
+          const canon = normalizeSkill(t);
+          if (canon) roleGroundedTools.add(canon.toLowerCase());
+        }
+      }
+    } else if (projItem) {
+      roleGroundedTools = new Set<string>();
+      roleContextTitle = projItem.name;
+      for (const t of projItem.technologies ?? []) {
+        roleGroundedTools.add(t.toLowerCase());
+        const canon = normalizeSkill(t);
+        if (canon) roleGroundedTools.add(canon.toLowerCase());
+      }
+      if (originalBulletText) {
+        for (const t of extractToolsFromText(originalBulletText)) {
+          roleGroundedTools.add(t.toLowerCase());
+          const canon = normalizeSkill(t);
+          if (canon) roleGroundedTools.add(canon.toLowerCase());
+        }
+      }
+    }
+  }
+
   // Check tools against grounded tools
   for (const tool of detectedTools) {
     const toolLower = tool.toLowerCase();
     const canon = normalizeSkill(tool)?.toLowerCase();
 
-    const isGrounded =
+    const isProfileGrounded =
       facts.tools.has(toolLower) ||
       (canon && facts.tools.has(canon)) ||
-      facts.allTextLower.includes(toolLower);
+      getSkillRegex(toolLower).test(facts.allTextLower);
 
-    if (!isGrounded) {
+    if (!isProfileGrounded) {
       unverifiedClaims.push(
         `Tool/Skill "${tool}" is not mentioned in your Master Profile`
       );
+    } else if (roleGroundedTools) {
+      // Tool exists in profile, but verify it belongs to this role/project
+      const isRoleGrounded =
+        roleGroundedTools.has(toolLower) ||
+        (canon && roleGroundedTools.has(canon));
+      if (!isRoleGrounded) {
+        unverifiedClaims.push(
+          `Tool/Skill "${tool}" is from another role in your profile, but not associated with this role (${roleContextTitle})`
+        );
+      }
     }
   }
+
+  const origBulletMetrics = originalBulletText
+    ? new Set(extractMetricsFromText(originalBulletText).map(normalizeMetricString))
+    : null;
 
   // Check metrics against grounded metrics & numbers
   for (const metric of detectedMetrics) {
     const norm = normalizeMetricString(metric);
-    const directHit =
-      facts.metricsExact.has(norm) ||
-      facts.allTextLower.includes(norm) ||
-      facts.allTextLower.includes(metric.toLowerCase());
 
-    if (!directHit) {
-      unverifiedClaims.push(
-        `Metric "${metric}" was not found in your Master Profile (unverified metric)`
-      );
+    // If originalBulletText is provided (a bullet is being rewritten),
+    // any metric MUST be grounded in the original bullet itself!
+    // Metrics cannot be fabricated or transplanted from another role.
+    if (originalBulletText !== undefined) {
+      if (!origBulletMetrics || !origBulletMetrics.has(norm)) {
+        unverifiedClaims.push(
+          `Metric "${metric}" was not found in the original bullet (metrics cannot be fabricated or transferred from other roles)`
+        );
+        continue;
+      }
+
+      // Catch decimal precision drift or sign change when original bullet had e.g. 99.9% and suggested has 99.99% or 20% vs -20%
+      const bareNum = norm.replace(/[^0-9.+-]/g, "");
+      const flippedOrPrecisionChanged = Array.from(origBulletMetrics).some((origM) => {
+        const origBare = origM.replace(/[^0-9.+-]/g, "");
+        const isExactSignFlip = origM.replace(/^[+-]/, "") === norm.replace(/^[+-]/, "");
+        const hasDecimal = origBare.includes(".") || bareNum.includes(".");
+        const isPrecisionDrift = hasDecimal && (bareNum.startsWith(origBare) || origBare.startsWith(bareNum));
+        return origM !== norm && (isExactSignFlip || isPrecisionDrift);
+      });
+      if (flippedOrPrecisionChanged) {
+        unverifiedClaims.push(
+          `Metric "${metric}" altered sign or decimal precision from original bullet`
+        );
+        continue;
+      }
+    } else {
+      // For general text (e.g. summary or new bullet), check against profile facts
+      const exactHit =
+        facts.metricsExact.has(norm) ||
+        (!norm.startsWith("-") && facts.numbers.has(norm));
+
+      if (!exactHit) {
+        unverifiedClaims.push(
+          `Metric "${metric}" was not found in your Master Profile (unverified metric)`
+        );
+      }
     }
   }
 
@@ -350,8 +463,12 @@ export function validateSuggestion(
   masterProfile: ResumeDocument,
   suggestion: TailoredSuggestion
 ): TailoredSuggestion {
-  const facts = extractProfileGroundedFacts(masterProfile);
-  const result = validateTextAgainstProfile(facts, suggestion.suggestedText);
+  const result = validateTextAgainstProfile(
+    masterProfile,
+    suggestion.suggestedText,
+    suggestion.originalText,
+    suggestion.itemId
+  );
 
   return {
     ...suggestion,
@@ -369,8 +486,11 @@ export function validateSummary(
   suggestedSummary: string,
   explanation?: string
 ): SummaryComparison {
-  const facts = extractProfileGroundedFacts(masterProfile);
-  const result = validateTextAgainstProfile(facts, suggestedSummary);
+  const result = validateTextAgainstProfile(
+    masterProfile,
+    suggestedSummary,
+    undefined
+  );
 
   return {
     original: originalSummary,

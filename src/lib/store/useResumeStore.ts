@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import {
   ResumeDocument,
+  ResumeDocumentSchema,
   ResumeBasics,
   ExperienceItem,
   EducationItem,
@@ -234,10 +235,20 @@ export const defaultResumeDocument: ResumeDocument = {
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
+export interface SavedVariant {
+  id: string;
+  title: string;
+  jobTitle?: string;
+  jobDescription?: string;
+  profile: ResumeDocument;
+  savedAt: string;
+}
+
 export interface ResumeState {
   masterResume: ResumeDocument;
   resume: ResumeDocument;
   jd: JdRequirements;
+  savedVariants: SavedVariant[];
   isTailored: boolean;
   uiTheme: "dark" | "light";
 
@@ -271,11 +282,22 @@ export interface ResumeState {
 
   reorderSections: (newOrder: SectionId[]) => void;
   toggleSectionVisibility: (sectionId: SectionId) => void;
+  toggleItemHidden: (section: "experience" | "projects" | "education" | "certifications", itemId: string) => void;
+  toggleBulletHidden: (section: "experience" | "projects" | "education", itemId: string, bulletId: string) => void;
   updateTheme: (layout: Partial<ResumeLayout>) => void;
 
   // JD Actions
   setJd: (jd: JdRequirements | string) => void;
   clearJd: () => void;
+
+  // Saved Job Variants
+  saveVariant: (title: string, jobTitle?: string, jobDescription?: string) => void;
+  loadVariant: (id: string) => void;
+  deleteVariant: (id: string) => void;
+
+  // Backup Import & Export
+  exportBackupJson: () => string;
+  importBackupJson: (jsonStr: string) => boolean;
 
   // Profile lifecycle
   loadProfile: (profile: ResumeDocument) => void;
@@ -290,12 +312,13 @@ export interface ResumeState {
 
 export const useResumeStore = create<ResumeState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       masterResume: clone(defaultResumeDocument),
       resume: clone(defaultResumeDocument),
       jd: createEmptyJd(),
+      savedVariants: [] as SavedVariant[],
       isTailored: false,
-      uiTheme: "dark",
+      uiTheme: "dark" as "dark" | "light",
 
       updateBasics: (basics) =>
         set((state) => ({
@@ -607,13 +630,196 @@ export const useResumeStore = create<ResumeState>()(
           };
         }),
 
+      toggleItemHidden: (section, itemId) =>
+        set((state) => {
+          if (section === "experience") {
+            return {
+              resume: {
+                ...state.resume,
+                experience: state.resume.experience.map((e) =>
+                  e.id === itemId ? { ...e, hidden: !e.hidden } : e
+                ),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+          } else if (section === "projects") {
+            return {
+              resume: {
+                ...state.resume,
+                projects: state.resume.projects.map((p) =>
+                  p.id === itemId ? { ...p, hidden: !p.hidden } : p
+                ),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+          } else if (section === "education") {
+            return {
+              resume: {
+                ...state.resume,
+                education: state.resume.education.map((e) =>
+                  e.id === itemId ? { ...e, hidden: !e.hidden } : e
+                ),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+          } else if (section === "certifications") {
+            return {
+              resume: {
+                ...state.resume,
+                certifications: state.resume.certifications.map((c) =>
+                  c.id === itemId ? { ...c, hidden: !c.hidden } : c
+                ),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+          }
+          return state;
+        }),
+
+      toggleBulletHidden: (section, itemId, bulletId) =>
+        set((state) => {
+          if (section === "experience") {
+            return {
+              resume: {
+                ...state.resume,
+                experience: state.resume.experience.map((e) => {
+                  if (e.id !== itemId) return e;
+                  return {
+                    ...e,
+                    bullets: e.bullets.map((b) =>
+                      b.id === bulletId ? { ...b, hidden: !b.hidden } : b
+                    ),
+                  };
+                }),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+          } else if (section === "projects") {
+            return {
+              resume: {
+                ...state.resume,
+                projects: state.resume.projects.map((p) => {
+                  if (p.id !== itemId) return p;
+                  return {
+                    ...p,
+                    bullets: p.bullets.map((b) =>
+                      b.id === bulletId ? { ...b, hidden: !b.hidden } : b
+                    ),
+                  };
+                }),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+          } else if (section === "education") {
+            return {
+              resume: {
+                ...state.resume,
+                education: state.resume.education.map((e) => {
+                  if (e.id !== itemId) return e;
+                  return {
+                    ...e,
+                    highlights: e.highlights.map((h) =>
+                      h.id === bulletId ? { ...h, hidden: !h.hidden } : h
+                    ),
+                  };
+                }),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+          }
+          return state;
+        }),
+
+      saveVariant: (title, jobTitle, jobDescription) =>
+        set((state) => {
+          const id = `variant-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+          const newVariant: SavedVariant = {
+            id,
+            title: title.trim() || "Untitled Variant",
+            jobTitle: jobTitle || state.resume.targetRole || "Target Role",
+            jobDescription: jobDescription || state.jd.rawText || "",
+            profile: clone(state.resume),
+            savedAt: new Date().toISOString(),
+          };
+          const existingFiltered = state.savedVariants.filter(
+            (v) => v.title.toLowerCase() !== title.trim().toLowerCase()
+          );
+          return {
+            savedVariants: [newVariant, ...existingFiltered].slice(0, 20),
+          };
+        }),
+
+      loadVariant: (id) =>
+        set((state) => {
+          const v = state.savedVariants.find((item) => item.id === id);
+          if (!v) return state;
+          return {
+            resume: clone(v.profile),
+            jd: v.jobDescription
+              ? { ...createEmptyJd(), rawText: v.jobDescription, title: v.jobTitle || "" }
+              : state.jd,
+            isTailored: true,
+          };
+        }),
+
+      deleteVariant: (id) =>
+        set((state) => ({
+          savedVariants: state.savedVariants.filter((item) => item.id !== id),
+        })),
+
+      exportBackupJson: (): string => {
+        const state = get();
+        return JSON.stringify(
+          {
+            version: "1.0",
+            exportedAt: new Date().toISOString(),
+            masterResume: state.masterResume,
+            resume: state.resume,
+            savedVariants: state.savedVariants,
+            jd: state.jd,
+          },
+          null,
+          2
+        );
+      },
+
+      importBackupJson: (jsonStr: string): boolean => {
+        try {
+          const data = JSON.parse(jsonStr);
+          if (!data || typeof data !== "object") return false;
+          const targetResume = data.resume || data.profile;
+          if (!targetResume || typeof targetResume !== "object") return false;
+
+          const parsedResume = ResumeDocumentSchema.safeParse(targetResume);
+          if (!parsedResume.success) return false;
+
+          const rawMaster = data.masterResume || data.masterProfile;
+          const parsedMaster = rawMaster ? ResumeDocumentSchema.safeParse(rawMaster) : null;
+          const finalMaster = parsedMaster && parsedMaster.success ? parsedMaster.data : parsedResume.data;
+
+          const variantsList = Array.isArray(data.savedVariants || data.variants)
+            ? (data.savedVariants || data.variants).slice(0, 20)
+            : [];
+
+          set({
+            resume: clone(parsedResume.data),
+            masterResume: clone(finalMaster),
+            savedVariants: variantsList,
+            jd: data.jd || (data.jobDescription ? { ...createEmptyJd(), rawText: data.jobDescription, title: data.jobTitle || "" } : createEmptyJd()),
+          });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+
       clearJd: () =>
         set(() => ({
           jd: createEmptyJd(),
           isTailored: false,
         })),
 
-      loadProfile: (profile) =>
+      loadProfile: (profile: ResumeDocument) =>
         set(() => ({
           masterResume: clone(profile),
           resume: clone(profile),
@@ -652,25 +858,33 @@ export const useResumeStore = create<ResumeState>()(
           return { uiTheme: next };
         }),
 
-      setUiTheme: (theme) =>
-        set(() => {
-          if (typeof document !== "undefined") {
-            if (theme === "dark") {
-              document.documentElement.classList.add("dark");
-            } else {
-              document.documentElement.classList.remove("dark");
-            }
-          }
-          return { uiTheme: theme };
-        }),
+      setUiTheme: (theme: "dark" | "light") =>
+        set(() => ({
+          uiTheme: theme,
+        })),
     }),
     {
       name: "resuarchitect_resume_v1",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => {
+        if (typeof window !== "undefined" && window.localStorage) {
+          return window.localStorage;
+        }
+        const memoryStore = new Map<string, string>();
+        return {
+          getItem: (key: string) => memoryStore.get(key) ?? null,
+          setItem: (key: string, value: string) => {
+            memoryStore.set(key, value);
+          },
+          removeItem: (key: string) => {
+            memoryStore.delete(key);
+          },
+        };
+      }),
       partialize: (state) => ({
         masterResume: state.masterResume,
         resume: state.resume,
         jd: state.jd,
+        savedVariants: state.savedVariants,
         isTailored: state.isTailored,
         uiTheme: state.uiTheme,
       }),

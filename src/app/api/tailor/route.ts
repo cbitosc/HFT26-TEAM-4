@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ResumeDocument } from "../../../lib/schema/resume";
-import { JdRequirements } from "../../../lib/schema/jd";
+import { ResumeDocument, ResumeDocumentSchema } from "../../../lib/schema/resume";
+import { JdRequirements, JdRequirementsSchema } from "../../../lib/schema/jd";
 import {
   TailoredSuggestion,
   CriticFinding,
@@ -10,6 +10,7 @@ import {
 } from "../../../lib/ai/aiTypes";
 import { validateSuggestion, validateSummary } from "../../../lib/ai/truthGuard";
 import { generateHeuristicTailor } from "../../../lib/ai/heuristicTailor";
+import { calculateJdCoverage } from "../../../lib/scoring/deterministicScorer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ function anonymizeProfile(profile: ResumeDocument): ResumeDocument {
 export async function POST(req: NextRequest) {
   const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
-  let body: unknown;
+  let body: any;
   try {
     body = await req.json();
   } catch {
@@ -50,15 +51,28 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const parsedRequest = TailorRequestSchema.safeParse(body);
-  if (!parsedRequest.success) {
+  // Support both { resume, jd } and { resume, jdText } payload formats
+  const candidateResume = body?.resume;
+  const candidateJd = body?.jd ?? body?.jdText;
+  const targetKeywords = Array.isArray(body?.targetKeywords) ? body.targetKeywords : [];
+
+  if (!candidateResume || typeof candidateResume !== "object") {
     return NextResponse.json(
-      { error: "Invalid tailor request structure", details: parsedRequest.error.issues },
+      { error: "Missing or invalid 'resume' payload" },
       { status: 400 }
     );
   }
 
-  const { resume: masterProfile, jd: jdInput, targetKeywords } = parsedRequest.data;
+  const parsedResume = ResumeDocumentSchema.safeParse(candidateResume);
+  if (!parsedResume.success) {
+    return NextResponse.json(
+      { error: "Invalid resume structure", details: parsedResume.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const masterProfile = parsedResume.data;
+  const jdInput = candidateJd || "";
 
   // Check for external LLM API credentials
   const apiKey =
@@ -66,8 +80,14 @@ export async function POST(req: NextRequest) {
     process.env.OPENAI_API_KEY ||
     process.env.AI_API_KEY;
 
-  // If no API key is provided, seamlessly execute offline heuristic fallback
-  if (!apiKey) {
+  const isPlaceholder =
+    !apiKey ||
+    apiKey === "your_api_key_here" ||
+    apiKey === "your-featherless-api-key" ||
+    apiKey === "test_key";
+
+  // If no API key or placeholder provided, seamlessly execute offline heuristic fallback
+  if (isPlaceholder) {
     const fallbackResponse = generateHeuristicTailor(masterProfile, jdInput);
     return NextResponse.json(fallbackResponse, { status: 200 });
   }
@@ -135,7 +155,7 @@ ${JSON.stringify({
 })}
 
 Target Job Description:
-${jdText}
+${jdText.slice(0, 4000)}
 
 ${targetKeywords && targetKeywords.length > 0 ? `Target Focus Keywords: ${targetKeywords.join(", ")}` : ""}
 
@@ -156,8 +176,7 @@ Respond with a single JSON object with this exact shape:
       "originalText": string,
       "suggestedText": string,
       "targetKeywords": string[],
-      "explanation": string,
-      "coverageDeltaEstimate": number
+      "explanation": string
     }
   ],
   "criticFindings": [
@@ -230,27 +249,100 @@ Respond with a single JSON object with this exact shape:
       .replace(/\s*```$/, "");
 
     const parsedData = JSON.parse(cleanedJson);
+    const baseReport = calculateJdCoverage(masterProfile, jdInput);
 
-    // Validate all suggestions through the Truth Guard
-    const validatedSuggestions: TailoredSuggestion[] = (parsedData.suggestions || []).map(
-      (sugg: TailoredSuggestion, idx: number) => {
-        const withDefaults: TailoredSuggestion = {
-          id: sugg.id || `llm-sugg-${idx + 1}`,
-          section: sugg.section || "experience",
-          itemId: sugg.itemId,
-          bulletId: sugg.bulletId,
-          itemTitle: sugg.itemTitle || "Experience Bullet",
-          originalText: sugg.originalText || "",
-          suggestedText: sugg.suggestedText || "",
-          targetKeywords: Array.isArray(sugg.targetKeywords) ? sugg.targetKeywords : [],
-          truthStatus: "verified",
-          unverifiedClaims: [],
-          explanation: sugg.explanation,
-          coverageDeltaEstimate: typeof sugg.coverageDeltaEstimate === "number" ? sugg.coverageDeltaEstimate : 3,
-        };
-        return validateSuggestion(masterProfile, withDefaults);
+    // Validate all suggestions through the Truth Guard and drop nonexistent bullet IDs
+    const validatedSuggestions: TailoredSuggestion[] = [];
+    const suggestionsList = Array.isArray(parsedData.suggestions) ? parsedData.suggestions : [];
+
+    for (let idx = 0; idx < suggestionsList.length; idx++) {
+      const sugg = suggestionsList[idx];
+      if (!sugg || typeof sugg !== "object" || !sugg.suggestedText) continue;
+
+      const targetBulletId = sugg.bulletId || sugg.targetId || sugg.id;
+
+      // Locate original bullet in master profile
+      let foundExp = masterProfile.experience?.find((e) =>
+        e.bullets?.some((b) => b.id === targetBulletId)
+      );
+      let foundProj = !foundExp
+        ? masterProfile.projects?.find((p) =>
+            p.bullets?.some((b) => b.id === targetBulletId)
+          )
+        : undefined;
+
+      if (!foundExp && !foundProj && sugg.originalText) {
+        foundExp = masterProfile.experience?.find((e) =>
+          e.bullets?.some((b) => b.text.trim() === sugg.originalText.trim())
+        );
+        if (!foundExp) {
+          foundProj = masterProfile.projects?.find((p) =>
+            p.bullets?.some((b) => b.text.trim() === sugg.originalText.trim())
+          );
+        }
       }
-    );
+
+      // Drop hallucinated bullet IDs that do not exist in the candidate's profile
+      if (!foundExp && !foundProj) continue;
+
+      const section: "experience" | "projects" = foundExp ? "experience" : "projects";
+      const itemId = foundExp ? foundExp.id : foundProj!.id;
+      const itemTitle = foundExp
+        ? `${foundExp.company} (${foundExp.position})`
+        : `Project: ${foundProj!.name}`;
+      const actualBullet = (foundExp ? foundExp.bullets : foundProj!.bullets).find(
+        (b) => b.id === targetBulletId || b.text.trim() === (sugg.originalText || "").trim()
+      )!;
+
+      // Compute mathematically grounded hypothetical score delta
+      const hypotheticalResume: ResumeDocument = {
+        ...masterProfile,
+        experience: (masterProfile.experience || []).map((e) =>
+          e.id === itemId
+            ? {
+                ...e,
+                bullets: (e.bullets || []).map((b) =>
+                  b.id === actualBullet.id ? { ...b, text: sugg.suggestedText } : b
+                ),
+              }
+            : e
+        ),
+        projects: (masterProfile.projects || []).map((p) =>
+          p.id === itemId
+            ? {
+                ...p,
+                bullets: (p.bullets || []).map((b) =>
+                  b.id === actualBullet.id ? { ...b, text: sugg.suggestedText } : b
+                ),
+              }
+            : p
+        ),
+      };
+      const hypoReport = calculateJdCoverage(hypotheticalResume, jdInput);
+      const dynamicDelta = Math.max(0, hypoReport.overallScore - baseReport.overallScore);
+
+      const candidateSuggestion: TailoredSuggestion = {
+        id: `sugg-${section}-${idx + 1}`,
+        section,
+        itemId,
+        bulletId: actualBullet.id,
+        itemTitle,
+        originalText: actualBullet.text,
+        suggestedText: sugg.suggestedText,
+        targetKeywords: Array.isArray(sugg.targetKeywords)
+          ? sugg.targetKeywords.filter((k: string) =>
+              typeof k === "string" &&
+              new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(sugg.suggestedText)
+            )
+          : [],
+        truthStatus: "verified",
+        unverifiedClaims: [],
+        explanation: sugg.explanation,
+        coverageDeltaEstimate: dynamicDelta,
+      };
+
+      validatedSuggestions.push(validateSuggestion(masterProfile, candidateSuggestion));
+    }
 
     // Validate summary comparison through Truth Guard
     let validatedSummary: SummaryComparison | undefined;

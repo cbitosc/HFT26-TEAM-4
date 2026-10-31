@@ -69,20 +69,20 @@ export const ScoreDeltaToast: React.FC = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300">
-      <div className="relative flex items-center space-x-3.5 bg-slate-900/95 border-2 border-emerald-500/80 rounded-xl px-4 py-3 shadow-2xl shadow-emerald-950/40 backdrop-blur-md max-w-sm text-slate-100 ring-1 ring-emerald-400/30">
+      <div className="relative flex items-center space-x-3.5 bg-obsidian-950/95 border border-emerald-500/40 rounded-xl px-4 py-3 shadow-glow-emerald backdrop-blur-xl max-w-sm text-slate-100 ring-1 ring-emerald-500/20">
         {/* Glowing badge icon */}
-        <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+        <div className="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
           <TrendingUp className="w-5 h-5 animate-pulse" />
         </div>
 
         {/* Text information */}
         <div className="min-w-0 pr-1">
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-extrabold text-emerald-300 flex items-center gap-1">
+            <span className="text-sm font-extrabold text-emerald-300 flex items-center gap-1 font-mono tracking-tight">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
               +{toast.delta}% Coverage!
             </span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="text-[10px] px-1.5 py-0.2 rounded font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tabular-nums">
               {toast.oldScore}% ➔ {toast.newScore}%
             </span>
           </div>
@@ -95,14 +95,14 @@ export const ScoreDeltaToast: React.FC = () => {
         <button
           type="button"
           onClick={() => setToast(null)}
-          className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0 ml-1"
+          className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-obsidian-800 transition-colors shrink-0 ml-1"
           title="Dismiss"
         >
           <X className="w-3.5 h-3.5" />
         </button>
 
         {/* Bottom progress decay bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-800 rounded-b-xl overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-obsidian-800 rounded-b-xl overflow-hidden">
           <div className="h-full bg-emerald-400 animate-[width_4s_linear]" />
         </div>
       </div>

@@ -461,16 +461,18 @@ export const JdScoringPanel: React.FC = () => {
         />
       </div>
 
-      {/* Real-Time Coverage Gauge Card with Warm Gold & Amber Gradient */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white via-amber-50/20 to-orange-50/20 dark:from-stone-900/90 dark:to-stone-950 border border-stone-200 dark:border-stone-800 shadow-sm transition-colors duration-200">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* Circular/Numeric Score Presentation */}
-          <div className="flex items-center space-x-4">
-            <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
-              {/* Circular SVG Gauge */}
+      {/* Real-Time Coverage Gauge Card with Linear/Raycast Ambient Obsidian Theme */}
+      <div className="relative overflow-hidden p-5 sm:p-6 rounded-2xl bg-white dark:bg-obsidian-900/90 border border-slate-200 dark:border-white/[0.08] shadow-sm transition-all duration-200">
+        <div className="absolute top-0 right-0 w-96 h-48 bg-gradient-to-bl from-emerald-500/10 via-teal-500/5 to-transparent blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          {/* Circular/Numeric Score Presentation with Glowing SVG Ring */}
+          <div className="flex items-center space-x-5">
+            <div className="relative w-22 h-22 shrink-0 flex items-center justify-center">
+              {/* Circular SVG Gauge with Glow */}
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                 <path
-                  className="text-stone-200 dark:text-stone-800"
+                  className="text-slate-100 dark:text-obsidian-800"
                   strokeWidth="3.2"
                   stroke="currentColor"
                   fill="none"
@@ -482,41 +484,49 @@ export const JdScoringPanel: React.FC = () => {
                   strokeWidth="3.2"
                   strokeLinecap="round"
                   fill="none"
+                  style={{
+                    filter: `drop-shadow(0 0 6px ${theme.strokeColor}66)`,
+                  }}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  className="transition-all duration-500 ease-out"
+                  className="transition-all duration-700 ease-out"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-black text-stone-900 dark:text-white tracking-tight">
+                <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight tabular-nums">
                   {report.overallScore}%
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-stone-500 dark:text-stone-400 font-mono font-bold">
+                <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono font-bold">
                   Coverage
                 </span>
               </div>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center space-x-2">
-                <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${theme.badge}`}>
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border tracking-tight ${theme.badge}`}>
                   {theme.label}
                 </span>
-                <span className="text-xs text-stone-500 dark:text-stone-400 font-mono">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono tabular-nums">
                   {report.matchedCount}/{report.totalRequiredKeywords} skills
                 </span>
+                {/* Floating Live Indicator Badge */}
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  Live Sync
+                </span>
               </div>
-              <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed max-w-md">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-w-md tracking-tight">
                 {theme.desc}
               </p>
             </div>
           </div>
 
           {/* Quick Metrics Badge */}
-          <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 border-stone-200 dark:border-stone-800 pt-3 sm:pt-0">
-            <span className="text-[11px] text-stone-500 dark:text-stone-400">Missing Gaps</span>
+          <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 border-slate-200 dark:border-white/[0.08] pt-3 sm:pt-0">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Missing Gaps</span>
             <span
-              className={`text-lg font-bold font-mono ${
-                report.missingCount > 0 ? "text-peach-600 dark:text-peach-400" : "text-emerald-600 dark:text-emerald-400"
+              className={`text-xl font-bold font-mono tabular-nums ${
+                report.missingCount > 0 ? "text-amber-500 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
               }`}
             >
               {report.missingCount} {report.missingCount === 1 ? "gap" : "gaps"}
@@ -525,63 +535,63 @@ export const JdScoringPanel: React.FC = () => {
         </div>
 
         {/* 3 Metric Breakdown Bars */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-4 border-t border-stone-200 dark:border-stone-800">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-white/[0.06]">
           {/* Must-Haves */}
-          <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-950/70 border border-stone-200 dark:border-stone-800/60 space-y-1.5">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-obsidian-850/80 border border-slate-200 dark:border-white/[0.06] hover:border-white/10 transition-all duration-150 hover:-translate-y-0.5 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-stone-700 dark:text-stone-300 flex items-center gap-1">
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 tracking-tight">
                 <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                 Must-Haves (3.0x)
               </span>
-              <span className="font-mono font-bold text-stone-900 dark:text-white">{report.mustHaveScore}%</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white tabular-nums">{report.mustHaveScore}%</span>
             </div>
-            <div className="w-full bg-stone-200 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 dark:bg-obsidian-800 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-rose-500 h-full rounded-full transition-all duration-300"
+                className="bg-rose-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${report.mustHaveScore}%` }}
               />
             </div>
-            <p className="text-[10px] text-stone-500 dark:text-stone-400">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
               {report.mustHaveCount} core requirements identified
             </p>
           </div>
 
           {/* Preferred */}
-          <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-950/70 border border-stone-200 dark:border-stone-800/60 space-y-1.5">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-obsidian-850/80 border border-slate-200 dark:border-white/[0.06] hover:border-white/10 transition-all duration-150 hover:-translate-y-0.5 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-stone-700 dark:text-stone-300 flex items-center gap-1">
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 tracking-tight">
                 <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                 Preferred (1.5x)
               </span>
-              <span className="font-mono font-bold text-stone-900 dark:text-white">{report.preferredScore}%</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white tabular-nums">{report.preferredScore}%</span>
             </div>
-            <div className="w-full bg-stone-200 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 dark:bg-obsidian-800 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-amber-500 h-full rounded-full transition-all duration-300"
+                className="bg-amber-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${report.preferredScore}%` }}
               />
             </div>
-            <p className="text-[10px] text-stone-500 dark:text-stone-400">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
               {report.preferredCount} nice-to-have qualifications
             </p>
           </div>
 
           {/* Bullet Evidence */}
-          <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-950/70 border border-stone-200 dark:border-stone-800/60 space-y-1.5">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-obsidian-850/80 border border-slate-200 dark:border-white/[0.06] hover:border-white/10 transition-all duration-150 hover:-translate-y-0.5 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-stone-700 dark:text-stone-300 flex items-center gap-1">
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 tracking-tight">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 Bullet Evidence (1.0x)
               </span>
-              <span className="font-mono font-bold text-stone-900 dark:text-white">{report.bulletEvidenceScore}%</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white tabular-nums">{report.bulletEvidenceScore}%</span>
             </div>
-            <div className="w-full bg-stone-200 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 dark:bg-obsidian-800 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-300"
+                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${report.bulletEvidenceScore}%` }}
               />
             </div>
-            <p className="text-[10px] text-stone-500 dark:text-stone-400">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">
               Matched skills backed by real bullet points
             </p>
           </div>

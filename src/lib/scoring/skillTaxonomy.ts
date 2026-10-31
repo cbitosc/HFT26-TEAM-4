@@ -6,7 +6,9 @@ export type SkillCategory =
   | "Cloud & DevOps"
   | "AI & Machine Learning"
   | "Testing & Tooling"
-  | "System Design & Architecture";
+  | "System Design & Architecture"
+  | "Product & Leadership"
+  | "Methodologies & Collaboration";
 
 export const SKILL_TAXONOMY: Record<SkillCategory, string[]> = {
   Languages: [
@@ -487,6 +489,56 @@ export const SKILL_TAXONOMY: Record<SkillCategory, string[]> = {
     "Scalability",
     "Network Protocols",
     "TCP/IP",
+  ],
+
+  "Product & Leadership": [
+    "Product Management",
+    "Technical Product Management",
+    "Product Strategy",
+    "Roadmapping",
+    "Technical PRD",
+    "User Stories",
+    "User Research",
+    "Customer Discovery",
+    "A/B Testing",
+    "Experimentation",
+    "Stakeholder Management",
+    "Cross-Functional Leadership",
+    "Engineering Management",
+    "Mentorship",
+    "Team Leadership",
+    "Project Management",
+    "Program Management",
+    "OKRs",
+    "KPIs",
+    "Data-Driven Decision Making",
+    "Feature Prioritization",
+    "Product Analytics",
+    "Looker",
+    "Amplitude",
+    "Mixpanel",
+    "Tableau",
+    "Power BI",
+  ],
+
+  "Methodologies & Collaboration": [
+    "Agile",
+    "Scrum",
+    "Kanban",
+    "Sprint Planning",
+    "Backlog Grooming",
+    "Jira",
+    "Linear",
+    "Confluence",
+    "Notion",
+    "Slack",
+    "Code Review",
+    "Pair Programming",
+    "Technical Writing",
+    "Documentation",
+    "Design Systems",
+    "Root Cause Analysis",
+    "Incident Management",
   ],
 };
 

@@ -239,23 +239,24 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
       };
 
   return (
-    <div className={`flex flex-col h-full bg-stone-100 dark:bg-stone-950 overflow-hidden print:overflow-visible print:h-auto transition-colors duration-200 ${className}`}>
-      {/* Canvas Interactive Top Toolbar */}
-      <div className="border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur px-2.5 sm:px-4 py-2 flex items-center justify-between shrink-0 text-xs print:hidden shadow-xs">
+    <div className={`flex flex-col h-full bg-slate-100/70 dark:bg-obsidian-950 overflow-hidden print:overflow-visible print:h-auto transition-colors duration-200 ${className}`}>
+      {/* Canvas Interactive Top Toolbar with Glassmorphism */}
+      <div className="border-b border-slate-200 dark:border-white/[0.08] bg-white/80 dark:bg-obsidian-950/80 backdrop-blur-xl px-2.5 sm:px-4 py-2 flex items-center justify-between shrink-0 text-xs print:hidden shadow-xs">
         {/* Left: View & Theme Info */}
         <div className="flex items-center space-x-1.5 sm:space-x-2.5">
-          <div className="flex items-center space-x-1.5 text-stone-800 dark:text-stone-200 font-bold">
-            <FileText className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-            <span className="hidden xs:inline">A4 Canvas</span>
+          <div className="flex items-center space-x-1.5 text-slate-900 dark:text-white font-bold tracking-tight">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <FileText className="w-3.5 h-3.5 text-emerald-500" />
+            <span className="hidden xs:inline">A4 Live Canvas</span>
           </div>
-          <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 font-mono capitalize">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-obsidian-850 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.06] font-mono capitalize">
             {themeConfig.name}
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20 font-mono hidden sm:inline">
+          <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20 font-mono hidden sm:inline tabular-nums">
             {basePt} pt
           </span>
           {autoFitOnePage && (
-            <span className="hidden md:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 font-mono">
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 font-mono">
               <ShieldCheck className="w-3 h-3 text-emerald-500" />
               1-Page Fit
             </span>
@@ -265,12 +266,12 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
         {/* Right: Zoom & Export Controls */}
         <div className="flex items-center space-x-1 sm:space-x-2">
           {/* Zoom controls */}
-          <div className="flex items-center bg-stone-100 dark:bg-stone-850 rounded-lg border border-stone-200 dark:border-stone-800 p-0.5">
+          <div className="flex items-center bg-slate-100 dark:bg-obsidian-900 rounded-lg border border-slate-200 dark:border-white/[0.08] p-0.5">
             <button
               type="button"
               onClick={handleZoomOut}
               disabled={zoom <= 0.42}
-              className="p-1 rounded text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-200 dark:hover:bg-stone-800 transition"
+              className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-obsidian-800 transition"
               title="Zoom out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
@@ -280,7 +281,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             <button
               type="button"
               onClick={handleFitWidth}
-              className="text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold transition text-stone-600 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-stone-200 dark:hover:bg-stone-800"
+              className="text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold transition text-slate-600 dark:text-slate-300 hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-slate-200 dark:hover:bg-obsidian-800"
               title="Fit A4 sheet to screen width"
             >
               Fit
@@ -292,10 +293,10 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
                   key={z}
                   type="button"
                   onClick={() => handleSetZoom(z)}
-                  className={`text-[10px] px-1.5 py-0.5 rounded font-mono transition ${
+                  className={`text-[10px] px-1.5 py-0.5 rounded font-mono transition tabular-nums ${
                     Math.abs(zoom - z) < 0.02
-                      ? "bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/30"
-                      : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
+                      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
                   {Math.round(z * 100)}%
@@ -307,7 +308,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
               type="button"
               onClick={handleZoomIn}
               disabled={zoom >= 1.2}
-              className="p-1 rounded text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-200 dark:hover:bg-stone-800 transition"
+              className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-obsidian-800 transition"
               title="Zoom in"
             >
               <ZoomIn className="w-3.5 h-3.5" />
@@ -318,7 +319,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
           <button
             type="button"
             onClick={handleCopyText}
-            className="hidden sm:flex items-center space-x-1 px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-stone-700 transition text-[11px]"
+            className="hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-obsidian-900 dark:hover:bg-obsidian-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.08] transition text-[11px]"
             title="Copy all resume text to clipboard"
           >
             {copied ? (
@@ -328,7 +329,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
               </>
             ) : (
               <>
-                <Copy className="w-3 h-3" />
+                <Copy className="w-3 h-3 text-slate-400" />
                 <span className="hidden md:inline">Copy Text</span>
               </>
             )}
@@ -339,10 +340,10 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             <button
               type="button"
               onClick={onToggleAtsView}
-              className="flex items-center space-x-1 px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition text-[11px]"
+              className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-obsidian-900 dark:hover:bg-obsidian-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/[0.08] transition text-[11px]"
               title="Inspect raw linearized plain text as parsed by ATS robots"
             >
-              <Bot className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <Bot className="w-3.5 h-3.5 text-emerald-500" />
               <span className="hidden md:inline">ATS Robot</span>
             </button>
           )}
@@ -352,7 +353,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             type="button"
             onClick={handleExportDocx}
             disabled={exportingDocx}
-            className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-xs transition text-[11px] disabled:opacity-50"
+            className="flex items-center space-x-1 px-2.5 sm:px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-obsidian-950 font-bold shadow-glow-emerald transition text-[11px] disabled:opacity-50"
             title="Export ATS-Friendly Word Document (.docx)"
           >
             <Download className={`w-3 h-3 ${exportingDocx ? "animate-bounce" : ""}`} />
@@ -364,7 +365,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             type="button"
             onClick={handleExportPdf}
             disabled={exportingPdf}
-            className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-stone-950 font-bold shadow-xs transition text-[11px] disabled:opacity-50"
+            className="flex items-center space-x-1 px-2 sm:px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-obsidian-900 dark:hover:bg-obsidian-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-white/[0.1] font-semibold shadow-xs transition text-[11px] disabled:opacity-50"
             title="Download ATS-Friendly PDF Document (.pdf) (or Ctrl+P for Vector Print)"
           >
             <Printer className={`w-3 h-3 ${exportingPdf ? "animate-spin" : ""}`} />
@@ -375,9 +376,9 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
       {/* 1-Page Overflow Warning Banner */}
       {hasOverflow && (
-        <div className="bg-amber-500/15 border-b border-amber-500/30 px-3 py-1.5 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between shrink-0 print:hidden animate-in fade-in">
+        <div className="bg-amber-500/10 border-b border-amber-500/25 px-3 py-1.5 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between shrink-0 print:hidden animate-in fade-in">
           <div className="flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
             <span className="text-[11px]">
               <strong>1-Page Fit Warning:</strong> Content overflows 297mm standard A4 (lower sections may be clipped). Switch to &quot;Compact&quot; margins, trim bullet points, or toggle off 1-Page Fit in Theme tab to enable multi-page view.
             </span>
@@ -385,8 +386,8 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
         </div>
       )}
 
-      {/* Scrollable Viewport Wrapper */}
-      <div className="flex-1 overflow-auto p-2 sm:p-6 md:p-8 flex justify-center bg-stone-200/80 dark:bg-stone-950/80 custom-scrollbar print:p-0 print:bg-white print:overflow-visible transition-colors duration-200">
+      {/* Scrollable Viewport Wrapper with Ambient Studio Dot Grid */}
+      <div className="flex-1 overflow-auto p-2 sm:p-6 md:p-8 flex justify-center bg-slate-200/50 dark:bg-obsidian-950 studio-grid-bg custom-scrollbar print:p-0 print:bg-white print:overflow-visible transition-colors duration-200">
         {/* Scale transformation wrapper */}
         <div
           id="resume-a4-sheet-wrapper"
@@ -396,11 +397,11 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
             marginBottom: zoom > 1.0 ? `${(zoom - 1.0) * 1123}px` : undefined,
           }}
         >
-          {/* A4 Sheet Container */}
+          {/* A4 Sheet Container with High-End Elevation */}
           <article
             ref={sheetRef}
             id="resume-a4-sheet"
-            className="bg-white text-slate-900 shadow-2xl rounded-sm print:shadow-none print:w-full print:max-w-none print:p-0 transition-all selection:bg-emerald-100 selection:text-emerald-900"
+            className="bg-white text-slate-900 shadow-sheet-ambient rounded-sm print:shadow-none print:w-full print:max-w-none print:p-0 transition-all selection:bg-emerald-100 selection:text-emerald-900 ring-1 ring-black/5 dark:ring-white/[0.08]"
             style={
               {
                 width: "210mm",
@@ -558,7 +559,8 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
                 // SECTION 2: Work Experience
                 if (sectionId === "experience") {
-                  if (!experience || experience.length === 0) return null;
+                  const visibleExp = (experience || []).filter((exp) => !exp.hidden);
+                  if (visibleExp.length === 0) return null;
                   return (
                     <section
                       key="sec-experience"
@@ -574,59 +576,62 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
                         Work Experience
                       </h2>
                       <div className={autoFitOnePage ? "space-y-2" : "space-y-3"}>
-                        {experience.map((exp) => (
-                          <div
-                            key={exp.id}
-                            className={autoFitOnePage ? "space-y-0.5" : "space-y-1"}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="font-bold text-slate-900 inline">
-                                  {exp.position}
-                                </h3>
-                                <span className="text-slate-600 font-semibold">
-                                  {" "}• {exp.company}
-                                </span>
-                                {exp.location && (
-                                  <span className="text-slate-500 font-normal">
-                                    {" "}({exp.location})
+                        {visibleExp.map((exp) => {
+                          const visibleBullets = (exp.bullets || []).filter((b) => !b.hidden);
+                          return (
+                            <div
+                              key={exp.id}
+                              className={autoFitOnePage ? "space-y-0.5" : "space-y-1"}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h3 className="font-bold text-slate-900 inline">
+                                    {exp.position}
+                                  </h3>
+                                  <span className="text-slate-600 font-semibold">
+                                    {" "}• {exp.company}
                                   </span>
-                                )}
+                                  {exp.location && (
+                                    <span className="text-slate-500 font-normal">
+                                      {" "}({exp.location})
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-slate-500 font-mono text-[0.85em] whitespace-nowrap ml-2">
+                                  {exp.startDate} – {exp.current ? "Present" : exp.endDate}
+                                </span>
                               </div>
-                              <span className="text-slate-500 font-mono text-[0.85em] whitespace-nowrap ml-2">
-                                {exp.startDate} – {exp.current ? "Present" : exp.endDate}
-                              </span>
+
+                              {exp.description && (
+                                <p className="text-slate-600 italic text-[0.95em]">
+                                  {exp.description}
+                                </p>
+                              )}
+
+                              {visibleBullets.length > 0 && (
+                                <ul
+                                  className="list-disc list-outside ml-4 text-slate-700 leading-relaxed"
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "var(--bullet-gap, 0.2rem)",
+                                  }}
+                                >
+                                  {visibleBullets.map((bullet) => (
+                                    <li key={bullet.id}>{bullet.text}</li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              {exp.technologies && exp.technologies.length > 0 && (
+                                <p className="text-slate-500 text-[0.85em]">
+                                  <span className="font-semibold text-slate-700">Technologies: </span>
+                                  {exp.technologies.join(", ")}
+                                </p>
+                              )}
                             </div>
-
-                            {exp.description && (
-                              <p className="text-slate-600 italic text-[0.95em]">
-                                {exp.description}
-                              </p>
-                            )}
-
-                            {exp.bullets && exp.bullets.length > 0 && (
-                              <ul
-                                className="list-disc list-outside ml-4 text-slate-700 leading-relaxed"
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "var(--bullet-gap, 0.2rem)",
-                                }}
-                              >
-                                {exp.bullets.map((bullet) => (
-                                  <li key={bullet.id}>{bullet.text}</li>
-                                ))}
-                              </ul>
-                            )}
-
-                            {exp.technologies && exp.technologies.length > 0 && (
-                              <p className="text-slate-500 text-[0.85em]">
-                                <span className="font-semibold text-slate-700">Technologies: </span>
-                                {exp.technologies.join(", ")}
-                              </p>
-                            )}
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </section>
                   );
@@ -634,7 +639,8 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
                 // SECTION 3: Key Projects
                 if (sectionId === "projects") {
-                  if (!projects || projects.length === 0) return null;
+                  const visibleProjects = (projects || []).filter((proj) => !proj.hidden);
+                  if (visibleProjects.length === 0) return null;
                   return (
                     <section
                       key="sec-projects"
@@ -650,59 +656,62 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
                         Key Projects
                       </h2>
                       <div className={autoFitOnePage ? "space-y-1.5" : "space-y-2.5"}>
-                        {projects.map((proj) => (
-                          <div
-                            key={proj.id}
-                            className={autoFitOnePage ? "space-y-0.5" : "space-y-1"}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="font-bold text-slate-900 inline">
-                                  {proj.name}
-                                </h3>
-                                {proj.role && (
-                                  <span className="text-slate-600 font-normal">
-                                    {" "}— {proj.role}
+                        {visibleProjects.map((proj) => {
+                          const visibleBullets = (proj.bullets || []).filter((b) => !b.hidden);
+                          return (
+                            <div
+                              key={proj.id}
+                              className={autoFitOnePage ? "space-y-0.5" : "space-y-1"}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h3 className="font-bold text-slate-900 inline">
+                                    {proj.name}
+                                  </h3>
+                                  {proj.role && (
+                                    <span className="text-slate-600 font-normal">
+                                      {" "}— {proj.role}
+                                    </span>
+                                  )}
+                                </div>
+                                {(proj.startDate || proj.endDate) && (
+                                  <span className="text-slate-500 font-mono text-[0.85em] whitespace-nowrap ml-2">
+                                    {proj.startDate}
+                                    {proj.endDate ? ` – ${proj.endDate}` : ""}
                                   </span>
                                 )}
                               </div>
-                              {(proj.startDate || proj.endDate) && (
-                                <span className="text-slate-500 font-mono text-[0.85em] whitespace-nowrap ml-2">
-                                  {proj.startDate}
-                                  {proj.endDate ? ` – ${proj.endDate}` : ""}
-                                </span>
+
+                              {proj.description && (
+                                <p className="text-slate-600 text-[0.95em]">
+                                  {proj.description}
+                                </p>
+                              )}
+
+                              {visibleBullets.length > 0 && (
+                                <ul
+                                  className="list-disc list-outside ml-4 text-slate-700 leading-relaxed"
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "var(--bullet-gap, 0.2rem)",
+                                  }}
+                                >
+                                  {visibleBullets.map((b) => (
+                                    <li key={b.id}>{b.text}</li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              {proj.technologies && proj.technologies.length > 0 && (
+                                <p className="text-slate-500 text-[0.85em]">
+                                  <span className="font-semibold text-slate-700">Tech Stack: </span>
+                                  {proj.technologies.join(", ")}
+                                </p>
                               )}
                             </div>
-
-                            {proj.description && (
-                              <p className="text-slate-600 text-[0.95em]">
-                                {proj.description}
-                              </p>
-                            )}
-
-                            {proj.bullets && proj.bullets.length > 0 && (
-                              <ul
-                                className="list-disc list-outside ml-4 text-slate-700 leading-relaxed"
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "var(--bullet-gap, 0.2rem)",
-                                }}
-                              >
-                                {proj.bullets.map((b) => (
-                                  <li key={b.id}>{b.text}</li>
-                                ))}
-                              </ul>
-                            )}
-
-                            {proj.technologies && proj.technologies.length > 0 && (
-                              <p className="text-slate-500 text-[0.85em]">
-                                <span className="font-semibold text-slate-700">Tech Stack: </span>
-                                {proj.technologies.join(", ")}
-                              </p>
-                            )}
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </section>
                   );
@@ -744,7 +753,8 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
                 // SECTION 5: Education
                 if (sectionId === "education") {
-                  if (!education || education.length === 0) return null;
+                  const visibleEdu = (education || []).filter((edu) => !edu.hidden);
+                  if (visibleEdu.length === 0) return null;
                   return (
                     <section
                       key="sec-education"
@@ -760,37 +770,40 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
                         Education
                       </h2>
                       <div className={autoFitOnePage ? "space-y-1" : "space-y-1.5"}>
-                        {education.map((edu) => (
-                          <div key={edu.id} className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-bold text-slate-900">
-                                {edu.degree} in {edu.field}
-                              </h3>
-                              <p className="text-slate-600">
-                                {edu.institution}
-                                {edu.location ? `, ${edu.location}` : ""}
-                                {edu.gpa ? ` • GPA: ${edu.gpa}` : ""}
-                              </p>
-                              {edu.highlights && edu.highlights.length > 0 && (
-                                <ul
-                                  className="list-disc list-outside ml-4 mt-0.5 text-slate-600 text-[0.9em]"
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "var(--bullet-gap, 0.2rem)",
-                                  }}
-                                >
-                                  {edu.highlights.map((h) => (
-                                    <li key={h.id}>{h.text}</li>
-                                  ))}
-                                </ul>
-                              )}
+                        {visibleEdu.map((edu) => {
+                          const visibleHighlights = (edu.highlights || []).filter((h) => !h.hidden);
+                          return (
+                            <div key={edu.id} className="flex items-start justify-between">
+                              <div>
+                                <h3 className="font-bold text-slate-900">
+                                  {edu.degree} in {edu.field}
+                                </h3>
+                                <p className="text-slate-600">
+                                  {edu.institution}
+                                  {edu.location ? `, ${edu.location}` : ""}
+                                  {edu.gpa ? ` • GPA: ${edu.gpa}` : ""}
+                                </p>
+                                {visibleHighlights.length > 0 && (
+                                  <ul
+                                    className="list-disc list-outside ml-4 mt-0.5 text-slate-600 text-[0.9em]"
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: "var(--bullet-gap, 0.2rem)",
+                                    }}
+                                  >
+                                    {visibleHighlights.map((h) => (
+                                      <li key={h.id}>{h.text}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                              <span className="text-slate-500 font-mono text-[0.85em] whitespace-nowrap ml-2">
+                                {edu.startDate} – {edu.endDate}
+                              </span>
                             </div>
-                            <span className="text-slate-500 font-mono text-[0.85em] whitespace-nowrap ml-2">
-                              {edu.startDate} – {edu.endDate}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </section>
                   );
@@ -798,7 +811,8 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
 
                 // SECTION 6: Certifications
                 if (sectionId === "certifications") {
-                  if (!certifications || certifications.length === 0) return null;
+                  const visibleCerts = (certifications || []).filter((cert) => !cert.hidden);
+                  if (visibleCerts.length === 0) return null;
                   return (
                     <section
                       key="sec-certifications"
@@ -814,7 +828,7 @@ export const ResumeCanvas: React.FC<ResumeCanvasProps> = ({
                         Certifications & Credentials
                       </h2>
                       <div className="space-y-1 text-slate-700">
-                        {certifications.map((cert) => (
+                        {visibleCerts.map((cert) => (
                           <div key={cert.id} className="flex justify-between items-baseline">
                             <div>
                               <span className="font-semibold text-slate-900">

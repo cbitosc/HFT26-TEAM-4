@@ -150,6 +150,18 @@ describe("Deterministic Truth Guard Engine", () => {
         `Expected claim mentioning Kubernetes, got: ${JSON.stringify(result.unverifiedClaims)}`
       );
     });
+
+    it("should prevent substring false-positives for skills (JavaScript does not validate Java)", () => {
+      // groundedProfile has JavaScript / TypeScript, but NOT standalone Java
+      const javaClaim = "Engineered enterprise backend microservices with Java and Spring Boot.";
+      const result = validateTextAgainstProfile(groundedProfile, javaClaim);
+
+      assert.strictEqual(result.truthStatus, "needs_confirmation");
+      assert.ok(
+        result.unverifiedClaims.some((claim) => claim.includes("Java")),
+        `Expected claim mentioning Java, got: ${JSON.stringify(result.unverifiedClaims)}`
+      );
+    });
   });
 
   describe("Anti-Hallucination: Metric & Number Verification", () => {
@@ -187,6 +199,46 @@ describe("Deterministic Truth Guard Engine", () => {
       assert.ok(result.unverifiedClaims.some((c) => c.includes("Kubernetes")));
       assert.ok(result.unverifiedClaims.some((c) => c.includes("$10M") || c.includes("10M")));
     });
+
+    it("should detect metric sign flips and decimal precision alterations against original bullet", () => {
+      // Original bullet has 95ms
+      const alteredPrecision = "Spearheaded migration cutting latency to 95.5ms for active tenants.";
+      const resPrecision = validateTextAgainstProfile(
+        groundedProfile,
+        alteredPrecision,
+        "Spearheaded migration cutting latency to 95ms for active tenants."
+      );
+      assert.strictEqual(resPrecision.truthStatus, "needs_confirmation");
+      assert.ok(
+        resPrecision.unverifiedClaims.some((c) => c.includes("95.5ms") || c.includes("precision") || c.includes("altered")),
+        `Expected altered precision claim, got: ${JSON.stringify(resPrecision.unverifiedClaims)}`
+      );
+
+      // Sign flip test: original has +28% or 28%, suggested has -28%
+      const flippedSign = "Optimized complex PostgreSQL analytical queries, decreasing spend by -28%.";
+      const resSign = validateTextAgainstProfile(
+        groundedProfile,
+        flippedSign,
+        "Optimized complex PostgreSQL analytical queries, decreasing spend by 28%."
+      );
+      assert.strictEqual(resSign.truthStatus, "needs_confirmation");
+      assert.ok(
+        resSign.unverifiedClaims.some((c) => c.includes("-28%") || c.includes("sign") || c.includes("altered")),
+        `Expected sign flip claim, got: ${JSON.stringify(resSign.unverifiedClaims)}`
+      );
+    });
+
+    it("should flag bullets exceeding 180 character limit for clean single-line ATS formatting", () => {
+      const longBullet =
+        "Spearheaded enterprise cloud platform modernization utilizing TypeScript, React, Next.js, PostgreSQL, Docker, AWS ECS, Redis, WebSockets, and CI/CD pipelines to dramatically scale operations worldwide.";
+      assert.ok(longBullet.length > 180, `Expected bullet > 180 chars, got ${longBullet.length}`);
+
+      const result = validateTextAgainstProfile(groundedProfile, longBullet);
+      assert.ok(
+        result.unverifiedClaims.some((c) => c.includes("180 chars")),
+        `Expected ATS 180 char warning, got: ${JSON.stringify(result.unverifiedClaims)}`
+      );
+    });
   });
 
   describe("validateSuggestion & validateSummary helper methods", () => {
@@ -221,6 +273,92 @@ describe("Deterministic Truth Guard Engine", () => {
       assert.ok(summaryResult.unverifiedClaims.length > 0);
       assert.ok(summaryResult.unverifiedClaims.some((c) => c.includes("Kubernetes")));
       assert.ok(summaryResult.unverifiedClaims.some((c) => c.includes("$20M") || c.includes("20M")));
+    });
+
+    it("should prevent cross-role metric and tool transfer (Codex Finding 1 reproduction)", () => {
+      const multiRoleProfile: ResumeDocument = {
+        ...groundedProfile,
+        experience: [
+          {
+            id: "exp-cloud",
+            company: "Apex Cloud Technologies",
+            position: "Senior Cloud Engineer",
+            startDate: "2022-01",
+            endDate: "Present",
+            current: true,
+            bullets: [
+              {
+                id: "b-cloud-1",
+                text: "Reduced API latency by 42% on AWS infrastructure.",
+              },
+            ],
+            technologies: ["AWS", "Docker"],
+          },
+          {
+            id: "exp-docs",
+            company: "Acme Logistics",
+            position: "Documentation Specialist",
+            startDate: "2020-01",
+            endDate: "2021-12",
+            current: false,
+            bullets: [
+              {
+                id: "b-docs-1",
+                text: "Authored deployment guides and internal developer documentation.",
+              },
+            ],
+            technologies: ["Markdown"],
+          },
+        ],
+      };
+
+      // Rewriting the documentation bullet with claims transplanted from the cloud role:
+      const transplantedSuggestion: TailoredSuggestion = {
+        id: "sugg-transplant",
+        section: "experience",
+        itemId: "exp-docs",
+        bulletId: "b-docs-1",
+        originalText: "Authored deployment guides and internal developer documentation.",
+        suggestedText: "Reduced cloud spend by 42% using AWS.",
+        targetKeywords: ["AWS"],
+        explanation: "Attempting to claim AWS and 42% metric from another role",
+        truthStatus: "verified",
+        unverifiedClaims: [],
+      };
+
+      const validated = validateSuggestion(multiRoleProfile, transplantedSuggestion);
+
+      assert.strictEqual(
+        validated.truthStatus,
+        "needs_confirmation",
+        "Transplanted metrics or tools from another role must require confirmation"
+      );
+      assert.ok(
+        validated.unverifiedClaims.some((c) => c.includes("42%")),
+        `Expected claim flagging 42% metric, got: ${JSON.stringify(validated.unverifiedClaims)}`
+      );
+      assert.ok(
+        validated.unverifiedClaims.some((c) => c.includes("AWS")),
+        `Expected claim flagging AWS tool not in Acme Logistics, got: ${JSON.stringify(validated.unverifiedClaims)}`
+      );
+
+      // Legitimate rewrite for the cloud role preserving its own grounded 42% and AWS:
+      const legitimateSuggestion: TailoredSuggestion = {
+        id: "sugg-legit",
+        section: "experience",
+        itemId: "exp-cloud",
+        bulletId: "b-cloud-1",
+        originalText: "Reduced API latency by 42% on AWS infrastructure.",
+        suggestedText: "Architected cloud services reducing API latency by 42% on AWS.",
+        targetKeywords: ["AWS"],
+        explanation: "Action verb upgrade preserving grounded metrics and tools",
+        truthStatus: "verified",
+        unverifiedClaims: [],
+      };
+
+      const validatedLegit = validateSuggestion(multiRoleProfile, legitimateSuggestion);
+      assert.strictEqual(validatedLegit.truthStatus, "verified");
+      assert.strictEqual(validatedLegit.unverifiedClaims.length, 0);
     });
   });
 

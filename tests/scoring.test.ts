@@ -3,6 +3,7 @@ import assert from "node:assert";
 import { ALL_SKILLS, getSkillCategory, SKILL_TAXONOMY } from "../src/lib/scoring/skillTaxonomy";
 import { normalizeSkill, getSkillAliases } from "../src/lib/scoring/aliasMap";
 import { calculateJdCoverage, parseJdRequirements } from "../src/lib/scoring/deterministicScorer";
+import { generateHeuristicTailor } from "../src/lib/ai/heuristicTailor";
 import { ResumeDocument } from "../src/lib/schema/resume";
 
 describe("Skill Taxonomy & Catalog", () => {
@@ -124,6 +125,133 @@ Preferred Qualifications:
     const parsed = parseJdRequirements("Responsibilities:\n- Build the next generation platform for global payments.");
     const skills = parsed.map((p) => p.skill);
     assert.ok(!skills.includes("Next.js"), "Next.js must not be falsely detected on 'next generation'");
+  });
+
+  it("should parse inline headings with skills placed on the same line (Codex Finding 3 reproduction)", () => {
+    const inlineJd = `
+Nice to have: GraphQL, Next.js
+Must have: Python, Docker
+Requirements: React, TypeScript
+    `;
+    const parsed = parseJdRequirements(inlineJd);
+
+    const graphql = parsed.find((p) => p.skill === "GraphQL");
+    assert.ok(graphql, "GraphQL must be detected on inline Nice to have line");
+    assert.strictEqual(graphql?.tier, "preferred");
+
+    const nextjs = parsed.find((p) => p.skill === "Next.js");
+    assert.ok(nextjs, "Next.js must be detected on inline Nice to have line");
+    assert.strictEqual(nextjs?.tier, "preferred");
+
+    const python = parsed.find((p) => p.skill === "Python");
+    assert.ok(python, "Python must be detected on inline Must have line");
+    assert.strictEqual(python?.tier, "must-have");
+
+    const docker = parsed.find((p) => p.skill === "Docker");
+    assert.ok(docker, "Docker must be detected on inline Must have line");
+    assert.strictEqual(docker?.tier, "must-have");
+
+    const react = parsed.find((p) => p.skill === "React");
+    assert.ok(react, "React must be detected on inline Requirements line");
+    assert.strictEqual(react?.tier, "must-have");
+  });
+
+  it("should parse product management and methodology requirements from technical TPM JDs (Codex Finding 4)", () => {
+    const tpmText = `
+Requirements:
+- 5+ years of Technical Product Management experience managing platform products.
+- Deep expertise in Agile/Scrum processes, sprint planning, and Technical PRD authoring.
+- Experience with stakeholder management, A/B testing, and cross-functional leadership.
+- Proficiency in SQL, Looker, and Amplitude for product analytics.
+- Backlog management in Jira.
+    `;
+    const parsed = parseJdRequirements(tpmText);
+    const skills = parsed.map((p) => p.skill);
+
+    assert.ok(skills.includes("Technical Product Management") || skills.includes("Product Management"), "Should detect Product Management");
+    assert.ok(skills.includes("Agile"), "Should detect Agile");
+    assert.ok(skills.includes("Scrum"), "Should detect Scrum");
+    assert.ok(skills.includes("Technical PRD"), "Should detect Technical PRD");
+    assert.ok(skills.includes("Stakeholder Management"), "Should detect Stakeholder Management");
+    assert.ok(skills.includes("A/B Testing"), "Should detect A/B Testing");
+    assert.ok(skills.includes("Cross-Functional Leadership"), "Should detect Cross-Functional Leadership");
+    assert.ok(skills.includes("SQL"), "Should detect SQL");
+    assert.ok(skills.includes("Looker"), "Should detect Looker");
+    assert.ok(skills.includes("Amplitude"), "Should detect Amplitude");
+    assert.ok(skills.includes("Jira"), "Should detect Jira");
+  });
+
+  it("should not report fake score gains or attribute unadded keywords for verb-only rewrites (Codex Finding 2)", () => {
+    const testProfile: ResumeDocument = {
+      id: "verb-test-profile",
+      title: "Test Profile",
+      basics: {
+        name: "Test Engineer",
+        headline: "Software Engineer",
+        email: "test@example.com",
+        phone: "123",
+        location: "City",
+        summary: "Software engineer.",
+        profiles: [],
+      },
+      experience: [
+        {
+          id: "exp-1",
+          company: "Tech Corp",
+          position: "Software Engineer",
+          startDate: "2021-01",
+          endDate: "2023-01",
+          current: false,
+          bullets: [
+            {
+              id: "b-1",
+              text: "Worked on customer dashboard features using React.",
+            },
+          ],
+          technologies: ["React"],
+        },
+      ],
+      education: [],
+      projects: [],
+      skills: [
+        {
+          id: "sk-1",
+          category: "Frontend",
+          skills: ["React"],
+        },
+      ],
+      certifications: [],
+      layout: {
+        theme: "modern",
+        fontFamily: "inter",
+        fontScale: 1.0,
+        margins: "normal",
+        autoFitOnePage: false,
+        sectionOrder: ["summary", "experience", "projects", "skills"],
+        sectionVisibility: {
+          summary: true,
+          experience: true,
+          projects: true,
+          skills: true,
+          education: true,
+          certifications: true,
+        },
+      },
+      createdAt: "2026-01-01T00:00:00Z",
+      updatedAt: "2026-01-01T00:00:00Z",
+    };
+
+    // JD asking for Kubernetes and AWS (which candidate does NOT have in exp-1)
+    const jdWithMissing = "Requirements:\n- 3+ years AWS and Kubernetes infrastructure experience.";
+    const tailored = generateHeuristicTailor(testProfile, jdWithMissing);
+
+    assert.ok(tailored.suggestions.length > 0, "Should generate a suggestion");
+    const sugg = tailored.suggestions[0];
+
+    // The rewrite only sharpened the verb ("Spearheaded customer dashboard features using React.")
+    // It did NOT add AWS or Kubernetes because candidate lacks them.
+    assert.strictEqual(sugg.targetKeywords.length, 0, "Verb-only rewrite must have 0 targetKeywords");
+    assert.strictEqual(sugg.coverageDeltaEstimate, 0, "Verb-only rewrite must have 0 coverageDeltaEstimate");
   });
 });
 
@@ -248,5 +376,146 @@ describe("Weighted Evidence Calculation & Scoring Engine", () => {
     assert.strictEqual(report.totalRequiredKeywords, 0);
     assert.strictEqual(report.matchedKeywords.length, 0);
     assert.strictEqual(report.missingKeywords.length, 0);
+  });
+
+  it("should exclude hidden bullets and hidden items from JD coverage credit", () => {
+    const resumeWithHidden: ResumeDocument = {
+      ...minimalResume,
+      experience: [
+        {
+          id: "exp-1",
+          company: "Tech Corp",
+          position: "Frontend Lead",
+          startDate: "2022-01",
+          endDate: "Present",
+          current: true,
+          hidden: false,
+          bullets: [
+            { id: "b1", text: "Architected microservices using React.", hidden: true }, // hidden bullet
+            { id: "b2", text: "Developed high-throughput APIs using Node.js.", hidden: false },
+          ],
+          technologies: ["Node.js"], // React is not in technologies
+        },
+      ],
+      skills: [],
+    };
+
+    const jd = "Requirements:\n- Must have React\n- Must have Node.js";
+    const report = calculateJdCoverage(resumeWithHidden, jd);
+
+    // React is only in the hidden bullet (and technologies list is ignored unless in skills section)
+    // Node.js is in visible bullet b2 -> credit 1.0
+    const reactMatch = report.matchedKeywords.find((m) => m.skill === "React");
+    assert.strictEqual(reactMatch, undefined, "Hidden React bullet should not earn credit");
+
+    const nodeMatch = report.matchedKeywords.find((m) => m.skill === "Node.js");
+    assert.ok(nodeMatch, "Visible Node.js bullet should earn credit");
+    assert.strictEqual(nodeMatch?.credit, 1.0);
+  });
+
+  it("should exclude entire section when sectionVisibility is set to false", () => {
+    const resumeWithHiddenSection: ResumeDocument = {
+      ...minimalResume,
+      layout: {
+        ...minimalResume.layout,
+        sectionVisibility: {
+          ...minimalResume.layout.sectionVisibility,
+          experience: false, // hidden section
+        },
+      },
+    };
+
+    const jd = "Requirements:\n- Must have React";
+    const report = calculateJdCoverage(resumeWithHiddenSection, jd);
+
+    const reactMatch = report.matchedKeywords.find((m) => m.skill === "React");
+    assert.strictEqual(reactMatch, undefined, "Hidden experience section should not contribute to score");
+  });
+
+  it("should calculate actionMetricDensityPercent accurately from active bullets", () => {
+    const jd = "Requirements:\n- Must have React";
+    const report = calculateJdCoverage(minimalResume, jd);
+    // minimalResume has "Architected microservices using React and TypeScript on AWS."
+    // Contains action verb "Architected", but no metric.
+    assert.strictEqual(typeof report.actionMetricDensityPercent, "number");
+    assert.ok(
+      report.actionMetricDensityPercent !== undefined &&
+        report.actionMetricDensityPercent >= 0 &&
+        report.actionMetricDensityPercent <= 100
+    );
+  });
+
+  it("should accurately score candidate profile against Microsoft Careers ML job with 3.0x must-have and 1.5x preferred weighting", () => {
+    const mlCandidate: ResumeDocument = {
+      ...minimalResume,
+      experience: [
+        {
+          id: "exp-ml",
+          company: "AI Labs",
+          position: "Senior ML Engineer",
+          startDate: "2021-01",
+          endDate: "Present",
+          current: true,
+          bullets: [
+            { id: "b1", text: "Trained large deep learning models using Python and PyTorch on distributed GPU clusters." },
+            { id: "b2", text: "Containerized computer vision pipelines using Docker and deployed on Kubernetes." },
+          ],
+          technologies: ["Python", "PyTorch", "Docker", "Kubernetes"],
+        },
+      ],
+      skills: [
+        {
+          id: "sk-ml",
+          category: "Languages & Tools",
+          skills: ["Python", "C++", "PyTorch", "Docker", "Kubernetes", "Azure"],
+        },
+      ],
+    };
+
+    const msftJd = `
+# Senior Machine Learning Engineer
+Company: Microsoft
+Location: Redmond, WA, US
+
+### Required Qualifications
+• 5+ years experience with Python and C++
+• Deep expertise in PyTorch and Docker
+• Hands-on experience building distributed systems
+
+### Preferred Qualifications
+• Experience deploying machine learning services on Kubernetes and Azure
+• Familiarity with Go or Rust
+    `;
+
+    const report = calculateJdCoverage(mlCandidate, msftJd);
+
+    // Verify Must-Have and Preferred keyword detection
+    assert.ok(report.mustHaveCount >= 3, `Expected at least 3 must-have keywords, got ${report.mustHaveCount}`);
+    assert.ok(report.preferredCount >= 2, `Expected at least 2 preferred keywords, got ${report.preferredCount}`);
+
+    // Verify evidence scoring:
+    // Python, PyTorch, Docker are in bullets -> Credit 1.0 (3.0 weight each)
+    // C++ is in skills list -> Credit 0.6 (3.0 weight)
+    // Kubernetes is in bullets -> Credit 1.0 (1.5 weight)
+    // Azure is in skills list -> Credit 0.6 (1.5 weight)
+    const pythonMatch = report.matchedKeywords.find((m) => m.skill === "Python");
+    assert.strictEqual(pythonMatch?.tier, "must-have");
+    assert.strictEqual(pythonMatch?.credit, 1.0);
+    assert.strictEqual(pythonMatch?.weight, 3.0);
+
+    const cppMatch = report.matchedKeywords.find((m) => m.skill === "C++");
+    assert.strictEqual(cppMatch?.tier, "must-have");
+    assert.strictEqual(cppMatch?.credit, 0.6);
+
+    const k8sMatch = report.matchedKeywords.find((m) => m.skill === "Kubernetes");
+    assert.strictEqual(k8sMatch?.tier, "preferred");
+    assert.strictEqual(k8sMatch?.credit, 1.0);
+    assert.strictEqual(k8sMatch?.weight, 1.5);
+
+    // Overall and category scores must be healthy and positive
+    assert.ok(report.overallScore >= 55, `Overall score should be >=55%, got ${report.overallScore}%`);
+    assert.ok(report.mustHaveScore >= 65, `Must-have score should be >=65%, got ${report.mustHaveScore}%`);
+    assert.ok(report.preferredScore >= 30, `Preferred score should be >=30%, got ${report.preferredScore}%`);
+    assert.ok(report.bulletEvidenceScore >= 50, `Bullet evidence score should be >=50%, got ${report.bulletEvidenceScore}%`);
   });
 });

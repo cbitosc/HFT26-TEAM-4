@@ -57,11 +57,39 @@ export function isPrivateOrReservedIPv4(ip: string): boolean {
   return false;
 }
 
+function parseIPv6Groups(raw: string): number[] | null {
+  let ip = raw.toLowerCase().trim().replace(/^\[|\]$/g, "");
+  if (ip.includes(".")) {
+    const lastColon = ip.lastIndexOf(":");
+    const v4 = ip.slice(lastColon + 1);
+    const parts = v4.split(".").map(Number);
+    if (parts.length === 4 && parts.every((n) => Number.isInteger(n) && n >= 0 && n <= 255)) {
+      const hex =
+        ((parts[0] << 8) | parts[1]).toString(16) +
+        ":" +
+        ((parts[2] << 8) | parts[3]).toString(16);
+      ip = ip.slice(0, lastColon + 1) + hex;
+    }
+  }
+  const parts = ip.split("::");
+  if (parts.length > 2) return null;
+  const left = parts[0] ? parts[0].split(":") : [];
+  const right = parts[1] ? parts[1].split(":") : [];
+  if (parts.length === 2) {
+    const missing = 8 - (left.length + right.length);
+    if (missing < 0) return null;
+    const middle = Array(missing).fill("0");
+    return [...left, ...middle, ...right].map((h) => parseInt(h || "0", 16));
+  }
+  if (left.length !== 8) return null;
+  return left.map((h) => parseInt(h, 16));
+}
+
 /**
- * Validates IPv6 address against loopback, link-local, unique local, and IPv4-mapped ranges.
+ * Validates IPv6 address against loopback, link-local, unique local, IPv4-mapped, 6to4, NAT64, and Teredo ranges.
  */
 export function isPrivateOrReservedIPv6(ip: string): boolean {
-  const normalized = ip.toLowerCase().trim();
+  const normalized = ip.toLowerCase().trim().replace(/^\[|\]$/g, "");
 
   // IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1 or ::ffff:192.168.1.1)
   if (normalized.startsWith("::ffff:")) {
@@ -74,20 +102,42 @@ export function isPrivateOrReservedIPv6(ip: string): boolean {
   // Loopback (::1) and unspecified (::)
   if (normalized === "::1" || normalized === "::") return true;
 
-  // Link-local: fe80::/10 (fe80 through febf)
-  if (
-    normalized.startsWith("fe8") ||
-    normalized.startsWith("fe9") ||
-    normalized.startsWith("fea") ||
-    normalized.startsWith("feb")
-  ) {
+  const groups = parseIPv6Groups(normalized);
+  if (!groups || groups.length !== 8 || !groups.every((n) => Number.isInteger(n) && n >= 0 && n <= 0xffff)) {
     return true;
   }
 
-  // Unique local address: fc00::/7 (fc00 through fdff)
-  if (normalized.startsWith("fc") || normalized.startsWith("fd")) {
-    return true;
+  // :: (unspecified) and ::1 (loopback)
+  if (groups.every((g) => g === 0)) return true;
+  if (groups.slice(0, 7).every((g) => g === 0) && groups[7] === 1) return true;
+
+  // ::ffff:x:y (IPv4-mapped) & ::x:y (IPv4-compatible)
+  if (groups.slice(0, 5).every((g) => g === 0) && (groups[5] === 0xffff || groups[5] === 0)) {
+    const v4 = `${groups[6] >> 8}.${groups[6] & 0xff}.${groups[7] >> 8}.${groups[7] & 0xff}`;
+    return isPrivateOrReservedIPv4(v4);
   }
+  // 2002::/16 (6to4 tunneling)
+  if (groups[0] === 0x2002) {
+    const v4 = `${groups[1] >> 8}.${groups[1] & 0xff}.${groups[2] >> 8}.${groups[2] & 0xff}`;
+    return isPrivateOrReservedIPv4(v4);
+  }
+  // 64:ff9b::/96 (NAT64 well-known prefix)
+  if (groups[0] === 0x64 && groups[1] === 0xff9b && groups.slice(2, 6).every((g) => g === 0)) {
+    const v4 = `${groups[6] >> 8}.${groups[6] & 0xff}.${groups[7] >> 8}.${groups[7] & 0xff}`;
+    return isPrivateOrReservedIPv4(v4);
+  }
+  // 2001:0000::/32 (Teredo tunneling)
+  if (groups[0] === 0x2001 && groups[1] === 0) {
+    const v4 = `${(groups[6] ^ 0xffff) >> 8}.${(groups[6] ^ 0xffff) & 0xff}.${(groups[7] ^ 0xffff) >> 8}.${(groups[7] ^ 0xffff) & 0xff}`;
+    return isPrivateOrReservedIPv4(v4);
+  }
+
+  if ((groups[0] & 0xfe00) === 0xfc00) return true; // ULA fc00::/7
+  if ((groups[0] & 0xffc0) === 0xfe80) return true; // Link-local fe80::/10
+  if ((groups[0] & 0xffc0) === 0xfec0) return true; // Site-local fec0::/10
+  if (groups[0] === 0x2001 && groups[1] === 0xdb8) return true; // Documentation
+  if (groups[0] === 0x100 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0) return true; // Discard
+  if ((groups[0] & 0xff00) === 0xff00) return true; // Multicast
 
   return false;
 }
@@ -178,27 +228,74 @@ export async function validateJobUrl(
     };
   }
 
-  const hostname = parsed.hostname.toLowerCase();
+  // Reject URLs containing credentials
+  if (parsed.username || parsed.password) {
+    return {
+      valid: false,
+      error: "URLs containing credentials are not permitted (SSRF protection).",
+    };
+  }
 
-  // Disallow forbidden internal hostnames
+  // Restrict outbound ports to standard web ports
+  if (parsed.port) {
+    const portNum = parseInt(parsed.port, 10);
+    const ALLOWED_PORTS = [80, 443, 8080, 8443];
+    if (!ALLOWED_PORTS.includes(portNum)) {
+      return {
+        valid: false,
+        error: `Port ${portNum} is not permitted for job scraping (only standard web ports 80, 443, 8080, 8443 are allowed). SSRF protection rejects non-standard ports.`,
+      };
+    }
+  }
+
+  const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "").replace(/\.$/, "");
+
+  // Disallow forbidden internal hostnames, wildcard DNS services, and local TLDs
   const forbiddenHostnames = [
     "localhost",
     "metadata.google.internal",
     "instance-data",
     "metadata",
+    "localtest.me",
+    "lvh.me",
+    "vcap.me",
+    "traefik.me",
   ];
+
+  const forbiddenSuffixes = [
+    ".localhost",
+    ".local",
+    ".internal",
+    ".lan",
+    ".home",
+    ".home.arpa",
+    ".corp",
+    ".test",
+    ".example",
+    ".invalid",
+    ".nip.io",
+    ".sslip.io",
+    ".localtest.me",
+    ".lvh.me",
+    ".vcap.me",
+    ".traefik.me",
+  ];
+
+  const embeddedIpMatch = hostname.match(/\b(\d{1,3})[.-](\d{1,3})[.-](\d{1,3})[.-](\d{1,3})\b/);
+  const hasEmbeddedPrivateIp =
+    embeddedIpMatch &&
+    isPrivateOrReservedIPv4(
+      `${embeddedIpMatch[1]}.${embeddedIpMatch[2]}.${embeddedIpMatch[3]}.${embeddedIpMatch[4]}`
+    );
 
   if (
     forbiddenHostnames.includes(hostname) ||
-    hostname.endsWith(".localhost") ||
-    hostname.endsWith(".local") ||
-    hostname.endsWith(".internal") ||
-    hostname.endsWith(".lan") ||
-    hostname.endsWith(".home.arpa")
+    forbiddenSuffixes.some((sfx) => hostname.endsWith(sfx)) ||
+    hasEmbeddedPrivateIp
   ) {
     return {
       valid: false,
-      error: "Access to localhost, internal hosts, and cloud metadata is blocked (SSRF protection).",
+      error: "Access to localhost, wildcard DNS aliases, internal hosts, and cloud metadata is blocked (SSRF protection).",
     };
   }
 
@@ -228,7 +325,7 @@ export async function validateJobUrl(
         if (isPrivateOrReservedIp(record.address)) {
           return {
             valid: false,
-            error: `Target hostname resolves to private/reserved IP (${record.address}). Request blocked for SSRF protection.`,
+            error: "Target hostname resolves to a private or reserved IP address. Request blocked for SSRF protection.",
           };
         }
       }
@@ -251,7 +348,7 @@ export async function validateJobUrl(
 /**
  * Decodes common HTML entities into readable plain text.
  */
-function decodeHtmlEntities(text: string): string {
+export function decodeHtmlEntities(text: string): string {
   return text
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
@@ -280,27 +377,326 @@ function decodeHtmlEntities(text: string): string {
 }
 
 /**
+ * Tier 3: Structural Post-Processing & Header Repair.
+ * Rescues glued headings, normalizes bullet points to "\n- ", collapses excess newlines,
+ * and strips residual tracker / config noise.
+ */
+export function repairExtractedText(raw: string): string {
+  if (!raw) return "";
+  let text = raw;
+
+  // 1. Repair inline or glued headings that lack preceding newlines
+  // e.g. "systems.Required Qualifications: 5+ years..." -> "systems.\n\n### Required Qualifications:\n5+ years..."
+  const headingGluedPatterns = [
+    /([^\n#])\s*(\b(?:Required|Minimum|Basic|Core|Mandatory|Key)\s+(?:Qualifications|Requirements|Skills|Experience)\s*:?)/gi,
+    /([^\n#])\s*(\b(?:Preferred|Desired|Additional|Bonus|Optional)\s+(?:Qualifications|Requirements|Skills|Experience)\s*:?)/gi,
+    /([^\n#])\s*(\b(?:Nice\s+to\s+have|Bonus\s+points|What\s+we'd\s+love\s+to\s+see)\s*:?)/gi,
+    /([^\n#])\s*(\b(?:Core\s+|Primary\s+|Key\s+)?Responsibilities\s*:?)/gi,
+    /([^\n#])\s*(\bWhat\s+You(?:'ll|\s+will)\s+(?:Do|Need|Bring)\s*:?)/gi,
+  ];
+
+  for (const pattern of headingGluedPatterns) {
+    text = text.replace(pattern, "$1\n\n### $2\n\n");
+  }
+
+  // 2. Format standalone headings with markdown prefix if missing
+  text = text.replace(
+    /^(\s*)(?:#+\s*)?(Required\s+Qualifications|Preferred\s+Qualifications|Qualifications|Requirements|Responsibilities|Nice\s+to\s+Have|Key\s+Qualifications|Basic\s+Qualifications|Minimum\s+Qualifications)\s*:?/gim,
+    "\n\n### $2\n"
+  );
+
+  // 3. Normalize bullet points at line starts (-, •, *, +, ·, ‣, ⁃) to "• "
+  text = text.replace(/^[ \t]*[-•*+·‣⁃][ \t]*/gm, "• ");
+
+  // 4. Isolate glued inline bullet symbols (•, ·, ‣, ⁃) but not hyphens/dashes between words
+  text = text.replace(/([^\n])\s+[•·‣⁃]\s+/g, "$1\n• ");
+
+  // 5. Collapse 3+ newlines to "\n\n"
+  text = text.replace(/\n{3,}/g, "\n\n");
+
+  return text.trim();
+}
+
+/**
+ * Strips HTML formatting, structural tags, and entities to produce clean text.
+ */
+export function cleanHtmlToText(raw: string): string {
+  if (!raw) return "";
+  let text = raw;
+  if (text.includes("&lt;") || text.includes("&gt;") || text.includes("&amp;")) {
+    text = decodeHtmlEntities(text);
+  }
+
+  // Convert bold/strong headings to markdown headings
+  text = text.replace(
+    /<(?:strong|b)\b[^>]*>\s*(Required\s+Qualifications|Preferred\s+Qualifications|Qualifications|Requirements|Responsibilities|Nice\s+to\s+Have|Key\s+Qualifications|Basic\s+Qualifications|Minimum\s+Qualifications|What\s+You(?:'ll|\s+will)\s+(?:Do|Need|Bring))\s*:?\s*<\/(?:strong|b)>/gi,
+    "\n\n### $1\n\n"
+  );
+
+  text = text
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n• ")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<\/section>/gi, "\n\n")
+    .replace(/<\/article>/gi, "\n\n")
+    .replace(/<\/h[1-6]>/gi, "\n\n")
+    .replace(/<h[1-6][^>]*>/gi, "\n\n### ")
+    .replace(/<\/tr>/gi, "\n")
+    .replace(/<\/t[dh]>/gi, " ");
+
+  text = text.replace(/<[^>]+>/g, "");
+  text = decodeHtmlEntities(text);
+
+  const lines = text.split("\n");
+  const filtered: string[] = [];
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+    if (!trimmed || trimmed === "•" || trimmed === "-" || trimmed === "*") {
+      if (filtered.length > 0 && filtered[filtered.length - 1] !== "") {
+        filtered.push("");
+      }
+      continue;
+    }
+    filtered.push(trimmed);
+  }
+  const joined = filtered.join("\n").trim();
+  return repairExtractedText(joined);
+}
+
+/**
+ * Extracts structured job description from schema.org JobPosting in JSON-LD.
+ * Used by Microsoft Careers, Greenhouse, Lever, Workday, Ashby, and top ATS platforms.
+ */
+export function extractFromLdJson(html: string): { title: string; text: string } | null {
+  const scriptRegex = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = scriptRegex.exec(html)) !== null) {
+    const content = match[1].trim();
+    try {
+      const parsed = JSON.parse(content);
+      const candidates: any[] = Array.isArray(parsed)
+        ? parsed
+        : parsed["@graph"] && Array.isArray(parsed["@graph"])
+        ? parsed["@graph"]
+        : [parsed];
+
+      for (const item of candidates) {
+        if (!item || typeof item !== "object") continue;
+        const type = item["@type"];
+        const isJobPosting =
+          type === "JobPosting" ||
+          (Array.isArray(type) && type.includes("JobPosting")) ||
+          type === "http://schema.org/JobPosting" ||
+          type === "https://schema.org/JobPosting" ||
+          type === "schema:JobPosting";
+
+        if (isJobPosting) {
+          const title = item.title || item.name || "";
+          const company =
+            typeof item.hiringOrganization === "object" && item.hiringOrganization
+              ? item.hiringOrganization.name || ""
+              : typeof item.hiringOrganization === "string"
+              ? item.hiringOrganization
+              : "";
+
+          let location = "";
+          if (item.jobLocation) {
+            if (typeof item.jobLocation.address === "string") {
+              location = item.jobLocation.address;
+            } else if (typeof item.jobLocation.address === "object" && item.jobLocation.address) {
+              const addr = item.jobLocation.address;
+              const locality = addr.addressLocality || "";
+              const region = addr.addressRegion || "";
+              const country =
+                typeof addr.addressCountry === "object" && addr.addressCountry
+                  ? addr.addressCountry.name || ""
+                  : typeof addr.addressCountry === "string"
+                  ? addr.addressCountry
+                  : "";
+              location = [locality, region, country].filter(Boolean).join(", ");
+            } else if (item.jobLocation.name) {
+              location = item.jobLocation.name;
+            }
+          }
+
+          const parts: string[] = [];
+          if (title) parts.push(`# ${title}`);
+          if (company) parts.push(`Company: ${company}`);
+          if (location) parts.push(`Location: ${location}`);
+          if (item.employmentType) {
+            const emp = Array.isArray(item.employmentType)
+              ? item.employmentType.join(", ")
+              : String(item.employmentType);
+            parts.push(`Employment Type: ${emp}`);
+          }
+          if (parts.length > 0) parts.push("");
+
+          const desc = cleanHtmlToText(item.description || "");
+          if (desc) {
+            parts.push(desc);
+          }
+
+          if (item.responsibilities) {
+            const resp = cleanHtmlToText(
+              Array.isArray(item.responsibilities)
+                ? item.responsibilities.join("\n• ")
+                : String(item.responsibilities)
+            );
+            if (resp && !desc.includes(resp.slice(0, 50))) {
+              parts.push("\n### Responsibilities\n" + resp);
+            }
+          }
+
+          if (item.qualifications || item.experienceRequirements) {
+            const qual = cleanHtmlToText(
+              String(item.qualifications || item.experienceRequirements)
+            );
+            if (qual && !desc.includes(qual.slice(0, 50))) {
+              parts.push("\n### Qualifications\n" + qual);
+            }
+          }
+
+          if (item.skills) {
+            const skills = cleanHtmlToText(
+              Array.isArray(item.skills) ? item.skills.join(", ") : String(item.skills)
+            );
+            if (skills && !desc.includes(skills.slice(0, 50))) {
+              parts.push("\n### Skills\n" + skills);
+            }
+          }
+
+          const combined = repairExtractedText(parts.join("\n"));
+          if (combined.length >= 80) {
+            return { title, text: combined };
+          }
+        }
+      }
+    } catch {
+      // Ignore JSON parse errors in malformed script tags
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Extracts structured job description from Next.js __NEXT_DATA__ hydration props if available.
+ */
+export function extractFromNextData(html: string): { title: string; text: string } | null {
+  const match = html.match(/<script\b[^>]*id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i);
+  if (!match) return null;
+
+  try {
+    const data = JSON.parse(match[1]);
+    const pageProps = data.props?.pageProps;
+    if (!pageProps || typeof pageProps !== "object") return null;
+
+    const job =
+      pageProps.job ||
+      pageProps.jobPosting ||
+      pageProps.jobDetail ||
+      pageProps.position ||
+      pageProps.listing;
+
+    if (job && typeof job === "object") {
+      const title = job.title || job.name || job.jobTitle || "";
+      const desc = cleanHtmlToText(job.description || job.jobDescription || job.content || "");
+      const parts: string[] = [];
+      if (title) parts.push(`# ${title}`);
+      if (job.company || job.companyName) {
+        parts.push(`Company: ${job.company || job.companyName}`);
+      }
+      if (job.location) {
+        parts.push(
+          `Location: ${typeof job.location === "string" ? job.location : job.location.name || ""}`
+        );
+      }
+      if (parts.length > 0) parts.push("");
+      if (desc) parts.push(desc);
+
+      const combined = repairExtractedText(parts.join("\n"));
+      if (combined.length >= 80) {
+        return { title, text: combined };
+      }
+    }
+  } catch {
+    // Ignore invalid JSON in __NEXT_DATA__
+  }
+
+  return null;
+}
+
+/**
  * Strips markup, scripts, and navigation clutter from raw HTML,
  * extracting clean, readable job description text and title.
  */
 export function extractReadableText(html: string): { title: string; text: string } {
-  // Extract document title before stripping
+  // Priority 1: Schema.org JobPosting in JSON-LD (standard for modern ATS & job boards)
+  const ldResult = extractFromLdJson(html);
+  if (ldResult && ldResult.text.length >= 80) {
+    return ldResult;
+  }
+
+  // Priority 2: Next.js __NEXT_DATA__ hydration state
+  const nextDataResult = extractFromNextData(html);
+  if (nextDataResult && nextDataResult.text.length >= 80) {
+    return nextDataResult;
+  }
+
+  // Priority 3: Fallback to Semantic Container or HTML body extraction (Tier 2)
   let title = "";
   const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
   if (titleMatch && titleMatch[1]) {
     title = decodeHtmlEntities(titleMatch[1].trim());
   }
 
+  // Target semantic job containers if present
+  let sourceHtml = html;
+  const containerMatch = html.match(
+    /<(main|article|section|div)\b[^>]*(?:id|class)=["'][^"']*(?:job-description|jobDescription|job-details|jobDetails|posting-description|description__text|career-job-desc|job-body|content-body|job_description)[^"']*["'][\s\S]*?<\/\1>/i
+  );
+  if (containerMatch && containerMatch[0].length >= 150) {
+    sourceHtml = containerMatch[0];
+  }
+
   // Remove non-content tags and their nested contents
-  let cleaned = html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-    .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, "")
-    .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, "")
-    .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, "")
-    .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, "")
-    .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, "")
-    .replace(/<aside\b[^<]*(?:(?!<\/aside>)<[^<]*)*<\/aside>/gi, "");
+  let cleaned = sourceHtml
+    .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+    .replace(/<noscript\b[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<svg\b[\s\S]*?<\/svg>/gi, "")
+    .replace(/<template\b[\s\S]*?<\/template>/gi, "")
+    .replace(/<iframe\b[\s\S]*?<\/iframe>/gi, "")
+    .replace(/<header\b[\s\S]*?<\/header>/gi, "")
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, "")
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, "")
+    .replace(/<aside\b[\s\S]*?<\/aside>/gi, "");
+
+  // Strip hidden elements and data blocks (e.g. style="display:none", hidden, aria-hidden="true", data-nosnippet)
+  cleaned = cleaned.replace(
+    /<(code|div|span|section|pre|p|textarea|article)\b[^>]*style=["'][^"']*(?:display\s*:\s*none|visibility\s*:\s*hidden)[^"']*["'][\s\S]*?<\/\1>/gi,
+    ""
+  );
+  cleaned = cleaned.replace(
+    /<(code|div|span|section|pre|p|textarea|article)\b[^>]*(?:\bhidden\b|aria-hidden=["']true["'])[\s\S]*?<\/\1>/gi,
+    ""
+  );
+  cleaned = cleaned.replace(
+    /<(code|div|span|section|pre|p|textarea|article)\b[^>]*data-nosnippet[\s\S]*?<\/\1>/gi,
+    ""
+  );
+  // Strip code and pre elements (which on career sites hold serialized configs / state dumps)
+  cleaned = cleaned.replace(/<code\b[\s\S]*?<\/code>/gi, "");
+  cleaned = cleaned.replace(/<pre\b[\s\S]*?<\/pre>/gi, "");
+
+  // Convert bold headings to markdown headings
+  cleaned = cleaned.replace(
+    /<(?:strong|b)\b[^>]*>\s*(Required\s+Qualifications|Preferred\s+Qualifications|Qualifications|Requirements|Responsibilities|Nice\s+to\s+Have|Key\s+Qualifications|Basic\s+Qualifications|Minimum\s+Qualifications|What\s+You(?:'ll|\s+will)\s+(?:Do|Need|Bring))\s*:?\s*<\/(?:strong|b)>/gi,
+    "\n\n### $1\n\n"
+  );
 
   // Convert structural tags to text formatting
   cleaned = cleaned
@@ -328,10 +724,30 @@ export function extractReadableText(html: string): { title: string; text: string
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
-    if (!line) {
+    if (!line || line === "•" || line === "-" || line === "*") {
       if (filteredLines.length > 0 && filteredLines[filteredLines.length - 1] !== "") {
         filteredLines.push("");
       }
+      continue;
+    }
+
+    // Filter out serialized JSON dumps and configurations
+    if (
+      (line.startsWith("{") && line.endsWith("}")) ||
+      (line.startsWith("[{") && line.endsWith("}]")) ||
+      line.includes('"themeOptions":') ||
+      line.includes('"varTheme":') ||
+      line.includes('"navbarData":') ||
+      line.includes('"questionsApply') ||
+      line.includes("careers-analyticskey") ||
+      line.includes('"customTheme":') ||
+      line.includes('"jobcard-')
+    ) {
+      continue;
+    }
+
+    // Filter out UUID tracking strings
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:-[0-9]+)?$/i.test(line)) {
       continue;
     }
 
@@ -350,7 +766,8 @@ export function extractReadableText(html: string): { title: string; text: string
     filteredLines.push(line);
   }
 
-  const resultText = filteredLines.join("\n").trim();
+  const resultText = repairExtractedText(filteredLines.join("\n"));
+  return { title, text: resultText };
   return { title, text: resultText };
 }
 
@@ -475,6 +892,22 @@ function fetchPinned(
       const headersHelper = {
         get: (name: string) => headersMap.get(name.toLowerCase()) || null,
       };
+
+      // SEC-06: Check Content-Type header BEFORE buffering to avoid wasting memory on non-HTML responses.
+      const earlyContentType = headersHelper.get("content-type") || "";
+      if (
+        earlyContentType &&
+        !earlyContentType.includes("text/html") &&
+        !earlyContentType.includes("text/plain") &&
+        !earlyContentType.includes("application/xhtml")
+      ) {
+        req.destroy();
+        return reject(
+          new Error(
+            `Unsupported content type "${earlyContentType.split(";")[0].trim()}". Only web pages (HTML/text) can be scraped.`
+          )
+        );
+      }
 
       let totalBytes = 0;
       const chunks: Buffer[] = [];
