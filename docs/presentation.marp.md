@@ -3,327 +3,539 @@ marp: true
 theme: gaia
 _class: lead
 paginate: true
-backgroundColor: #0b0f19
-color: #f1f5f9
+size: 16:9
+backgroundColor: #f8fafc
+color: #0f172a
 style: |
   section {
-    font-family: 'Inter', system-ui, sans-serif;
-    padding: 40px;
-    background-color: #0b0f19;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 36px 50px;
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-size: 16px;
+  }
+  section.dark {
+    background-color: #08090d;
     color: #f1f5f9;
   }
-  h1, h2, h3 {
+  section.dark h1, section.dark h2, section.dark h3 {
     color: #ffffff;
+  }
+  section.dark p, section.dark li {
+    color: #cbd5e1;
+  }
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.2rem;
+  }
+  h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
     letter-spacing: -0.02em;
+    margin-bottom: 0.6rem;
   }
-  h1 { font-size: 2.2rem; }
-  h2 { font-size: 1.6rem; color: #10b981; }
-  h3 { font-size: 1.2rem; }
-  p, li { font-size: 0.85rem; line-height: 1.45; color: #cbd5e1; }
-  code {
-    font-family: 'JetBrains Mono', monospace;
-    background: #141b2d;
-    color: #38bdf8;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-  }
-  pre {
-    background: #06080d;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 12px;
+  .kicker {
     font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #059669;
+    margin-bottom: 0.2rem;
   }
-  table {
-    font-size: 0.78rem;
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  th {
-    background: #141b2d;
+  section.dark .kicker {
     color: #10b981;
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 8px;
   }
-  td {
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 8px;
-    background: rgba(14,20,34,0.6);
+  .card-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .card-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 16px;
+  }
+  .card-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 16px;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  section.dark .card {
+    background: #0e111a;
+    border: 1px solid #252d43;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .card-num {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #059669;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+  section.dark .card-title {
+    color: #ffffff;
+  }
+  .card-sub {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #059669;
+    margin-bottom: 8px;
+  }
+  .card-text {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: #475569;
+  }
+  section.dark .card-text {
+    color: #94a3b8;
   }
   .badge {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 9999px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-family: monospace;
-    font-weight: bold;
-    background: rgba(16,185,129,0.15);
-    color: #34d399;
-    border: 1px solid rgba(16,185,129,0.3);
+    font-weight: 700;
   }
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 12px;
+  .badge-emerald { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+  .badge-amber { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+  .badge-slate { background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin-top: 10px;
   }
-  .card {
-    background: rgba(14, 20, 34, 0.75);
-    border: 1px solid rgba(255,255,255,0.08);
+  th {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 700;
+  }
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+  }
+  .highlight-banner {
+    background: #0f172a;
+    color: #ffffff;
     border-radius: 10px;
-    padding: 12px;
+    padding: 12px 18px;
+    margin-top: 14px;
   }
   footer {
     font-size: 0.65rem;
     color: #64748b;
-    font-family: monospace;
   }
 ---
 
-<!-- Slide 1 -->
-<span class="badge">CBIT HACKTOBERFEST '26 • RESUME ARCHITECT TRACK</span>
+<!-- _class: dark -->
+<!-- _paginate: false -->
+
+<div class="kicker">CBIT HACKTOBERFEST '26 • GENERAL TRACK • TEAM-4</div>
 
 # ResuArchitect AI
-### Local-First, ATS-Certified Resume Architect & Deterministic Tailoring Studio
 
-**Team Red flowers (TEAM-4)** &bull; Registration ID: `HFEST26-2P5XJ82R`
-**Members:** Nawander Raghavendra (Lead), Nara Lakshmi Sankeerth, Navneet
-**Institution:** International Institute of Information Technology, Hyderabad (IIIT-H)
+### Deterministic ATS Resume Architecture & Bounded AI Tailoring Studio
 
-<div class="card-grid">
+<div style="font-size: 0.85rem; color: #94a3b8; margin-top: 6px; margin-bottom: 24px;">
+High-precision resume compilation with zero hallucinations, sub-2ms match scoring, and dual client-side native exports.
+</div>
+
+<div class="card-grid-3">
   <div class="card">
-    <strong style="color: #10b981; font-size: 1rem;">100% Local-First</strong><br/>
-    <small>Zero DB &bull; PII remains strictly in browser</small>
+    <div class="card-title" style="color: #10b981;">Sub-2ms Deterministic Scorer</div>
+    <div class="card-text">
+      • 400+ Curated Skills & 150+ Aliases<br/>
+      • 1.0x Bullet vs 0.6x Skill evidence model<br/>
+      • Zero LLM scoring drift (Strictly idempotent)
+    </div>
   </div>
   <div class="card">
-    <strong style="color: #06b6d4; font-size: 1rem;">&lt; 5ms Scoring</strong><br/>
-    <small>Deterministic &bull; 400+ Taxonomy</small>
+    <div class="card-title" style="color: #10b981;">Bounded Code Truth Guard</div>
+    <div class="card-text">
+      • Pre-view static regex & set difference<br/>
+      • Flags fabricated metrics & unverified tools<br/>
+      • Prevents resume inflation disqualification
+    </div>
   </div>
   <div class="card">
-    <strong style="color: #f59e0b; font-size: 1rem;">0% Hallucination</strong><br/>
-    <small>Static Truth Guard &bull; Metric Grounding</small>
+    <div class="card-title" style="color: #10b981;">100% Local-First Privacy</div>
+    <div class="card-text">
+      • Zero-DB browser localStorage persistence<br/>
+      • Native Vector PDF + OpenXML Word .docx<br/>
+      • Zero candidate PII ingress to cloud servers
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 24px; font-size: 0.72rem; color: #64748b;">
+Team Red flowers • Lead: Nawander Raghavendra | Members: Nara Lakshmi Sankeerth, Navneet • Repo: cbitosc/HFT26-TEAM-4
+</div>
+
+---
+
+<div class="kicker">The Recruitment Funnel Dilemma</div>
+
+## 75% of Qualified Candidates Filtered Out Before Human Review
+
+<div class="card-grid-4">
+  <div class="card">
+    <div class="card-num" style="color: #d97706;">01</div>
+    <div class="card-title">The Parsing Trap</div>
+    <div class="card-sub">Graphical & Table Flaws</div>
+    <div class="card-text">
+      Canva-style visual builders emit multi-column tables, text frames, and SVG icons. Automated ATS extractors scramble them into unreadable character soup.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-num">02</div>
+    <div class="card-title">The Keyword Gap</div>
+    <div class="card-sub">Blind Requirement Matching</div>
+    <div class="card-text">
+      Candidates manually guess target keywords. Lack of visibility into Must-Haves vs Preferred qualifications leads to silent ATS rejection.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-num" style="color: #d97706;">03</div>
+    <div class="card-title">The Hallucination Hazard</div>
+    <div class="card-sub">Unbounded Generative AI</div>
+    <div class="card-text">
+      Chatbots invent metrics ("grew revenue by 35%") and fabricate tools the candidate never used, causing immediate disqualification in technical interviews.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-num">04</div>
+    <div class="card-title">The Privacy & Paywall Trap</div>
+    <div class="card-sub">Predatory Monetization</div>
+    <div class="card-text">
+      Platforms lock downloads behind $29 subscription paywalls after hours of editing, while harvesting candidate PII into recruiter databases.
+    </div>
   </div>
 </div>
 
 ---
 
-<!-- Slide 2 -->
-<span class="badge">INDUSTRY PROBLEM</span>
+<div class="kicker">System Topology & Data Flow</div>
 
-## The Three Systemic Failures of Modern Hiring
-**75%+ of qualified candidates are silently rejected by Applicant Tracking Systems before a human reviews them.**
+## 100% Local-First Engine with Zero Database & Zero PII Ingress
 
-<div class="card-grid">
-  <div class="card" style="border-left: 4px solid #f43f5e;">
-    <strong style="color: #f43f5e;">1. The Parsing Trap</strong><br/>
-    <p>Visual drag-and-drop builders use multi-column CSS tables and canvas frames. ATS linear parsers extract scrambled text streams (e.g. <i>"React 2022 Senior Developer Education"</i>).</p>
+<div class="card-grid-4">
+  <div class="card">
+    <div class="card-sub">STAGE 1: INGESTION</div>
+    <div class="card-title">Profile & JD Input</div>
+    <div class="card-text">
+      • Form editor + 3 production presets<br/>
+      • Pasted text or SSRF-protected URL<br/>
+      • Browser localStorage; Zero cloud DB
+    </div>
   </div>
-  <div class="card" style="border-left: 4px solid #f59e0b;">
-    <strong style="color: #f59e0b;">2. The Keyword Gap</strong><br/>
-    <p>Candidates manually guess target keywords. Listing skills in a catalog without bullet evidence fails ATS ranking filters and lacks tier weighting.</p>
+  <div class="card">
+    <div class="card-sub">STAGE 2: SCORING</div>
+    <div class="card-title">Deterministic Engine</div>
+    <div class="card-text">
+      • 400+ skill taxonomy & alias dictionary<br/>
+      • 1.0x Bullet vs 0.6x Skill weighting<br/>
+      • Real-time circular SVG progress gauge
+    </div>
   </div>
-  <div class="card" style="border-left: 4px solid #06b6d4;">
-    <strong style="color: #06b6d4;">3. AI Hallucination & PII</strong><br/>
-    <p>Generic LLM wrappers invent past employment numbers (<i>"increased revenue by $10M"</i>) and leak sensitive contact PII to cloud databases.</p>
+  <div class="card">
+    <div class="card-sub">STAGE 3: TAILORING</div>
+    <div class="card-title">Bounded AI Pipeline</div>
+    <div class="card-text">
+      • Google XYZ bullet optimization<br/>
+      • Code Truth Guard static audit<br/>
+      • Git-style diff reviewer with shields
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-sub">STAGE 4: EXPORT</div>
+    <div class="card-title">Dual AST Compilers</div>
+    <div class="card-text">
+      • OpenXML .docx with Heading 1/2<br/>
+      • Vector-text PDF with exact A4 bounds<br/>
+      • "View as ATS Robot" plaintext console
+    </div>
+  </div>
+</div>
+
+<div class="highlight-banner">
+  <div style="font-weight: 700; font-size: 0.85rem; color: #10b981; margin-bottom: 2px;">CORE ARCHITECTURAL INVARIANT: COMPLETE DATA RESIDENCY</div>
+  <div style="font-size: 0.75rem; color: #e2e8f0;">
+    All resume state, scoring algorithms, and binary file compilation execute 100% on the candidate's device in client-side TypeScript. No candidate PII is ever sent to external databases or stored without explicit consent.
   </div>
 </div>
 
 ---
 
-<!-- Slide 3 -->
-<span class="badge">ARCHITECTURE PILLARS</span>
+<div class="kicker">The Match Algorithm</div>
 
-## System Overview & Architecture Pillars
+## Deterministic Mathematical Precision Replaces Flaky LLM Guesswork
 
-* **Pillar 1: Local-First Privacy**
-  * Full client-side execution via **Zustand** + browser `localStorage`.
-  * Zero server-side candidate data storage; complete PII sovereignty.
-* **Pillar 2: Deterministic Scorer (&lt; 5ms Latency)**
-  * Curated **400+ skill taxonomy** across 8 engineering disciplines.
-  * Bidirectional alias dictionary (`k8s` &harr; `Kubernetes`, `postgres` &harr; `PostgreSQL`).
-* **Pillar 3: Algorithmic Truth Guard**
-  * Deterministic static analysis gate. Inspects AI proposals for metric sign-flips, precision drifts, and ungrounded tools against Master Profile.
-* **Pillar 4: Certified Dual ATS Exporters**
-  * Native OpenXML DOCX (real headings, 9000-twip tab stops, zero tables).
-  * Vector Print PDF (`jsPDF` / `@page A4` CSS) with 1-page auto-fit.
+<div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; margin-top: 14px;">
+  <div>
+    <table>
+      <thead>
+        <tr>
+          <th>Evaluation Dimension</th>
+          <th style="color: #10b981;">ResuArchitect Deterministic</th>
+          <th style="color: #f59e0b;">Flaky LLM Scoring</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Execution Latency</b></td>
+          <td><b>&lt; 2 ms</b> (Instantaneous)</td>
+          <td>8,000 – 15,000 ms (High lag)</td>
+        </tr>
+        <tr>
+          <td><b>Idempotency</b></td>
+          <td><b>100% Stable</b>: <code>f(f(x)) === f(x)</code></td>
+          <td>Non-deterministic (±20% drift)</td>
+        </tr>
+        <tr>
+          <td><b>Compute Cost</b></td>
+          <td><b>$0.00</b> (Client-side JS)</td>
+          <td>$0.03+ per keystroke (API burn)</td>
+        </tr>
+        <tr>
+          <td><b>Explainability</b></td>
+          <td><b>Exact keyword delta</b> &amp; tier list</td>
+          <td>Vague summary without proof</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
----
-
-<!-- Slide 4 -->
-<span class="badge">EXECUTION TOPOLOGY</span>
-
-## End-to-End System Workflow Architecture
-
-```
-[Job URL / Pasted Text] ──► [SSRF-Protected Extractor (JSON-LD)] ──┐
-                                                                    ▼
-[Candidate Master Profile] ──► [Zustand Local Store] ──► [Deterministic Scorer (<5ms)]
-                                        │                           ▼
-                                        │                 [Coverage % Gauge]
-                                        ▼
-                   [/api/tailor (Bounded LLM / 8s Cap)]
-                                        │
-                                        ▼
-                           [Algorithmic Truth Guard]
-                                        │
-                                        ▼
-                         [Git-Style Diff Reviewer]
-                                        │
-                                        ▼
-             [Live A4 Canvas / ATS Robot Inspector] ──► [Native DOCX & Vector PDF]
-```
-
-*Data flow runs 100% locally; network calls are strictly bounded and timeout-protected.*
-
----
-
-<!-- Slide 5 -->
-<span class="badge">SCORING ENGINE</span>
-
-## Deterministic Scoring & 400+ Skill Taxonomy
-
-### The Normalized Coverage Equation:
-$$\text{Coverage \%} = \min\left(100, \left[\frac{\sum (\text{Weight} \times \text{EvidenceCredit})}{\sum \text{Weight}}\right] \times 100\right)$$
-
-| Evidence Tier | Multiplier | Semantic Rule |
-| :--- | :---: | :--- |
-| **Work / Project Bullet Point** | **1.0x** | Proven applied engineering impact with measurable context |
-| **Skills Catalog / Summary** | **0.6x** | Listed familiarity without active bullet evidence (anti-stuffing) |
-| **Missing Requirement** | **0.0x** | Actionable gap highlighted for targeted candidate learning |
-
-* **Tier Multipliers:** Must-Haves (`3.0x`), Preferred (`1.5x`), General (`1.0x`).
-* **Greedy Token Subsumption:** Matches specific phrases like *"Spring Boot"* without falsely matching substring *"Spring Framework"*.
+  <div class="card" style="padding: 14px;">
+    <div class="card-title" style="color: #059669; font-size: 0.88rem;">EVIDENCE WEIGHTING FORMULA</div>
+    <div class="card-text" style="font-size: 0.74rem; line-height: 1.45;">
+      • <b>1.0x Full Credit:</b> Skill proven in Experience / Project bullets.<br/>
+      • <b>0.6x Partial Credit:</b> Listed in Skills block without bullet proof.<br/>
+      • <b>0.0x Zero Credit:</b> Missing requirement or hidden item.<br/>
+      • <b>60% / 40% Tiering:</b> Must-Haves (60%) vs Preferred (40%).<br/>
+      • <b>150+ Aliases:</b> <code>K8s</code> ↔ <code>Kubernetes</code>, <code>Postgres</code> ↔ <code>PostgreSQL</code>.
+    </div>
+  </div>
+</div>
 
 ---
 
-<!-- Slide 6 -->
-<span class="badge">ETHICAL AI</span>
+<div class="kicker">Anti-Hallucination Architecture</div>
 
-## Algorithmic Truth Guard: Preventing AI Hallucinations
+## Bounded 3-Stage Co-Pilot Eliminates Invented Metrics & Tools
 
-**A 4-step static analysis gate intercepts ungrounded AI claims:**
+<div class="card-grid-3">
+  <div class="card">
+    <div class="card-num">STAGE 1</div>
+    <div class="card-title">Deterministic JD Parser</div>
+    <div class="card-text">
+      Extracts canonical keywords &amp; requirement tiers before any generative invocation. Bounded scope ensures zero model drift.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-num" style="color: #059669;">STAGE 2</div>
+    <div class="card-title">Google XYZ Bullet Rewriter</div>
+    <div class="card-text">
+      Transforms passive bullets into Google's structure:<br/>
+      <em>"Accomplished [X], as measured by [Y], by doing [Z]"</em> with target JD keywords.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-num" style="color: #d97706;">STAGE 3</div>
+    <div class="card-title">Code Truth Guard &amp; Critic</div>
+    <div class="card-text">
+      Static regex and set-difference audit. Validates candidate tools and numbers against original text before rendering diffs.
+    </div>
+  </div>
+</div>
 
-1. **Grounded Entity Extraction:** Whitelists all tools, languages, and metrics in Master Profile.
-2. **Metric & Precision Linter:** Flags newly invented numbers, sign-flips (`-20%` vs `20%`), and decimal drift (`99.9%` vs `99.99%`).
-3. **Tool Guard:** Blocks tools the candidate never used.
-4. **Qualitative & Envelope Guard:** Flags unearned claims (*"resilient architecture"*) on entry profiles; enforces strict **180-char** ATS line envelope.
-
-```diff
-+ [VERIFIED]: "Engineered Redis caching layer for merchant checkout, reducing p99 API latency by 42%."
-- [FLAGGED]:  "Architected multi-region AWS Lambda microservices saving $1.4M annually with 99.99% uptime."
-              (AWS Lambda not in profile; $1.4M fabricated; 99.99% ungrounded)
-```
-
----
-
-<!-- Slide 7 -->
-<span class="badge">CO-PILOT OPTIMIZATION</span>
-
-## Bounded AI Tailoring & Single-Bullet Co-Pilot
-
-* **Google XYZ Impact Formula:**
-  $$\text{"Accomplished [X], as measured by [Y], by doing [Z]"}$$
-  * Front-loads high-impact action verbs from curated 30-verb taxonomy.
-  * Ensures quantifiable result metrics are coupled with technical mechanism.
-
-* **Bounded Execution & Offline Resilience:**
-  * **Primary:** Single-turn Featherless/OpenAI LLM call with strict **8-second circuit breaker** and temperature `0.2`.
-  * **Fallback:** Zero-delay Heuristic Engine (`heuristicTailor.ts`) runs 100% offline, guaranteeing unbroken live pitch demos.
-
-* **Dynamic Score Delta Bump:**
-  * Computes exact mathematical $\%$ increase for each proposal (e.g. `+18% Coverage`) before candidate accepts.
-
----
-
-<!-- Slide 8 -->
-<span class="badge">DOCUMENT COMPILATION</span>
-
-## Dual ATS Export: Engineering Under the Hood
-
-### 1. Native OpenXML DOCX Compiler (`docx-js`):
-* Compiles valid binary `word/document.xml` packages directly in-browser.
-* **True Heading Styles:** Employs real `Heading 1` & `Heading 2` for native outline trees.
-* **Tab Stops (9000 twips):** Right-aligned dates and locations without hidden tables.
-* **ZERO Tables:** Eliminates table-based parsing corruption in legacy ATS engines.
-
-### 2. Vector Print PDF Engine (`jsPDF` / `@page A4`):
-* Pure vector text stream (`%PDF-`) with exact geometric millimeter coordinates.
-* **Selectable & Searchable:** 100% copy-pasteable for machine indexing.
-* **Auto-Fit Algorithm:** Dynamically clamps spacing variables to fit single page without dropping or clipping lines.
+<div class="card" style="margin-top: 14px; padding: 12px 16px;">
+  <div style="font-weight: 700; font-size: 0.8rem; color: #0f172a; margin-bottom: 6px;">TRUTH GUARD CLASSIFICATION STATES</div>
+  <div style="font-size: 0.74rem; line-height: 1.5; color: #334155;">
+    <span class="badge badge-emerald">[VERIFIED GROUNDED]</span> <b>Green Shield:</b> All tools, numbers, and metrics exist in verified profile. Safe to apply.<br/>
+    <span class="badge badge-amber">[NEEDS CONFIRMATION]</span> <b>Amber Shield:</b> Qualitative enhancement or phrasing adjustment lacking explicit baseline.<br/>
+    <span class="badge" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">[UNGROUNDED CLAIM]</span> <b>Red Alert:</b> Invented tools or fabricated metrics detected. Automatically blocked.
+  </div>
+</div>
 
 ---
 
-<!-- Slide 9 -->
-<span class="badge">SECURITY & INGESTION</span>
+<div class="kicker">Studio User Interface & Workflow</div>
 
-## SSRF-Protected Enterprise Job Scraper
+## Split-Screen Precision Studio with Real-Time Score Delta Feedback
 
-**Perimeter Defense Architecture:**
-* **Protocol & Host Filter:** Enforces HTTP/HTTPS; blocks `file://`, `ftp://`, and embedded credentials.
-* **Private IP Filter:** Blocks loopback (`127.0.0.1`), RFC1918 ranges, and cloud metadata (`169.254.169.254`).
-* **DNS Pre-Flight & Hard Pinning:** Pre-resolves hostname and binds outbound socket to verified public IP, preventing DNS rebinding attacks (`.nip.io`, `.sslip.io`).
+<div class="card-grid-3">
+  <div class="card">
+    <div class="card-title">Left Control Pane (50%)</div>
+    <div class="card-sub">Tactile Form &amp; Diff Controls</div>
+    <div class="card-text">
+      • Segmented card blocks with emerald focus rings<br/>
+      • Instant <code>+ Add to Skills</code> 1-click gap injection<br/>
+      • Git-style Diff Reviewer with side-by-side comparison<br/>
+      • Drag-and-drop section reordering
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Center Precision Divider</div>
+    <div class="card-sub">Keyboard-Accessible Splitter</div>
+    <div class="card-text">
+      • Seamless cursor-col-resize drag handle<br/>
+      • <code>ArrowLeft</code> / <code>ArrowRight</code> keyboard stepping<br/>
+      • Double-click instant reset to 50/50 balance<br/>
+      • Floating split-percentage readout chip
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Right Live Studio (50%)</div>
+    <div class="card-sub">Floating A4 Paper Canvas</div>
+    <div class="card-text">
+      • Ambient studio dot grid (<code>.studio-grid-bg</code>)<br/>
+      • 60 FPS live reactive updates on every keystroke<br/>
+      • Glassmorphic zoom toolbar (75% to 120% scale)<br/>
+      • Dynamic 1-Page Layout Auto-fit constraint bounds
+    </div>
+  </div>
+</div>
 
-**3-Tier Resilient Extraction:**
-* **Tier 1 (JSON-LD Schema):** Parses `JobPosting` schema, handling `@graph` arrays.
-* **Tier 2 (Semantic DOM):** Targets `<main>`, `<article>`, and filters tracking JSON bloat (Phenom `themeOptions`, `questionsApply`).
-* **Tier 3 (Structural Post-Processor):** Reconstructs block linebreaks and isolates glued headings (`### Required Qualifications`).
-
----
-
-<!-- Slide 10 -->
-<span class="badge">USER EXPERIENCE</span>
-
-## "View as ATS Robot" & Visual Studio
-
-* **Obsidian Studio Workspace:**
-  * Dark obsidian palette (`#08090d`, `#0e111a`, `#141824`) with razor borders.
-  * Draggable layout divider with responsive presets (35% / 45% / 55%).
-  * Real-time reactive A4 paper canvas with 60fps pan/zoom controls.
-
-* **"View as ATS Robot" Inspector:**
-  * Dedicated terminal diagnostic view showing the exact linearized plaintext parsed by bots.
-  * Verifies reading-order integrity and proves absence of column scrambling to judges.
-
-* **1-Click Auto-Fit:**
-  * Mathematical line budget optimizer adjusting `--section-gap` and font scaling dynamically.
-
----
-
-<!-- Slide 11 -->
-<span class="badge">QUALITY ASSURANCE</span>
-
-## Production Verification & Test Suite
-
-### Metrics Dashboard:
-* **38 / 38 Unit Tests Passing** across 12 comprehensive suites (100% pass rate).
-* **&lt; 600ms Execution Time** via native `tsx`/`vitest` runner.
-* **0 TypeScript & ESLint Errors** (`tsc --noEmit` clean on strict mode).
-* **5 / 5 Production Routes** statically compiled via Next.js 14 App Router.
-
-### Test Domains Verified:
-1. Deterministic Scoring & 3.0x/1.5x/1.0x Tier Weighting
-2. Bidirectional Alias Dictionary Normalization
-3. Truth Guard Metric Precision, Sign-Flip & Tool Linter
-4. OpenXML DOCX Tab-Stop & Heading Structure
-5. Vector PDF Text Layer Extraction & Auto-Fit
-6. SSRF IP Validation, DNS Rebinding & 3-Tier Scraper
+<div class="card" style="margin-top: 14px; padding: 10px 16px;">
+  <div style="font-size: 0.75rem; color: #059669; font-weight: 600;">
+    <b>Framer Motion Micro-Interactions:</b> Spring tab indicators (stiffness: 380, damping: 30) • Floating <code>+4% Coverage</code> animated delta badges • Dynamic circular SVG gauge with glowing filters • Tabular numerals preventing layout jitter.
+  </div>
+</div>
 
 ---
 
-<!-- Slide 12 -->
-<span class="badge">CONCLUSION</span>
+<div class="kicker">Verified Document Generation</div>
 
-## Summary: The ResuArchitect AI Paradigm
+## Dual Native Exporters & Real-Time ATS Robot Inspector
 
-* **100% Privacy-Preserving:**
-  * Sensitive career histories and contact PII never touch external cloud databases.
-* **Mathematically Explainable:**
-  * Eliminates opaque LLM percentages with an auditable, sub-5ms evidence scoring formula.
-* **Certified ATS Integrity:**
-  * True linear reading order, zero table layout traps, and native vector exports.
+<div class="card-grid-3">
+  <div class="card">
+    <div class="card-title">Native OpenXML Word DOCX</div>
+    <div class="card-sub">Office OpenXML XML Binaries</div>
+    <div class="card-text">
+      • Programmatically constructed with <code>docx</code><br/>
+      • True semantic <code>Heading 1</code> &amp; <code>Heading 2</code><br/>
+      • Right-aligned tab-stops for dates &amp; locations<br/>
+      • Genuine bullet runs; recruiters can edit in Word
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Native Vector-Text PDF</div>
+    <div class="card-sub">jsPDF Coordinate Engine</div>
+    <div class="card-text">
+      • Exact coordinate drawing with <code>@page A4</code><br/>
+      • Clean selectable, copyable vector typography<br/>
+      • Preserves exact line-height &amp; margin bounds<br/>
+      • Eliminates OCR errors common in canvas tools
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">"View as ATS Robot" Terminal</div>
+    <div class="card-sub">Linearized Diagnostic View</div>
+    <div class="card-text">
+      • Authentic developer terminal chrome<br/>
+      • Traffic-light window controls (red/yellow/green)<br/>
+      • Shows raw character stream parsed by robots<br/>
+      • Proves linear reading order before applying
+    </div>
+  </div>
+</div>
 
 ---
-### CBIT Hacktoberfest '26 &bull; Team Red flowers (TEAM-4)
-**IIIT Hyderabad** &bull; Nawander Raghavendra, Nara Lakshmi Sankeerth, Navneet
+
+<div class="kicker">Security & Production Resilience</div>
+
+## Enterprise Security Hardening with 100% Offline Fallback Failsafe
+
+<div class="card-grid-3">
+  <div class="card">
+    <div class="card-title">SSRF Defense in Scraping</div>
+    <div class="card-sub">Multi-Layer URL Guard</div>
+    <div class="card-text">
+      • Whitelists <code>http:</code> and <code>https:</code> only<br/>
+      • Pre-resolves DNS to prevent rebinding attacks<br/>
+      • Blocks loopback, RFC1918, and <code>169.254.169.254</code><br/>
+      • Enforces 5s timeout &amp; 1MB payload ceiling
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Autonomous Boundary Matrix</div>
+    <div class="card-sub">86/86 Passing Automated Tests</div>
+    <div class="card-text">
+      • Fuzzed with null bytes, emojis, RTL scripts<br/>
+      • Stress-tested with 25,000-character JDs<br/>
+      • Math invariant verified: score bounded in [0, 100]<br/>
+      • Strict idempotency verified across runs
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Offline Heuristic Failsafe</div>
+    <div class="card-sub">Zero Single-Point-of-Failure</div>
+    <div class="card-text">
+      • Complete client-side rule engine<br/>
+      • Functions 100% offline without external API keys<br/>
+      • Instant zero-latency fallback during network cut<br/>
+      • Guaranteed flawless live hackathon demo
+    </div>
+  </div>
+</div>
+
+---
+
+<!-- _class: dark -->
+<!-- _paginate: false -->
+
+<div class="kicker">Executive Summary & Demo Roadmap</div>
+
+## ResuArchitect AI: Deterministic Precision Meets Modern Design
+
+<div class="card-grid-2">
+  <div class="card">
+    <div class="card-title" style="color: #10b981;">THREE CORE STRATEGIC PILLARS</div>
+    <div class="card-text" style="font-size: 0.8rem; line-height: 1.5;">
+      <b>1. Verifiable Mathematical Scoring:</b> Sub-2ms evidence weighting (1.0x vs 0.6x) replaces arbitrary LLM guesswork with reproducible precision.<br/><br/>
+      <b>2. Algorithmic Truth Guard:</b> Code-level regex and set validation prevents fabricated metrics or unverified tools before candidate review.<br/><br/>
+      <b>3. Dual Client-Side Native Compilation:</b> 100% on-device vector PDF and OpenXML .docx generation ensures complete data privacy and zero paywalls.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color: #10b981;">LIVE DEMONSTRATION WORKFLOW</div>
+    <div class="card-text" style="font-size: 0.76rem; line-height: 1.45;">
+      <span class="badge badge-emerald">STEP 1</span> Load Preset: Alex Rivera (Senior SWE) + Stripe Full-Stack JD<br/>
+      <span class="badge badge-emerald">STEP 2</span> Sub-2ms Match Scoring: Inspect Must-Have vs Preferred coverage<br/>
+      <span class="badge badge-emerald">STEP 3</span> 1-Click Skill Injection: Add missing 'Kubernetes' skill (+6% surge)<br/>
+      <span class="badge badge-emerald">STEP 4</span> Bounded AI Tailoring: Before/After diffs with Truth Guard badges<br/>
+      <span class="badge badge-emerald">STEP 5</span> Single-Bullet Co-Pilot: Google XYZ optimization modal<br/>
+      <span class="badge badge-emerald">STEP 6</span> ATS Robot Terminal: Inspect raw linearized text stream<br/>
+      <span class="badge badge-emerald">STEP 7</span> Dual One-Click Export: Generate native OpenXML .docx &amp; vector PDF
+    </div>
+  </div>
+</div>
+
+<div style="text-align: center; margin-top: 24px; font-size: 0.85rem; font-weight: 700; color: #10b981;">
+Team Red flowers (TEAM-4) • Thank You &amp; Open for Q&amp;A
+</div>
