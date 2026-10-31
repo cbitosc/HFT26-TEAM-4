@@ -5,6 +5,7 @@ import Header from "@/components/navbar/Header";
 import EditorTabs from "@/components/editor/EditorTabs";
 import ResumeCanvas from "@/components/preview/ResumeCanvas";
 import AtsRobotView from "@/components/preview/AtsRobotView";
+import FormAutoFillView from "@/components/form/FormAutoFillView";
 import ScoreDeltaToast from "@/components/feedback/ScoreDeltaToast";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import {
@@ -14,9 +15,10 @@ import {
   Eye,
   GripVertical,
   RotateCcw,
+  Zap,
 } from "lucide-react";
 
-export type PreviewMode = "canvas" | "ats-robot";
+export type PreviewMode = "canvas" | "ats-robot" | "form-fill";
 export type MobileTab = "editor" | "preview";
 
 const DEFAULT_LEFT_PCT = 50;
@@ -104,7 +106,7 @@ export default function Home() {
       style={{ "--left-pane-w": `${leftWidthPct}%` } as React.CSSProperties}
       className="min-h-screen flex flex-col bg-slate-50 dark:bg-obsidian-950 text-slate-900 dark:text-slate-100 transition-colors duration-200"
     >
-      <Header />
+      <Header onOpenFormAutoFill={() => setPreviewMode("form-fill")} />
 
       {/* Mobile/Tablet View Toggle (Screens < 1024px) */}
       <div className="lg:hidden sticky top-[53px] z-40 bg-white/80 dark:bg-obsidian-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/[0.08] px-3 py-1.5 flex items-center justify-center gap-2 print:hidden shadow-xs">
@@ -220,6 +222,22 @@ export default function Home() {
                 <Bot className="w-3.5 h-3.5 text-emerald-500" />
                 <span>View as ATS Robot</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setPreviewMode("form-fill")}
+                className={`flex items-center space-x-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                  previewMode === "form-fill"
+                    ? "bg-white dark:bg-obsidian-850 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-white/[0.08] font-bold"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5 text-emerald-500" />
+                <span>AutoFill Job Form</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 ml-1 font-bold">
+                  Live
+                </span>
+              </button>
             </div>
 
             <div className="flex items-center space-x-1.5 text-xs">
@@ -261,7 +279,7 @@ export default function Home() {
           <div className="flex-1 overflow-hidden flex flex-col print:overflow-visible print:h-auto">
             {previewMode === "canvas" ? (
               <ResumeCanvas onToggleAtsView={() => setPreviewMode("ats-robot")} />
-            ) : (
+            ) : previewMode === "ats-robot" ? (
               <>
                 <div className="flex-1 flex flex-col overflow-hidden print:hidden">
                   <AtsRobotView onSwitchToCanvas={() => setPreviewMode("canvas")} />
@@ -270,6 +288,10 @@ export default function Home() {
                   <ResumeCanvas />
                 </div>
               </>
+            ) : (
+              <div className="flex-1 flex flex-col overflow-hidden print:hidden">
+                <FormAutoFillView onSwitchToCanvas={() => setPreviewMode("canvas")} />
+              </div>
             )}
           </div>
         </div>

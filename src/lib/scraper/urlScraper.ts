@@ -1103,3 +1103,124 @@ export async function scrapeJobUrl(urlStr: string): Promise<ScrapeResult> {
     clearTimeout(timeoutId);
   }
 }
+
+/**
+ * Fetches HTML from a remote URL with strict SSRF protection, DNS pinning, and size limits.
+ * Used for fetching live job application forms and candidate portals.
+ */
+export async function fetchHtmlSafely(urlStr: string): Promise<{
+  success: boolean;
+  html?: string;
+  finalUrl?: string;
+  status?: number;
+  error?: string;
+}> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    const validation = await validateJobUrl(urlStr, controller.signal);
+    if (!validation.valid || !validation.url || !validation.pinnedIp) {
+      return {
+        success: false,
+        error: validation.error || "Invalid or restricted URL.",
+      };
+    }
+
+    let currentUrlObj = validation.url;
+    let currentPinnedIp = validation.pinnedIp;
+    let response: {
+      status: number;
+      headers: { get: (name: string) => string | null };
+      body: string;
+    } | null = null;
+    const MAX_REDIRECTS = 3;
+
+    for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount++) {
+      const res = await fetchPinned(
+        currentUrlObj,
+        currentPinnedIp,
+        controller.signal,
+        {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 (ResuArchitect-JobReader/1.0)",
+          Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Cache-Control": "no-cache",
+        }
+      );
+
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get("location");
+        if (!location) {
+          return {
+            success: false,
+            error: "Redirect status received without Location header.",
+          };
+        }
+
+        if (redirectCount === MAX_REDIRECTS) {
+          return {
+            success: false,
+            error: "Too many redirects (exceeded 3 hops limit).",
+          };
+        }
+
+        const nextUrlObj = new URL(location, currentUrlObj.toString());
+        const redirectCheck = await validateJobUrl(nextUrlObj.toString(), controller.signal);
+        if (!redirectCheck.valid || !redirectCheck.url || !redirectCheck.pinnedIp) {
+          return {
+            success: false,
+            error: `Redirected to restricted destination: ${redirectCheck.error}`,
+          };
+        }
+        currentUrlObj = redirectCheck.url;
+        currentPinnedIp = redirectCheck.pinnedIp;
+        continue;
+      }
+
+      response = res;
+      break;
+    }
+
+    if (!response) {
+      return {
+        success: false,
+        error: "Failed to establish connection to target URL.",
+      };
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (
+      !contentType.includes("text/html") &&
+      !contentType.includes("text/plain") &&
+      !contentType.includes("application/xhtml+xml")
+    ) {
+      return {
+        success: false,
+        error: `Unsupported content type "${contentType}". Only web pages (HTML/text) can be parsed.`,
+      };
+    }
+
+    return {
+      success: true,
+      html: response.body,
+      finalUrl: currentUrlObj.toString(),
+      status: response.status,
+    };
+  } catch (err: unknown) {
+    if (err instanceof Error && (err.name === "AbortError" || err.message.includes("aborted"))) {
+      return {
+        success: false,
+        error: "Form fetch request timed out after 5 seconds.",
+      };
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      success: false,
+      error: `Network error while fetching form: ${message}`,
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}

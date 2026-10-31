@@ -6,3 +6,4 @@ import "./pdfExport.test";
 import "./urlScraper.test";
 import "./boundaryMatrix.test";
 import "./variantsAndStore.test";
+import "./formAutoFill.test";

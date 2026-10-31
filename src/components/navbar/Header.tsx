@@ -18,6 +18,7 @@ import {
   Trash2,
   Bookmark,
   Layers,
+  Zap,
 } from "lucide-react";
 import { useResumeStore } from "@/lib/store/useResumeStore";
 import { sampleProfilesMap } from "@/lib/presets/sampleProfiles";
@@ -32,9 +33,14 @@ import { exportToPdf } from "@/lib/export/pdfExport";
 interface HeaderProps {
   onExportPdf?: () => void;
   onExportDocx?: () => void;
+  onOpenFormAutoFill?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onExportPdf,
+  onExportDocx,
+  onOpenFormAutoFill,
+}) => {
   const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [variantsOpen, setVariantsOpen] = useState(false);
@@ -521,8 +527,20 @@ export const Header: React.FC<HeaderProps> = ({ onExportPdf, onExportDocx }) => 
             <span className="sr-only">Toggle Theme</span>
           </button>
 
-          {/* ALWAYS VISIBLE EXPORT BUTTONS */}
+          {/* ALWAYS VISIBLE EXPORT & ACTION BUTTONS */}
           <div className="flex items-center space-x-1 sm:space-x-1.5 border-l border-slate-200 dark:border-white/[0.08] pl-1.5 sm:pl-2 shrink-0">
+            {onOpenFormAutoFill && (
+              <button
+                type="button"
+                onClick={onOpenFormAutoFill}
+                title="Open Job Application Form Auto-Filler"
+                className="hidden lg:flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 text-xs font-bold transition-all duration-150 hover:-translate-y-0.5 active:scale-[0.98]"
+              >
+                <Zap className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="hidden xl:inline">AutoFill Form</span>
+              </button>
+            )}
+
             {/* PDF Export Button */}
             <button
               type="button"
